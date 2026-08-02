@@ -153,3 +153,189 @@ body {
     animation: none !important;
   }
 }
+
+/* ==================== Jack Pose 独有视觉语言 ====================
+   设计理念：暖色手作质感
+   - 纸张纹理：暖色噪点叠加
+   - 圆点网格：取代 Studio 的线条网格
+   - 有机气泡：不规则形态的暖色光斑
+   - 弹性弹跳：bounce 缓动入场
+   - 暖光发光：琥珀色柔光
+   ================================================== */
+
+/* 纸张纹理 — 暖色噪点 */
+.pose-paper-texture {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.8 0 0 0 0 0.6 0 0 0 0 0.4 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+:root[data-theme="dark"] .pose-paper-texture {
+  opacity: 0.06;
+  mix-blend-mode: screen;
+}
+
+/* 圆点网格 — 取代线条网格 */
+.pose-dot-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: radial-gradient(circle, var(--color-accent, #ec4899) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.04;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+}
+
+:root[data-theme="dark"] .pose-dot-grid {
+  opacity: 0.08;
+}
+
+/* 有机暖色气泡 */
+.pose-warm-blobs {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pose-warm-blob {
+  position: absolute;
+  border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+  filter: blur(80px);
+  opacity: 0.25;
+  animation: pose-blob-morph 18s ease-in-out infinite;
+}
+
+.pose-warm-blob:nth-child(1) {
+  width: 420px;
+  height: 380px;
+  background: radial-gradient(circle, var(--color-accent, #ec4899), transparent 70%);
+  top: -8%;
+  left: -3%;
+  animation-delay: 0s;
+}
+
+.pose-warm-blob:nth-child(2) {
+  width: 360px;
+  height: 320px;
+  background: radial-gradient(circle, var(--color-accent-hover, #f43f5e), transparent 70%);
+  bottom: -5%;
+  right: -5%;
+  animation-delay: -6s;
+  border-radius: 58% 42% 37% 63% / 56% 59% 41% 44%;
+}
+
+.pose-warm-blob:nth-child(3) {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, #fbbf24, transparent 70%);
+  top: 45%;
+  left: 40%;
+  animation-delay: -12s;
+  border-radius: 63% 37% 41% 59% / 44% 56% 44% 56%;
+}
+
+@keyframes pose-blob-morph {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+  }
+  33% {
+    transform: translate(60px, -40px) scale(1.08) rotate(120deg);
+    border-radius: 58% 42% 37% 63% / 56% 59% 41% 44%;
+  }
+  66% {
+    transform: translate(-40px, 30px) scale(0.92) rotate(240deg);
+    border-radius: 37% 63% 58% 42% / 59% 41% 56% 44%;
+  }
+}
+
+/* 暖光发光 */
+.pose-warm-glow {
+  box-shadow:
+    0 0 20px rgba(var(--accent-rgb, 236, 72, 153), 0.15),
+    0 0 40px rgba(251, 191, 36, 0.08),
+    0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+:root[data-theme="dark"] .pose-warm-glow {
+  box-shadow:
+    0 0 24px rgba(var(--accent-rgb, 236, 72, 153), 0.25),
+    0 0 48px rgba(251, 191, 36, 0.12),
+    0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* 手作风格按钮 — 微旋转 */
+.pose-craft-hover {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+}
+
+.pose-craft-hover:hover {
+  transform: translateY(-3px) rotate(-0.5deg);
+}
+
+.pose-craft-hover:active {
+  transform: translateY(0) rotate(0deg) scale(0.98);
+}
+
+/* 弹跳入场 */
+@keyframes pose-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) rotate(-2deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.03) rotate(0.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.pose-pop-in {
+  animation: pose-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* 卡片翻转悬停 */
+.pose-card-tilt {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+}
+
+.pose-card-tilt:hover {
+  transform: perspective(800px) rotateX(4deg) rotateY(-4deg) translateY(-4px);
+}
+
+/* 暖色渐变文字 */
+.pose-gradient-text {
+  background: linear-gradient(135deg, var(--color-accent, #ec4899), #fbbf24, var(--color-accent-hover, #f43f5e));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: pose-gradient-shift 8s ease infinite;
+}
+
+@keyframes pose-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* 手绘风格边框 */
+.pose-handcraft-border {
+  border-radius: 16px 20px 16px 22px;
+  border-width: 1.5px;
+}
+
+:root[data-theme="dark"] .pose-handcraft-border {
+  border-radius: 18px 16px 22px 14px;
+}

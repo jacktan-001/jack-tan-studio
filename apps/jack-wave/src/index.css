@@ -329,3 +329,233 @@ textarea {
 @media (max-width: 768px) {
   .theme-toggle { width: 32px; height: 32px; }
 }
+
+/* ==================== Jack Wave 独有视觉语言 ====================
+   设计理念：冷色流动质感
+   - 波纹纹理：SVG 水波叠加
+   - 音频频条：背景均衡器装饰
+   - 液态气泡：流动形态的冷色光斑
+   - 模糊入场：blur + fade 缓入
+   - 液态光晕：水波纹扩散
+   ================================================== */
+
+/* 波纹纹理 — SVG 水波 */
+.wave-ripple-texture {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' preserveAspectRatio='xMidYMid slice'%3E%3Cpath d='M0,400 Q300,300 600,400 T1200,400 L1200,800 L0,800 Z' fill='none' stroke='%2306b6d4' stroke-width='1.5' opacity='0.6'/%3E%3Cpath d='M0,420 Q300,340 600,420 T1200,420' fill='none' stroke='%2314b8a6' stroke-width='1' opacity='0.4'/%3E%3Cpath d='M0,440 Q300,380 600,440 T1200,440' fill='none' stroke='%230ea5e9' stroke-width='0.8' opacity='0.3'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-position: center;
+  animation: wave-flow 25s linear infinite;
+}
+
+:root[data-theme="dark"] .wave-ripple-texture {
+  opacity: 0.1;
+}
+
+@keyframes wave-flow {
+  0% { background-position: 0% center; }
+  100% { background-position: 1200px center; }
+}
+
+/* 音频频条 — 背景装饰 */
+.wave-eq-bars {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  z-index: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 8px;
+  pointer-events: none;
+  opacity: 0.12;
+  gap: 4px;
+}
+
+:root[data-theme="dark"] .wave-eq-bars {
+  opacity: 0.18;
+}
+
+.wave-eq-bar {
+  flex: 1;
+  background: linear-gradient(to top, var(--teal, #06b6d4), transparent);
+  border-radius: 2px 2px 0 0;
+  animation: wave-eq 1.2s ease-in-out infinite;
+  min-height: 8px;
+}
+
+.wave-eq-bar:nth-child(odd) { animation-duration: 0.8s; animation-delay: -0.3s; }
+.wave-eq-bar:nth-child(3n) { animation-duration: 1.5s; animation-delay: -0.6s; }
+.wave-eq-bar:nth-child(4n) { animation-duration: 1.0s; animation-delay: -0.9s; }
+.wave-eq-bar:nth-child(5n) { animation-duration: 1.3s; animation-delay: -0.2s; }
+
+@keyframes wave-eq {
+  0%, 100% { height: 20%; }
+  50% { height: 80%; }
+}
+
+/* 液态气泡 — 流动形态 */
+.wave-liquid-blobs {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-liquid-blob {
+  position: absolute;
+  border-radius: 40% 60% 70% 30% / 50% 60% 40% 50%;
+  filter: blur(100px);
+  opacity: 0.2;
+  animation: wave-liquid-move 22s ease-in-out infinite;
+}
+
+.wave-liquid-blob:nth-child(1) {
+  width: 480px;
+  height: 360px;
+  background: radial-gradient(ellipse, var(--teal, #06b6d4), transparent 70%);
+  top: -12%;
+  left: -8%;
+  animation-delay: 0s;
+}
+
+.wave-liquid-blob:nth-child(2) {
+  width: 380px;
+  height: 300px;
+  background: radial-gradient(ellipse, var(--teal-light, #0ea5e9), transparent 70%);
+  bottom: -10%;
+  right: -6%;
+  animation-delay: -8s;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+}
+
+@keyframes wave-liquid-move {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    border-radius: 40% 60% 70% 30% / 50% 60% 40% 50%;
+  }
+  25% {
+    transform: translate(70px, -50px) scale(1.1);
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  50% {
+    transform: translate(-40px, 60px) scale(0.95);
+    border-radius: 30% 70% 60% 40% / 40% 50% 50% 60%;
+  }
+  75% {
+    transform: translate(50px, 30px) scale(1.05);
+    border-radius: 50% 50% 40% 60% / 70% 30% 60% 40%;
+  }
+}
+
+/* 模糊入场 */
+@keyframes wave-blur-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+.wave-blur-in {
+  animation: wave-blur-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 液态光晕 */
+.wave-liquid-glow {
+  position: relative;
+}
+
+.wave-liquid-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--teal, #06b6d4), var(--teal-light, #0ea5e9), #14b8a6);
+  opacity: 0;
+  z-index: -1;
+  filter: blur(12px);
+  transition: opacity 0.4s;
+}
+
+.wave-liquid-glow:hover::before {
+  opacity: 0.5;
+}
+
+/* 水波纹扩散 — 点击/悬停时触发 */
+@keyframes wave-ripple-expand {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+.wave-ripple {
+  animation: wave-ripple-expand 0.8s ease-out;
+}
+
+/* 流动渐变文字 */
+.wave-gradient-text {
+  background: linear-gradient(135deg, var(--teal, #06b6d4), #14b8a6, var(--teal-light, #0ea5e9));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: wave-gradient-flow 6s ease infinite;
+}
+
+@keyframes wave-gradient-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* 玻璃态 — 水色版 */
+.wave-glass {
+  background: var(--card, rgba(255, 255, 255, 0.72));
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 16px);
+}
+
+:root[data-theme="dark"] .wave-glass {
+  background: var(--card, rgba(30, 41, 59, 0.72));
+  border-color: rgba(6, 182, 212, 0.12);
+}
+
+/* 液态边框 — 流动 */
+.wave-liquid-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.wave-liquid-border::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--teal, #06b6d4), var(--teal-light, #0ea5e9), transparent);
+  transition: left 0.6s ease;
+}
+
+.wave-liquid-border:hover::after {
+  left: 100%;
+}

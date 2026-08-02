@@ -152,3 +152,270 @@ body {
     animation: none !important;
   }
 }
+
+/* ==================== Jack Tan 独有视觉语言 ====================
+   设计理念：蓝色商务精炼质感
+   - 斜线纹理：细密对角线条
+   - 几何网格：精密方格
+   - 精确滑入：精确缓动入场
+   - 精炼光影：蓝色冷调阴影
+   - 专业渐变线：顶部光带
+   ================================================== */
+
+/* 斜线纹理 */
+.tan-diagonal-texture {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-accent, #7c3aed) 0,
+    var(--color-accent, #7c3aed) 1px,
+    transparent 1px,
+    transparent 12px
+  );
+  mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+}
+
+:root[data-theme="dark"] .tan-diagonal-texture {
+  opacity: 0.04;
+}
+
+/* 几何网格 — 精密方格 */
+.tan-geo-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.02;
+  background-image:
+    linear-gradient(var(--color-accent, #7c3aed) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-accent, #7c3aed) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
+}
+
+:root[data-theme="dark"] .tan-geo-grid {
+  opacity: 0.05;
+}
+
+/* 精炼蓝色光带 — 顶部 */
+.tan-accent-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 1;
+  background: linear-gradient(90deg, transparent, var(--color-accent, #7c3aed), var(--color-accent-hover, #3b82f6), transparent);
+  background-size: 200% 100%;
+  animation: tan-line-flow 8s ease infinite;
+  pointer-events: none;
+}
+
+@keyframes tan-line-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* 商务蓝色光斑 */
+.tan-blue-blobs {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tan-blue-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.12;
+  animation: tan-blob-drift 25s ease-in-out infinite;
+}
+
+.tan-blue-blob:nth-child(1) {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, var(--color-accent, #7c3aed), transparent 70%);
+  top: -15%;
+  right: -5%;
+}
+
+.tan-blue-blob:nth-child(2) {
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, var(--color-accent-hover, #3b82f6), transparent 70%);
+  bottom: -10%;
+  left: -5%;
+  animation-delay: -10s;
+}
+
+@keyframes tan-blob-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-50px, 40px) scale(1.05); }
+}
+
+/* 精炼光影 */
+.tan-refined-shadow {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tan-refined-shadow:hover {
+  box-shadow:
+    0 2px 8px rgba(var(--accent-rgb, 124, 58, 237), 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme="dark"] .tan-refined-shadow {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="dark"] .tan-refined-shadow:hover {
+  box-shadow:
+    0 2px 8px rgba(var(--accent-rgb, 124, 58, 237), 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* 精确滑入 */
+@keyframes tan-precise-slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tan-slide-up {
+  animation: tan-precise-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes tan-precise-slide-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.tan-slide-left {
+  animation: tan-precise-slide-left 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 精炼滚动揭示 */
+.tan-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tan-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 商务渐变文字 */
+.tan-gradient-text {
+  background: linear-gradient(135deg, var(--color-accent, #7c3aed), var(--color-accent-hover, #3b82f6));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: tan-gradient-shift 8s ease infinite;
+}
+
+@keyframes tan-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* 精炼卡片 — 微光边框 */
+.tan-refined-card {
+  position: relative;
+  border: 1px solid var(--color-neutral-200, #e5e5e5);
+  background: var(--color-white, #fff);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root[data-theme="dark"] .tan-refined-card {
+  border-color: var(--color-neutral-200, #27272a);
+  background: var(--color-neutral-50, #12121e);
+}
+
+.tan-refined-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-accent, #7c3aed), transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.tan-refined-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--accent-rgb, 124, 58, 237), 0.2);
+}
+
+.tan-refined-card:hover::before {
+  opacity: 1;
+}
+
+/* 精确交错入场 */
+.tan-stagger > * {
+  opacity: 0;
+  animation: tan-precise-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.tan-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.tan-stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.tan-stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.tan-stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.tan-stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.tan-stagger > *:nth-child(6) { animation-delay: 0.3s; }
+
+/* 专业标签 */
+.tan-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  background: rgba(var(--accent-rgb, 124, 58, 237), 0.08);
+  color: var(--color-accent, #7c3aed);
+  border: 1px solid rgba(var(--accent-rgb, 124, 58, 237), 0.12);
+}
+
+:root[data-theme="dark"] .tan-tag {
+  background: rgba(var(--accent-rgb, 124, 58, 237), 0.12);
+  border-color: rgba(var(--accent-rgb, 124, 58, 237), 0.2);
+}
+
+/* 蓝色精炼发光 */
+.tan-blue-glow {
+  box-shadow: 0 0 1px rgba(var(--accent-rgb, 124, 58, 237), 0.3),
+              0 0 4px rgba(var(--accent-rgb, 124, 58, 237), 0.15);
+}

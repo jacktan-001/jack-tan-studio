@@ -10,7 +10,7 @@ export interface Project {
   repo: string;
   tech: string[];
   features: string[];
-  status: 'live' | 'beta';
+  status: 'live' | 'beta' | 'coming-soon';
 }
 
 export const projects: Project[] = [
@@ -55,6 +55,48 @@ export const projects: Project[] = [
     tech: ['HTML5', 'CSS3', 'IntersectionObserver', 'PWA'],
     features: ['工作经历', '核心项目', '上线作品', '专利成果', '荣誉资质'],
     status: 'live',
+  },
+  {
+    id: 'lens',
+    name: 'Jack Lens',
+    tagline: 'Visual Insights',
+    description: '数据可视化与洞察工具。将复杂信息转化为直观的视觉叙事，让数据自己说话。',
+    icon: 'lens',
+    color: '#8b5cf6',
+    colorRgb: '139, 92, 246',
+    url: '#',
+    repo: '',
+    tech: ['D3.js', 'Canvas', 'WebSocket', 'Cloudflare D1'],
+    features: ['实时数据流', '交互式图表', '自定义仪表盘', '数据导出'],
+    status: 'coming-soon',
+  },
+  {
+    id: 'cast',
+    name: 'Jack Cast',
+    tagline: 'Audio Stories',
+    description: '个人播客与音频故事平台。录制、剪辑、发布一站式，让声音成为创意的载体。',
+    icon: 'cast',
+    color: '#f59e0b',
+    colorRgb: '245, 158, 11',
+    url: '#',
+    repo: '',
+    tech: ['Web Audio API', 'MediaRecorder', 'R2 Storage', 'Podcast RSS'],
+    features: ['音频录制', '在线剪辑', 'RSS 订阅', '波形可视化'],
+    status: 'coming-soon',
+  },
+  {
+    id: 'craft',
+    name: 'JackCraft',
+    tagline: 'Creative Sandbox',
+    description: '创意实验场。代码可视化、交互艺术、生成式设计 —— 探索技术与美学的交汇点。',
+    icon: 'craft',
+    color: '#10b981',
+    colorRgb: '16, 185, 129',
+    url: '#',
+    repo: '',
+    tech: ['WebGL', 'Three.js', 'GLSL Shaders', 'GSAP'],
+    features: ['生成式艺术', '着色器实验', '交互装置', '代码可视化'],
+    status: 'coming-soon',
   },
 ];
 

@@ -120,6 +120,20 @@ export interface ProjectVisualEffect {
   customCursor: boolean;
   /** 霓虹边框 */
   neonBorder: boolean;
+  /** 纹理类型 — 每个项目独有 */
+  textureType: 'grid-lines' | 'dot-grid' | 'wave-ripple' | 'diagonal-lines' | 'none';
+  /** 纹理 CSS 类名 — 对应各 app 中的 CSS 实现 */
+  textureClass: string;
+  /** 背景容器类名 */
+  blobsClass: string;
+  /** 入场动画类名 */
+  entranceClass: string;
+  /** 渐变文字类名 */
+  gradientTextClass: string;
+  /** 玻璃态类名 */
+  glassClass: string;
+  /** 设计风格描述 */
+  designStyle: string;
 }
 
 /** 各项目视觉个性预设 */
@@ -132,6 +146,13 @@ export const projectVisuals: Record<string, ProjectVisualEffect> = {
     glowIntensity: 0.5,
     customCursor: true,
     neonBorder: true,
+    textureType: 'grid-lines',
+    textureClass: 'grid-bg',
+    blobsClass: 'gradient-mesh',
+    entranceClass: 'fadeInUp',
+    gradientTextClass: 'gradient-text',
+    glassClass: 'glass',
+    designStyle: '科幻科技感 — 线条网格 + 霓虹发光 + 渐变气泡',
   },
   wave: {
     noiseOpacity: 0.02,
@@ -141,6 +162,13 @@ export const projectVisuals: Record<string, ProjectVisualEffect> = {
     glowIntensity: 0.4,
     customCursor: false,
     neonBorder: false,
+    textureType: 'wave-ripple',
+    textureClass: 'wave-ripple-texture',
+    blobsClass: 'wave-liquid-blobs',
+    entranceClass: 'wave-blur-in',
+    gradientTextClass: 'wave-gradient-text',
+    glassClass: 'wave-glass',
+    designStyle: '冷色流动质感 — 水波纹理 + 音频频条 + 液态气泡 + 模糊入场',
   },
   pose: {
     noiseOpacity: 0.025,
@@ -150,6 +178,13 @@ export const projectVisuals: Record<string, ProjectVisualEffect> = {
     glowIntensity: 0.5,
     customCursor: true,
     neonBorder: true,
+    textureType: 'dot-grid',
+    textureClass: 'pose-dot-grid',
+    blobsClass: 'pose-warm-blobs',
+    entranceClass: 'pose-pop-in',
+    gradientTextClass: 'pose-gradient-text',
+    glassClass: 'glass',
+    designStyle: '暖色手作质感 — 纸张纹理 + 圆点网格 + 有机气泡 + 弹性弹跳',
   },
   tan: {
     noiseOpacity: 0.015,
@@ -159,6 +194,61 @@ export const projectVisuals: Record<string, ProjectVisualEffect> = {
     glowIntensity: 0.3,
     customCursor: false,
     neonBorder: false,
+    textureType: 'diagonal-lines',
+    textureClass: 'tan-diagonal-texture',
+    blobsClass: 'tan-blue-blobs',
+    entranceClass: 'tan-slide-up',
+    gradientTextClass: 'tan-gradient-text',
+    glassClass: 'glass',
+    designStyle: '蓝色商务精炼 — 斜线纹理 + 几何网格 + 精确滑入 + 精炼光影',
+  },
+  lens: {
+    noiseOpacity: 0.03,
+    blobCount: 3,
+    showGrid: true,
+    glassBlur: '18px',
+    glowIntensity: 0.45,
+    customCursor: true,
+    neonBorder: true,
+    textureType: 'grid-lines',
+    textureClass: 'grid-bg',
+    blobsClass: 'gradient-mesh',
+    entranceClass: 'fadeInUp',
+    gradientTextClass: 'gradient-text',
+    glassClass: 'glass',
+    designStyle: '数据洞察感 — 棱镜网格 + 光谱散射 + 数据流光效',
+  },
+  cast: {
+    noiseOpacity: 0.02,
+    blobCount: 2,
+    showGrid: false,
+    glassBlur: '14px',
+    glowIntensity: 0.4,
+    customCursor: false,
+    neonBorder: false,
+    textureType: 'wave-ripple',
+    textureClass: 'wave-ripple-texture',
+    blobsClass: 'wave-liquid-blobs',
+    entranceClass: 'wave-blur-in',
+    gradientTextClass: 'wave-gradient-text',
+    glassClass: 'wave-glass',
+    designStyle: '音频播客感 — 声波纹理 + 频段光晕 + 暖琥珀光斑',
+  },
+  craft: {
+    noiseOpacity: 0.035,
+    blobCount: 3,
+    showGrid: true,
+    glassBlur: '20px',
+    glowIntensity: 0.5,
+    customCursor: true,
+    neonBorder: true,
+    textureType: 'grid-lines',
+    textureClass: 'grid-bg',
+    blobsClass: 'gradient-mesh',
+    entranceClass: 'scaleIn',
+    gradientTextClass: 'gradient-text',
+    glassClass: 'glass',
+    designStyle: '创意实验感 — 生成式纹理 + 几何变换 + 着色器光效',
   },
 };
 
