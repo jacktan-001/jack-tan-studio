@@ -1,0 +1,331 @@
+@import "tailwindcss";
+
+/* ==================== Tailwind v4 主题令牌 ====================
+   将 studio-core 的 CSS 变量映射到 Tailwind 工具类。
+   waveTheme preset: accent #06b6d4, accent2 #0ea5e9, accent3 #14b8a6
+   ThemeProvider 通过 applyPreset() 动态注入 --accent / --accent-2 等变量，
+   这里通过 @theme inline 桥接使 Tailwind 工具类跟随主题切换。 */
+@theme inline {
+  --color-accent: var(--accent, #06b6d4);
+  --color-accent-2: var(--accent-2, #0ea5e9);
+  --color-accent-3: var(--accent-3, #14b8a6);
+  --color-accent-bg: rgba(var(--accent-rgb, 6, 182, 212), 0.1);
+
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* ==================== CSS 变量：Wave 主题配色 ====================
+   原 common.css 的设计令牌，适配 studio-core 主题系统。
+   亮色模式为默认，暗色模式通过 [data-theme="dark"] 覆盖。
+   studio-core 的 ThemeProvider 会设置 data-theme 属性。 */
+
+:root {
+  /* Brand — 映射到 studio-core 的 waveTheme */
+  --teal: var(--accent, #06b6d4);
+  --teal-light: var(--accent-2, #0ea5e9);
+
+  /* Gray Scale */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* Semantic Aliases */
+  --text: var(--gray-800);
+  --text2: var(--gray-500);
+  --text3: var(--gray-400);
+
+  /* Surface */
+  --bg: #fafafa;
+  --card: rgba(255, 255, 255, 0.72);
+  --card-solid: #fff;
+  --card-hover: #f8fafc;
+  --nav-bg: rgba(255, 255, 255, 0.72);
+  --player-bg: rgba(255, 255, 255, 0.85);
+
+  /* Border & Hover */
+  --border: rgba(0, 0, 0, 0.06);
+  --hover-bg: rgba(0, 0, 0, 0.03);
+
+  /* Form */
+  --input-bg: #fff;
+  --tag-bg: rgba(6, 182, 212, 0.1);
+
+  /* Status */
+  --red: #ef4444;
+  --green: #22c55e;
+
+  /* Layout */
+  --radius: 16px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.1);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* === DARK MODE === */
+:root[data-theme="dark"] {
+  --teal: var(--accent, #14b8a6);
+  --teal-light: var(--accent-2, #2dd4bf);
+  --gray-50: #1e293b;
+  --gray-100: #334155;
+  --gray-200: #475569;
+  --gray-300: #64748b;
+  --gray-400: #94a3b8;
+  --gray-500: #cbd5e1;
+  --gray-600: #e2e8f0;
+  --gray-700: #f1f5f9;
+  --gray-800: #f8fafc;
+  --gray-900: #ffffff;
+  --text: #f1f5f9;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --bg: #0f172a;
+  --card: rgba(30, 41, 59, 0.72);
+  --card-solid: #1e293b;
+  --card-hover: #334155;
+  --nav-bg: rgba(15, 23, 42, 0.72);
+  --player-bg: rgba(15, 23, 42, 0.85);
+  --border: rgba(255, 255, 255, 0.08);
+  --hover-bg: rgba(255, 255, 255, 0.05);
+  --input-bg: #1e293b;
+  --tag-bg: rgba(6, 182, 212, 0.2);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
+  --red: #f87171;
+  --green: #4ade80;
+}
+
+/* ==================== RESET ==================== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ==================== TYPOGRAPHY ==================== */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+  transition: background .3s, color .3s;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: 16px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 12px;
+  width: 100%;
+  outline: none;
+  transition: border-color .2s;
+  background: var(--input-bg);
+  color: var(--text);
+  -webkit-appearance: none;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--teal);
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* ==================== COMPONENTS (from common.css) ==================== */
+
+/* Buttons */
+.btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+}
+.btn-primary { background: var(--teal); color: #fff; }
+.btn-primary:hover { background: var(--teal-light); transform: translateY(-1px); }
+.btn-primary:active { background: var(--teal-light); }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-outline { background: transparent; border: 1.5px solid var(--gray-200); color: var(--text); }
+.btn-outline:hover { border-color: var(--gray-400); transform: translateY(-1px); }
+.btn-sm { padding: 8px 14px; font-size: 13px; min-height: 36px; border-radius: 10px; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* Icon Buttons */
+.icon-btn, .theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text2);
+  transition: all .2s;
+  background: var(--gray-100);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.icon-btn:hover, .theme-toggle:hover { color: var(--teal); background: var(--tag-bg); }
+.icon-btn:active, .theme-toggle:active { transform: scale(.95); }
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal {
+  background: var(--card-solid);
+  border-radius: 20px;
+  max-width: 640px;
+  width: 100%;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(20px);
+  transition: transform .25s;
+  box-shadow: var(--shadow-lg);
+}
+.modal-overlay.active .modal { transform: translateY(0); }
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: background .15s;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+}
+.modal-close:hover { background: var(--gray-200); }
+
+/* Form */
+.form-group { margin-bottom: 20px; }
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.form-label .req { color: var(--red); margin-left: 2px; }
+.form-label .opt { color: var(--text3); font-weight: 400; font-size: 12px; margin-left: 4px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--gray-900);
+  color: var(--bg);
+  padding: 12px 24px;
+  border-radius: 99px;
+  font-size: 14px;
+  z-index: 300;
+  opacity: 0;
+  transition: all .3s;
+  pointer-events: none;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+  max-width: 90vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--teal);
+  color: #fff;
+  padding: 8px 16px;
+  z-index: 300;
+  border-radius: 0 0 8px 0;
+  font-size: 14px;
+}
+.skip-link:focus { top: 0; }
+
+/* Animations */
+@keyframes eq {
+  0%, 100% { transform: scaleY(.4); }
+  50% { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .theme-toggle { width: 32px; height: 32px; }
+}

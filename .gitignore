@@ -1,0 +1,35 @@
+# dependencies
+node_modules
+.pnpm-store
+
+# build outputs
+dist
+.vercel
+.turbo
+
+# env files
+.env
+.env.*local
+
+# editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# os
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*
+
+# typescript build info
+*.tsbuildinfo
+
+# wrangler
+.wrangler
+
+# misc
+.cache

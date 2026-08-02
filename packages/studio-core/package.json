@@ -1,0 +1,34 @@
+{
+  "name": "@jack-tan/studio-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Jack Tan Studio Core - 共享底座七层架构",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens": "./src/tokens/index.ts",
+    "./utils": "./src/utils/index.ts",
+    "./storage": "./src/storage/index.ts",
+    "./theme": "./src/theme/index.ts",
+    "./pwa": "./src/pwa/index.ts",
+    "./deploy": "./src/deploy/index.ts",
+    "./effects": "./src/effects/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "gsap": "^3.12.0",
+    "motion": "^12.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}

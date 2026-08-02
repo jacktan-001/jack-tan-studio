@@ -1,0 +1,42 @@
+{
+  "name": "jack-tan-studio",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Jack Tan Studio - 个人项目集合 monorepo",
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:studio": "turbo dev --filter=@jack-tan/studio-app",
+    "dev:pose": "turbo dev --filter=@jack-tan/jack-pose",
+    "dev:wave": "turbo dev --filter=@jack-tan/jack-wave",
+    "dev:tan": "turbo dev --filter=@jack-tan/jack-tan",
+    "build": "turbo build",
+    "build:studio": "turbo build --filter=@jack-tan/studio-app",
+    "build:pose": "turbo build --filter=@jack-tan/jack-pose",
+    "build:wave": "turbo build --filter=@jack-tan/jack-wave",
+    "build:tan": "turbo build --filter=@jack-tan/jack-tan",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint",
+    "clean": "turbo clean && rm -rf node_modules",
+    "preview:studio": "turbo build --filter=@jack-tan/studio-app && cd apps/studio && npx vite preview --port 4173",
+    "preview:pose": "turbo build --filter=@jack-tan/jack-pose && cd apps/jack-pose && npx vite preview --port 4174",
+    "preview:wave": "turbo build --filter=@jack-tan/jack-wave && cd apps/jack-wave && npx vite preview --port 4175",
+    "preview:tan": "turbo build --filter=@jack-tan/jack-tan && cd apps/jack-tan && npx vite preview --port 4176"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.7.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/node": "^22.0.0",
+    "vite": "^6.0.0",
+    "tailwindcss": "^4.0.0",
+    "pnpm": "^9.0.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
