@@ -44,7 +44,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/jack-pose/dist --project-name jack-pose
+          command: pages deploy apps/jack-pose/dist --project-name jackpose
 
       - name: Deploy Jack Wave
         uses: cloudflare/wrangler-action@v3
