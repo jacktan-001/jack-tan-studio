@@ -10,36 +10,44 @@ var STATIC_CACHE = CACHE_VERSION + '-static';
 var API_CACHE = CACHE_VERSION + '-api';
 var MEDIA_CACHE = CACHE_VERSION + '-media';
 
+// 子路径部署：从 SW scope 推导 base（如 /wave/），保证缓存与 API 前缀正确
+var BASE = new URL(self.registration.scope).pathname; // e.g. '/wave/'
+function p(path) { return BASE + path.replace(/^\//, ''); }
+
 // 核心静态资源
 var CORE_ASSETS = [
-  '/',
-  '/index.html',
-  '/common.css',
-  '/data.js',
-  '/app.js',
-  '/manifest.json',
-  '/avatar.jpg',
-  '/admin.html'
+  p('/'),
+  p('/index.html'),
+  p('/common.css'),
+  p('/data.js'),
+  p('/app.js'),
+  p('/manifest.json'),
+  p('/avatar.jpg'),
+  p('/admin.html')
 ];
 
 // 需要预缓存的资源
 var PRECACHE_ASSETS = [
-  '/',
-  '/index.html',
-  '/common.css',
-  '/data.js',
-  '/app.js',
-  '/manifest.json',
-  '/avatar.jpg'
+  p('/'),
+  p('/index.html'),
+  p('/common.css'),
+  p('/data.js'),
+  p('/app.js'),
+  p('/manifest.json'),
+  p('/avatar.jpg')
 ];
 
 // === Install：预缓存核心资源 ===
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(STATIC_CACHE).then(function(cache) {
-      return cache.addAll(PRECACHE_ASSETS).catch(function(err) {
-        console.warn('SW: 预缓存部分资源失败', err);
-      });
+      return Promise.allSettled(
+        PRECACHE_ASSETS.map(function(url) {
+          return cache.add(url).catch(function(err) {
+            console.warn('SW: 预缓存失败', url, err);
+          });
+        })
+      );
     })
   );
   self.skipWaiting();
@@ -74,7 +82,7 @@ self.addEventListener('fetch', function(e) {
 
   // 策略 1：API 请求 → Network-First
   // 确保管理后台和公开数据总是获取最新内容
-  if (url.pathname.startsWith('/api/')) {
+  if (url.pathname.startsWith(BASE + 'api/')) {
     e.respondWith(networkFirst(req, API_CACHE, 300)); // API 缓存 5 分钟
     return;
   }

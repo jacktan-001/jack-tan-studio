@@ -94,7 +94,7 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
     }
 
     try {
-      const res = await fetch('/api/submit', {
+      const res = await fetch(import.meta.env.BASE_URL + 'api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

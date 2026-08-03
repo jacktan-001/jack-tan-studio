@@ -26,7 +26,7 @@ function App() {
   useEffect(() => {
     // 注册 Service Worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch((err) => {
+      navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js').catch((err) => {
         console.warn('[SW] 注册失败:', err)
       })
     }

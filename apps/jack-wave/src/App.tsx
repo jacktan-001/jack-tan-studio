@@ -56,7 +56,7 @@ export default function App() {
 
   // === 加载 KV 动态数据 ===
   useEffect(() => {
-    fetch('/api/public-data')
+    fetch(import.meta.env.BASE_URL + 'api/public-data')
       .then((r) => {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
@@ -112,7 +112,7 @@ export default function App() {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
-        .register('/sw.js')
+        .register(import.meta.env.BASE_URL + 'sw.js')
         .then((reg) => {
           reg.addEventListener('updatefound', () => {
             const newWorker = reg.installing;

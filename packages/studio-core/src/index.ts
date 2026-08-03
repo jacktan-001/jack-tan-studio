@@ -25,6 +25,9 @@ export * from './storage';
 // Layer 4: Theme
 export * from './theme';
 
+// Layer 4.5: Navigation (cross-project StudioBar)
+export * from './nav';
+
 // Layer 5: PWA
 export * from './pwa';
 

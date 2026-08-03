@@ -8,6 +8,9 @@
 const CACHE_VERSION = 'jack-pose-v1'
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`
 
+// 子路径部署：从 SW scope 推导 base（如 /pose/）
+const BASE = new URL(self.registration.scope).pathname
+
 // ==================== Install ====================
 self.addEventListener('install', () => {
   self.skipWaiting()
@@ -48,14 +51,14 @@ self.addEventListener('fetch', (e) => {
             return res
           })
           .catch(() =>
-            caches.match(req).then((r) => r || caches.match('/')),
+            caches.match(req).then((r) => r || caches.match(BASE)),
           ),
       )
       return
     }
 
     // 哈希静态资源：Cache First
-    if (url.pathname.startsWith('/assets/')) {
+    if (url.pathname.startsWith(BASE + 'assets/')) {
       e.respondWith(
         caches.match(req).then(
           (cached) =>
