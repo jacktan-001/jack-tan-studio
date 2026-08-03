@@ -139,12 +139,12 @@ export default function Hero() {
           style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}
         >
           <a
-            href="/projects/wave/intro"
+            href="/projects/jack-wave/intro"
             data-cursor-hover
             onClick={(e) => {
               e.preventDefault()
               setPendingProject('wave')
-              navigateWithTransition('/projects/wave/intro')
+              navigateWithTransition('/projects/jack-wave/intro')
             }}
             style={{
               display: 'inline-flex',
