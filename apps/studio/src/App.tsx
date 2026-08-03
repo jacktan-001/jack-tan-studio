@@ -3,7 +3,6 @@ import { AnimatePresence } from 'motion/react'
 import Navbar from './components/layout/Navbar'
 import CustomCursor from './components/ui/CustomCursor'
 import Home from './pages/Home'
-import ProjectView from './pages/ProjectView'
 
 function BackgroundEffects() {
   return (
@@ -31,7 +30,6 @@ export default function App() {
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Home />} />
-            <Route path="/project/:id" element={<ProjectView />} />
           </Routes>
         </AnimatePresence>
       </div>
