@@ -369,9 +369,19 @@ function escAttr(s) {
   return String(s || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 }
 
-// --- 主题切换 ---
+// --- 主题切换（与全局 jack-tan-theme 保持一致） ---
+function readGlobalTheme() {
+  var raw = localStorage.getItem('jack-tan-theme');
+  if (!raw) return null;
+  try {
+    var parsed = JSON.parse(raw);
+    return (parsed === 'light' || parsed === 'dark') ? parsed : null;
+  } catch (e) {
+    return (raw === 'light' || raw === 'dark') ? raw : null;
+  }
+}
 function initTheme() {
-  var saved = localStorage.getItem('jackwave_theme');
+  var saved = readGlobalTheme();
   var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   var isDark = saved === 'dark' || (!saved && prefersDark);
   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -379,8 +389,9 @@ function initTheme() {
 }
 function toggleTheme() {
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  localStorage.setItem('jackwave_theme', isDark ? 'light' : 'dark');
+  var next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('jack-tan-theme', JSON.stringify(next));
   updateThemeIcon(!isDark);
 }
 function updateThemeIcon(isDark) {

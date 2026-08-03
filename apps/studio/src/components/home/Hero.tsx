@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'motion/react'
 import { ArrowDown, Sparkles } from 'lucide-react'
+import { setPendingProject, navigateWithTransition } from '@jack-tan/studio-core'
 
 export default function Hero() {
   const ref = useRef<HTMLDivElement>(null)
@@ -138,9 +138,14 @@ export default function Hero() {
           transition={{ delay: 0.7, duration: 0.6 }}
           style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}
         >
-          <Link
-            to="/project/wave"
+          <a
+            href="/projects/wave/intro"
             data-cursor-hover
+            onClick={(e) => {
+              e.preventDefault()
+              setPendingProject('wave')
+              navigateWithTransition('/projects/wave/intro')
+            }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -153,6 +158,7 @@ export default function Hero() {
               fontSize: '15px',
               boxShadow: '0 8px 30px rgba(124, 58, 237, 0.4)',
               transition: 'transform 0.3s, box-shadow 0.3s',
+              textDecoration: 'none',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-2px)'
@@ -164,7 +170,7 @@ export default function Hero() {
             }}
           >
             探索作品
-          </Link>
+          </a>
           <a
             href="https://github.com/jacktan-001"
             target="_blank"

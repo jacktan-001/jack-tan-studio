@@ -1,11 +1,11 @@
 /**
  * 主题管理：暗色/亮色模式切换
- * 优先读取 localStorage，其次跟随系统偏好
+ * 优先读取全局 jack-tan-theme，其次跟随系统偏好
  */
 
 export type Theme = 'light' | 'dark'
 
-const STORAGE_KEY = 'jack-pose-theme'
+const STORAGE_KEY = 'jack-tan-theme'
 
 function getSystemTheme(): Theme {
   if (typeof window === 'undefined') return 'light'
@@ -16,8 +16,19 @@ function applyTheme(theme: Theme) {
   document.documentElement.setAttribute('data-theme', theme)
 }
 
+function readSavedTheme(): Theme | null {
+  const raw = localStorage.getItem(STORAGE_KEY)
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw)
+    return parsed === 'light' || parsed === 'dark' ? parsed : null
+  } catch {
+    return raw === 'light' || raw === 'dark' ? raw : null
+  }
+}
+
 export function initTheme() {
-  const saved = localStorage.getItem(STORAGE_KEY) as Theme | null
+  const saved = readSavedTheme()
   const theme = saved ?? getSystemTheme()
   applyTheme(theme)
 }
@@ -30,7 +41,7 @@ export function toggleTheme(): Theme {
   const current = getCurrentTheme()
   const next: Theme = current === 'dark' ? 'light' : 'dark'
   applyTheme(next)
-  localStorage.setItem(STORAGE_KEY, next)
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
   return next
 }
 

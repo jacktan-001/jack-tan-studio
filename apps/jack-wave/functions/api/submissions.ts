@@ -9,6 +9,25 @@ const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 
 /**
+ * 使用恒定时间比较来验证密码，防止时序攻击
+ */
+async function timingSafeEqual(a: string, b: string): Promise<boolean> {
+  const encoder = new TextEncoder();
+  const [hashA, hashB] = await Promise.all([
+    crypto.subtle.digest('SHA-256', encoder.encode(a)),
+    crypto.subtle.digest('SHA-256', encoder.encode(b)),
+  ]);
+  const arrA = new Uint8Array(hashA);
+  const arrB = new Uint8Array(hashB);
+  if (arrA.length !== arrB.length) return false;
+  let result = 0;
+  for (let i = 0; i < arrA.length; i++) {
+    result |= arrA[i] ^ arrB[i];
+  }
+  return result === 0;
+}
+
+/**
  * 安全解析整数参数，失败时返回默认值
  */
 function parseIntParam(value: string | null, defaultValue: number): number {
@@ -23,7 +42,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const password =
     url.searchParams.get('password') || context.request.headers.get('x-admin-password');
 
-  if (!password || password !== context.env.ADMIN_PASSWORD) {
+  if (!password || !(await timingSafeEqual(password, context.env.ADMIN_PASSWORD))) {
     return Response.json({ error: '未授权' }, { status: 401 });
   }
 
@@ -107,7 +126,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
     url.searchParams.get('password') || context.request.headers.get('x-admin-password');
   const id = url.searchParams.get('id');
 
-  if (!password || password !== context.env.ADMIN_PASSWORD) {
+  if (!password || !(await timingSafeEqual(password, context.env.ADMIN_PASSWORD))) {
     return Response.json({ error: '未授权' }, { status: 401 });
   }
   if (!id) return Response.json({ error: '缺少 id 参数' }, { status: 400 });
