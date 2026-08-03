@@ -1,10 +1,10 @@
 {
-  "id": "/wave/",
+  "id": "/jack-wave/",
   "name": "Jack-Wave | Music Journal",
   "short_name": "Jack-Wave",
   "description": "好友乐享・音乐随记 — 用音乐记录生活，用旋律收藏时光",
-  "start_url": "/wave/",
-  "scope": "/wave/",
+  "start_url": "/jack-wave/",
+  "scope": "/jack-wave/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#fafafa",
@@ -14,25 +14,25 @@
   "categories": ["music", "entertainment", "lifestyle"],
   "icons": [
     {
-      "src": "/wave/avatar.jpg",
+      "src": "/jack-wave/avatar.jpg",
       "sizes": "192x192",
       "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "/wave/avatar.jpg",
+      "src": "/jack-wave/avatar.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "/wave/avatar.jpg",
+      "src": "/jack-wave/avatar.jpg",
       "sizes": "192x192",
       "type": "image/jpeg",
       "purpose": "maskable"
     },
     {
-      "src": "/wave/avatar.jpg",
+      "src": "/jack-wave/avatar.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
       "purpose": "maskable"
@@ -43,19 +43,19 @@
       "name": "月度歌单",
       "short_name": "月度",
       "description": "查看本月精选歌单",
-      "url": "/wave/#monthly"
+      "url": "/jack-wave/#monthly"
     },
     {
       "name": "心情歌单",
       "short_name": "心情",
       "description": "浏览心情歌单推荐",
-      "url": "/wave/#mood"
+      "url": "/jack-wave/#mood"
     },
     {
       "name": "推荐歌单",
       "short_name": "推荐",
       "description": "提交你的歌单推荐",
-      "url": "/wave/#submit"
+      "url": "/jack-wave/#submit"
     }
   ]
 }

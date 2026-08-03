@@ -2,25 +2,25 @@
   "name": "Jack-Tan | Personal Portfolio",
   "short_name": "Jack-Tan",
   "description": "9年民航安全体系深耕者，监管数字化转型实践者",
-  "start_url": "/tan/",
+  "start_url": "/jack-tan/",
   "display": "standalone",
   "background_color": "#f7f8fa",
   "theme_color": "#2d4a7a",
   "icons": [
     {
-      "src": "/tan/icons/icon-192.png",
+      "src": "/jack-tan/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/tan/icons/icon-512.png",
+      "src": "/jack-tan/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/tan/icons/icon-512.png",
+      "src": "/jack-tan/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

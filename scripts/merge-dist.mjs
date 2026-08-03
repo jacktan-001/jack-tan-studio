@@ -4,12 +4,12 @@
  * 将四个应用的构建产物合并到一个输出目录 deploy/dist，
  * 使其部署到同一个 Cloudflare Pages 项目（jack-tan-studio）的子路径下：
  *   studio → /        (根)
- *   pose   → /pose/
- *   wave   → /wave/
- *   tan    → /tan/
+ *   pose   → /jack-pose/
+ *   wave   → /jack-wave/
+ *   tan    → /jack-tan/
  *
- * 同时把 jack-wave 的 Pages Functions 重组到 deploy/functions/wave/，
- * 使 API 路由映射为 /wave/api/*（Pages Functions 按文件系统路径路由）。
+ * 同时把 jack-wave 的 Pages Functions 重组到 deploy/functions/jack-wave/，
+ * 使 API 路由映射为 /jack-wave/api/*（Pages Functions 按文件系统路径路由）。
  *
  * 用法: node scripts/merge-dist.mjs
  */
@@ -39,21 +39,24 @@ mkdirSync(functions, { recursive: true });
 
 // 2. 合并静态产物
 copy(resolve(root, 'apps/studio/dist'), resolve(dist, '.')); // studio 在根
-copy(resolve(root, 'apps/jack-pose/dist'), resolve(dist, 'pose'));
-copy(resolve(root, 'apps/jack-wave/dist'), resolve(dist, 'wave'));
-copy(resolve(root, 'apps/jack-tan/dist'), resolve(dist, 'tan'));
+copy(resolve(root, 'apps/jack-pose/dist'), resolve(dist, 'jack-pose'));
+copy(resolve(root, 'apps/jack-wave/dist'), resolve(dist, 'jack-wave'));
+copy(resolve(root, 'apps/jack-tan/dist'), resolve(dist, 'jack-tan'));
 
-// 3. 重组 wave Functions 到 /wave/api/* 路由
+// 3. 重组 wave Functions 到 /jack-wave/api/* 路由
 const waveFn = resolve(root, 'apps/jack-wave/functions');
-copy(resolve(waveFn, 'api'), resolve(functions, 'wave/api'));
-copy(resolve(waveFn, '_lib'), resolve(functions, 'wave/_lib'));
+copy(resolve(waveFn, 'api'), resolve(functions, 'jack-wave/api'));
+copy(resolve(waveFn, '_lib'), resolve(functions, 'jack-wave/_lib'));
 
 // 4. 生成统一的 _redirects（子应用 SPA 回退在前，兜底在后）
 //    Pages 只对"不存在静态文件"的路径应用回退，已存在的静态资源正常直出。
 const redirects = [
-  '/pose/* /pose/index.html 200',
-  '/wave/* /wave/index.html 200',
-  '/tan/* /tan/index.html 200',
+  '/wave/* /jack-wave/:splat 301',
+  '/pose/* /jack-pose/:splat 301',
+  '/tan/* /jack-tan/:splat 301',
+  '/jack-pose/* /jack-pose/index.html 200',
+  '/jack-wave/* /jack-wave/index.html 200',
+  '/jack-tan/* /jack-tan/index.html 200',
   '/* /index.html 200',
 ].join('\n') + '\n';
 writeFileSync(resolve(dist, '_redirects'), redirects);
@@ -71,34 +74,34 @@ const headers = `/*
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-/pose/assets/*
+/jack-pose/assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-/wave/assets/*
+/jack-wave/assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-/tan/assets/*
+/jack-tan/assets/*
   Cache-Control: public, max-age=31536000, immutable
 
 /*.html
   Cache-Control: no-cache, must-revalidate
 
-/pose/*.html
+/jack-pose/*.html
   Cache-Control: no-cache, must-revalidate
 
-/wave/*.html
+/jack-wave/*.html
   Cache-Control: no-cache, must-revalidate
 
-/tan/*.html
+/jack-tan/*.html
   Cache-Control: no-cache, must-revalidate
 
-/wave/sw.js
+/jack-wave/sw.js
   Cache-Control: no-cache, must-revalidate
 
-/pose/sw.js
+/jack-pose/sw.js
   Cache-Control: no-cache, must-revalidate
 
-/wave/api/*
+/jack-wave/api/*
   Cache-Control: no-store
 `;
 writeFileSync(resolve(dist, '_headers'), headers);

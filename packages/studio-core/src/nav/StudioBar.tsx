@@ -13,9 +13,9 @@ export type StudioBarProject = 'studio' | 'pose' | 'wave' | 'tan';
 
 const LINKS: { id: StudioBarProject; label: string; href: string }[] = [
   { id: 'studio', label: 'Studio', href: '/' },
-  { id: 'pose', label: 'Pose', href: '/pose/' },
-  { id: 'wave', label: 'Wave', href: '/wave/' },
-  { id: 'tan', label: 'Tan', href: '/tan/' },
+  { id: 'pose', label: 'Pose', href: '/jack-pose/' },
+  { id: 'wave', label: 'Wave', href: '/jack-wave/' },
+  { id: 'tan', label: 'Tan', href: '/jack-tan/' },
 ];
 
 export interface StudioBarProps {
