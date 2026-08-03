@@ -42,7 +42,7 @@ export function StudioBar({ current }: StudioBarProps) {
         padding: '6px 12px',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        background: 'color-mix(in srgb, var(--bg, #06060a) 72%, transparent)',
+        background: 'var(--bg-glass, color-mix(in srgb, var(--bg, #06060a) 72%, transparent))',
         borderBottom: '1px solid var(--border, rgba(128,128,128,0.2))',
         fontFamily:
           "'Space Grotesk','Noto Sans SC',system-ui,-apple-system,sans-serif",
@@ -62,7 +62,7 @@ export function StudioBar({ current }: StudioBarProps) {
               fontWeight: active ? 700 : 500,
               letterSpacing: '0.02em',
               textDecoration: 'none',
-              color: active ? 'var(--bg, #06060a)' : 'var(--text, #fafafa)',
+              color: active ? '#fff' : 'var(--text, #fafafa)',
               background: active ? 'var(--accent, #7c3aed)' : 'transparent',
               border: active
                 ? '1px solid transparent'

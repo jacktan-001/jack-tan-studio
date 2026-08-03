@@ -68,15 +68,16 @@ export function applyThemeVars(
   }
 }
 
-/** 应用主题预设到根元素 */
+/** 应用主题预设到根元素（属性驱动，不注入内联变量）
+ *  theme.css 依据 data-theme / data-project 解析出具体变量值，
+ *  各应用可在此基础上用同名属性选择器做个性化覆盖。 */
 export function applyPreset(
   preset: ThemePreset,
   mode: ThemeMode,
   element: HTMLElement = document.documentElement,
 ): void {
-  const vars = getThemeVars(preset, mode);
-  applyThemeVars(element, vars);
   element.setAttribute('data-theme', mode);
+  element.setAttribute('data-project', preset.id);
 }
 
 /** 检测系统暗色模式偏好 */

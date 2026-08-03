@@ -8,10 +8,12 @@ import {
   createContext,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react';
+import './theme.css';
 import {
   type ThemeMode,
   type ThemeModeSetting,
@@ -73,8 +75,8 @@ export function ThemeProvider({
     return onSystemThemeChange(setSystemMode);
   }, []);
 
-  // 应用 CSS 变量
-  useEffect(() => {
+  // 应用主题属性（绘制前执行，避免闪色）
+  useLayoutEffect(() => {
     applyPreset(preset, mode);
   }, [preset, mode]);
 

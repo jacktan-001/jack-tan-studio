@@ -1,0 +1,95 @@
+/* ==================================================================
+ * Layer 4: Theme — 全局主题契约（属性驱动）
+ *
+ * 设计原则：
+ *  - 不使用内联 style 注入变量（内联优先级过高会压制应用层覆盖）。
+ *  - ThemeProvider 只负责在 <html> 上设置两个属性：
+ *      data-theme   = light | dark      （明暗模式，全局同步）
+ *      data-project = studio|wave|pose|tan （项目个性色）
+ *  - 本文件提供"中性色契约"（所有应用共享，保证风格统一）与
+ *    "项目强调色"（保证各应用个性）。
+ *  - 各应用可通过自己的 [data-theme=...] / [data-project=...] 规则
+ *    在此基础上做个性化覆盖（纹理、圆角、次要色阶等）。
+ * ================================================================== */
+
+/* ---------- 中性色契约：亮色（默认） ---------- */
+:root,
+:root[data-theme='light'] {
+  --bg: #f8f8fc;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f0f0f5;
+  --bg-glass: rgba(255, 255, 255, 0.6);
+  --text: #1a1a2e;
+  --text-muted: #646480;
+  --text-dim: #a0a0b8;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.16);
+  color-scheme: light;
+}
+
+/* ---------- 中性色契约：暗色 ---------- */
+:root[data-theme='dark'] {
+  --bg: #06060a;
+  --bg-surface: #0c0c14;
+  --bg-elevated: #12121e;
+  --bg-glass: rgba(18, 18, 30, 0.5);
+  --text: #f5f5f7;
+  --text-muted: #8888a0;
+  --text-dim: #555568;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  color-scheme: dark;
+}
+
+/* ---------- 项目强调色：Studio（默认，紫粉霓虹） ---------- */
+:root,
+:root[data-project='studio'] {
+  --accent: #7c3aed;
+  --accent-2: #ec4899;
+  --accent-3: #06b6d4;
+  --accent-4: #f59e0b;
+  --accent-rgb: 124, 58, 237;
+  --accent-2-rgb: 236, 72, 153;
+  --accent-3-rgb: 6, 182, 212;
+  --glow: 0 0 40px rgba(124, 58, 237, 0.5);
+  --gradient: linear-gradient(135deg, #7c3aed, #ec4899, #06b6d4);
+}
+
+/* ---------- 项目强调色：Wave（青蓝暖光） ---------- */
+:root[data-project='wave'] {
+  --accent: #06b6d4;
+  --accent-2: #0ea5e9;
+  --accent-3: #14b8a6;
+  --accent-4: #f59e0b;
+  --accent-rgb: 6, 182, 212;
+  --accent-2-rgb: 14, 165, 233;
+  --accent-3-rgb: 20, 184, 166;
+  --glow: 0 0 40px rgba(6, 182, 212, 0.5);
+  --gradient: linear-gradient(135deg, #06b6d4, #0ea5e9, #14b8a6);
+}
+
+/* ---------- 项目强调色：Pose（粉紫活力） ---------- */
+:root[data-project='pose'] {
+  --accent: #ec4899;
+  --accent-2: #f43f5e;
+  --accent-3: #8b5cf6;
+  --accent-4: #fbbf24;
+  --accent-rgb: 236, 72, 153;
+  --accent-2-rgb: 244, 63, 94;
+  --accent-3-rgb: 139, 92, 246;
+  --glow: 0 0 40px rgba(236, 72, 153, 0.5);
+  --gradient: linear-gradient(135deg, #ec4899, #f43f5e, #8b5cf6);
+}
+
+/* ---------- 项目强调色：Tan（紫蓝商务） ---------- */
+:root[data-project='tan'] {
+  --accent: #7c3aed;
+  --accent-2: #3b82f6;
+  --accent-3: #6366f1;
+  --accent-4: #8b5cf6;
+  --accent-rgb: 124, 58, 237;
+  --accent-2-rgb: 59, 130, 246;
+  --accent-3-rgb: 99, 102, 241;
+  --glow: 0 0 40px rgba(124, 58, 237, 0.4);
+  --gradient: linear-gradient(135deg, #7c3aed, #3b82f6, #6366f1);
+}
