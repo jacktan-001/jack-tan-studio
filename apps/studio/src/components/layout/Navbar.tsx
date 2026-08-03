@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Sun, Moon } from 'lucide-react'
+import { useTheme } from '@jack-tan/studio-core'
 import { projects } from '../../data/projects'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
+  const { mode, toggleMode } = useTheme()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -120,6 +122,34 @@ export default function Navbar() {
           GitHub
         </a>
       </div>
+
+      <button
+        type="button"
+        onClick={toggleMode}
+        aria-label="切换主题"
+        title="切换主题"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '36px',
+          height: '36px',
+          borderRadius: '10px',
+          color: 'var(--text-muted)',
+          background: 'rgba(255,255,255,0.06)',
+          transition: 'all 0.3s',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = 'var(--text)'
+          e.currentTarget.style.background = 'rgba(255,255,255,0.12)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = 'var(--text-muted)'
+          e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+        }}
+      >
+        {mode === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+      </button>
 
       <button
         className="nav-mobile-toggle"

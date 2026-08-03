@@ -28,7 +28,7 @@ export function Footer() {
       <p>Music Journal &middot; 好友乐享 · 音乐随记</p>
       <p>&copy; 2026 &middot; Made with &hearts; and music</p>
       <a
-        href="/admin.html"
+        href={`${import.meta.env.BASE_URL}admin.html`}
         className="footer-admin"
         aria-label="管理员登录"
         style={{

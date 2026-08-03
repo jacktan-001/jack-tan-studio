@@ -38,7 +38,7 @@ export function Hero({ onPlayCurrentMonth }: HeroProps) {
       />
       <img
         className="hero-avatar"
-        src="/avatar.jpg"
+        src={`${import.meta.env.BASE_URL}avatar.jpg`}
         alt="Jack-Wave 头像"
         loading="eager"
         style={{

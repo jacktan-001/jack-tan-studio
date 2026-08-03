@@ -26,7 +26,7 @@ export default function Sidebar() {
         {/* Avatar */}
         <div className="mb-6 h-[88px] w-[88px] overflow-hidden rounded-[20px] bg-neutral-100 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
           <img
-            src="/avatar.jpg"
+            src={`${import.meta.env.BASE_URL}avatar.jpg`}
             alt="Jack Tan"
             width={88}
             height={88}

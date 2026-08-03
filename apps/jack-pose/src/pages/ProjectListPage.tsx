@@ -59,7 +59,7 @@ export function ProjectListPage() {
         {/* Hero */}
         <div className="text-center mb-10 sm:mb-12">
           <img
-            src="/hero-sm.png"
+            src={`${import.meta.env.BASE_URL}hero-sm.png`}
             alt="Jack Pose"
             className="w-44 h-44 sm:w-52 sm:h-52 mx-auto mb-6 rounded-3xl shadow-lg shadow-black/10"
           />
