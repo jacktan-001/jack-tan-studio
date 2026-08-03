@@ -2,7 +2,7 @@
  * Layer 4: Theme / Navigation — StudioBar 跨项目共享导航
  *
  * 单 origin 部署后，四个应用位于同一域名下的子路径：
- *   Studio /  ·  Pose /projects/pose/  ·  Wave /projects/wave/  ·  Tan /projects/tan/
+ *   Studio /  ·  Pose /projects/jack-pose/  ·  Wave /projects/jack-wave/  ·  Tan /projects/jack-tan/
  * StudioBar 提供跨应用快速切换 + 全局主题开关。
  * 样式全部基于共享 CSS 变量（--bg/--text/--accent），自动跟随当前应用主题。
  */
@@ -13,9 +13,9 @@ export type StudioBarProject = 'studio' | 'pose' | 'wave' | 'tan';
 
 const LINKS: { id: StudioBarProject; label: string; href: string }[] = [
   { id: 'studio', label: 'Studio', href: '/' },
-  { id: 'pose', label: 'Pose', href: '/projects/pose/' },
-  { id: 'wave', label: 'Wave', href: '/projects/wave/' },
-  { id: 'tan', label: 'Tan', href: '/projects/tan/' },
+  { id: 'pose', label: 'Pose', href: '/projects/jack-pose/' },
+  { id: 'wave', label: 'Wave', href: '/projects/jack-wave/' },
+  { id: 'tan', label: 'Tan', href: '/projects/jack-tan/' },
 ];
 
 export interface StudioBarProps {

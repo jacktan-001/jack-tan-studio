@@ -51,7 +51,7 @@ git push -u origin main
 
 | 配置项 | 值 |
 |--------|-----|
-| 项目名称 | `jack-tan-studio` |
+| 项目名称 | `jacktan-studio` |
 | 构建命令 | `pnpm install && pnpm build:studio` |
 | 构建输出目录 | `apps/studio/dist` |
 | 根目录 | `.` (monorepo root) |
@@ -92,20 +92,8 @@ git push -u origin main
 ### 方式一：通过 Wrangler CLI 创建
 
 ```bash
-# Studio 门户
-wrangler pages project create jack-tan-studio \
-  --production-branch main
-
-# Jack Pose
-wrangler pages project create jack-pose \
-  --production-branch main
-
-# Jack Wave
-wrangler pages project create jack-wave \
-  --production-branch main
-
-# Jack Tan
-wrangler pages project create jack-tan \
+# 单 origin 门户，子应用通过子路径访问
+wrangler pages project create jacktan-studio \
   --production-branch main
 ```
 
@@ -157,34 +145,14 @@ wrangler kv namespace create WAVE_KV
 ### 手动部署（本地构建 + 上传）
 
 ```bash
-# 构建并部署 Studio
-pnpm build:studio
-wrangler pages deploy apps/studio/dist --project-name jack-tan-studio
-
-# 构建并部署 Jack Pose
-pnpm build:pose
-wrangler pages deploy apps/jack-pose/dist --project-name jack-pose
-
-# 构建并部署 Jack Wave
-pnpm build:wave
-wrangler pages deploy apps/jack-wave/dist --project-name jack-wave
-
-# 构建并部署 Jack Tan
-pnpm build:tan
-wrangler pages deploy apps/jack-tan/dist --project-name jack-tan
-```
-
-### 一键部署全部
-
-```bash
 # 构建所有应用
 pnpm build
 
-# 逐个部署
-wrangler pages deploy apps/studio/dist --project-name jack-tan-studio
-wrangler pages deploy apps/jack-pose/dist --project-name jack-pose
-wrangler pages deploy apps/jack-wave/dist --project-name jack-wave
-wrangler pages deploy apps/jack-tan/dist --project-name jack-tan
+# 合并为单 origin 产物
+pnpm merge
+
+# 部署到 jacktan-studio
+cd deploy && npx wrangler pages deploy dist --project-name jacktan-studio
 ```
 
 ---
