@@ -25,8 +25,9 @@
   --color-divider: var(--color-divider);
   --color-placeholder: var(--color-placeholder);
 
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
-    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-sans: var(--font-body, 'Inter', 'Noto Sans SC', system-ui, sans-serif);
+  --font-display: var(--font-display, 'Inter', 'Noto Sans SC', sans-serif);
+  --font-mono: var(--font-mono, 'JetBrains Mono', ui-monospace, monospace);
 }
 
 /* ==================== CSS 变量：颜色系统 ====================
@@ -69,6 +70,16 @@
   --color-accent: var(--accent, #ec4899);
   --color-accent-hover: var(--accent-2, #f43f5e);
   --color-accent-bg: rgba(var(--accent-rgb, 236, 72, 153), 0.08);
+
+  /* Layout */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-card: 18px;
+  --radius-modal: 24px;
+  --shadow: 0 4px 24px rgba(193, 149, 106, 0.08);
+  --shadow-lg: 0 8px 40px rgba(193, 149, 106, 0.12);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 :root[data-theme="dark"] {
@@ -119,8 +130,7 @@ html {
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI',
-    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-body, 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg);
@@ -361,15 +371,26 @@ body {
 .pose-pop-in-delay-2 { animation: pose-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.16s both; }
 .pose-pop-in-delay-3 { animation: pose-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.24s both; }
 
-/* 卡片翻转悬停 */
+/* 卡片翻转悬停 — 支持 JS 驱动的动态倾斜 */
 .pose-card-tilt {
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   transform-style: preserve-3d;
   will-change: transform;
 }
 
+/* JS 驱动倾斜：通过 CSS 变量 --tilt-x / --tilt-y 控制旋转角度 */
+.pose-card-tilt[data-tilt] {
+  transform: perspective(800px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateY(var(--tilt-lift, 0px)) scale(var(--tilt-scale, 1));
+}
+
 .pose-card-tilt:hover {
   transform: perspective(800px) rotateX(5deg) rotateY(-5deg) translateY(-6px) scale(1.01);
+}
+
+/* 移动端按压反馈 */
+.pose-card-tilt:active {
+  transform: perspective(800px) rotateX(0deg) rotateY(0deg) translateY(-2px) scale(0.98);
+  transition: transform 0.15s ease-out;
 }
 
 /* 暖色渐变文字 */
@@ -513,4 +534,62 @@ body {
 
 .pose-glow-pulse {
   animation: pose-glow-pulse 2s ease-in-out infinite;
+}
+
+/* ==================== Jack Pose 交互增强 ====================
+   设计规范：
+   - PC：3D tilt ±6° 跟随光标坐标，平缓归位
+   - 移动端：取消 3D 倾斜，改为长按轻微缩放按压反馈
+   ================================================== */
+
+/* JS 驱动的倾斜卡片 — 快速 transition 响应光标移动 */
+.pose-tilt-card {
+  transition: transform 0.15s ease-out, box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* 移动端：按压反馈 */
+@media (max-width: 768px) {
+  .pose-tilt-card,
+  .pose-card-tilt {
+    transition: transform 0.2s ease-out;
+  }
+
+  .pose-tilt-card:active,
+  .pose-card-tilt:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease-out;
+  }
+
+  /* 噪点纹理静态化 — 关闭动画节省性能 */
+  .pose-paper-texture {
+    animation: none;
+  }
+
+  /* 气泡动画降频 */
+  .pose-warm-blob {
+    animation-duration: 30s;
+  }
+}
+
+/* ==================== View Transitions API ====================
+   Jack Pose 页面切换启用 View Transitions，卡片逐个 spring 弹性缩放入场。 */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root) {
+    animation: pose-vt-out 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  ::view-transition-new(root) {
+    animation: pose-vt-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+}
+
+@keyframes pose-vt-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+@keyframes pose-vt-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
 }

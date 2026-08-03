@@ -10,7 +10,35 @@
  *    "项目强调色"（保证各应用个性）。
  *  - 各应用可通过自己的 [data-theme=...] / [data-project=...] 规则
  *    在此基础上做个性化覆盖（纹理、圆角、次要色阶等）。
+ *
+ *  统一底层令牌（字体 + 圆角）：
+ *  - 所有子应用共享同一套字体栈和圆角体系，保证底层一致性
+ *  - 各应用在此基础上通过纹理、动画、交互、发光等维度建立独特个性
  * ================================================================== */
+
+/* ---------- 统一底层令牌：字体 + 圆角（所有应用共享） ---------- */
+:root {
+  /* 字体栈 — Inter Variable（拉丁）+ Noto Sans SC（中文），全局统一字重 400/500/600/700 */
+  --font-display: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* 圆角体系 — 全局统一基准：基础 12px / 卡片 18px / 弹窗 24px
+     四套风格仅通过光影、动效、纹理、色彩区分，基础几何圆角不改动 */
+  --radius-xs: 6px;       /* 小标签、徽章 */
+  --radius-sm: 8px;       /* 小按钮、输入框 */
+  --radius-base: 12px;    /* 基础组件统一基准 */
+  --radius-card: 18px;    /* 卡片大圆角 */
+  --radius-modal: 24px;   /* 弹窗 / 浮层 */
+  --radius-full: 999px;   /* 胶囊形 */
+
+  /* 兼容旧变量名映射 */
+  --radius: var(--radius-base);
+  --radius-sm-old: var(--radius-sm);
+  --radius-lg: var(--radius-card);
+  --radius-xl: var(--radius-modal);
+  --radius-2xl: var(--radius-modal);
+}
 
 /* ---------- 中性色契约：亮色（默认） ---------- */
 :root,

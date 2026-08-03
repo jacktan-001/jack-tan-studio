@@ -4,8 +4,8 @@
  */
 
 export const fontFamily = {
-  display: "'Space Grotesk', 'Noto Sans SC', sans-serif",
-  body: "'Noto Sans SC', 'Space Grotesk', sans-serif",
+  display: "'Inter', 'Noto Sans SC', system-ui, sans-serif",
+  body: "'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif",
   mono: "'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
 } as const;
 

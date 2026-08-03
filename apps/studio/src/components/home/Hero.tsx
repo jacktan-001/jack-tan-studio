@@ -2,6 +2,8 @@ import { useRef, useEffect, useState } from 'react'
 import { motion, useScroll, useTransform } from 'motion/react'
 import { ArrowDown, Sparkles } from 'lucide-react'
 import { setPendingProject, navigateWithTransition } from '@jack-tan/studio-core'
+import CharSplit from '../effects/CharSplit'
+import { useMagnetic } from '../../hooks/useMagnetic'
 
 export default function Hero() {
   const ref = useRef<HTMLDivElement>(null)
@@ -14,6 +16,12 @@ export default function Hero() {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9])
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+
+  // 磁吸按钮 refs — Studio 科幻展厅核心交互
+  const magneticExploreRef = useRef<HTMLAnchorElement>(null)
+  const magneticGithubRef = useRef<HTMLAnchorElement>(null)
+  useMagnetic(magneticExploreRef)
+  useMagnetic(magneticGithubRef)
 
   useEffect(() => {
     const handleMove = (e: MouseEvent) => {
@@ -106,7 +114,9 @@ export default function Hero() {
             marginBottom: '24px',
           }}
         >
-          <span className="gradient-text">Jack Tan</span>
+          <span className="gradient-text studio-neon-text">
+            <CharSplit text="Jack Tan" />
+          </span>
           <br />
           <span style={{
             fontWeight: 200,
@@ -139,8 +149,10 @@ export default function Hero() {
           style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}
         >
           <a
+            ref={magneticExploreRef}
             href="/projects/jack-wave/intro"
             data-cursor-hover
+            className="studio-magnetic"
             onClick={(e) => {
               e.preventDefault()
               setPendingProject('wave')
@@ -172,10 +184,12 @@ export default function Hero() {
             探索作品
           </a>
           <a
+            ref={magneticGithubRef}
             href="https://github.com/jacktan-001"
             target="_blank"
             rel="noopener noreferrer"
             data-cursor-hover
+            className="studio-magnetic"
             style={{
               display: 'inline-flex',
               alignItems: 'center',

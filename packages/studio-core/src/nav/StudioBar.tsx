@@ -111,7 +111,7 @@ export function StudioBar({ current }: StudioBarProps) {
         boxShadow: activeProject
           ? `inset 0 -1px 0 0 rgba(${previewRgb}, 0.25), 0 8px 40px rgba(${previewRgb}, 0.08)`
           : 'none',
-        fontFamily: "'Space Grotesk','Noto Sans SC',system-ui,-apple-system,sans-serif",
+        fontFamily: "var(--font-body, 'Inter','Noto Sans SC',system-ui,-apple-system,sans-serif)",
       }}
     >
       {/* ===== 左侧：Logo + 品牌名（点击返回 Studio） ===== */}

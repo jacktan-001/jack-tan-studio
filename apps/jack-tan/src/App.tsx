@@ -1,6 +1,7 @@
 import { StudioBar } from '@jack-tan/studio-core'
 import Sidebar from './components/Sidebar'
 import RevealObserver from './components/RevealObserver'
+import Spotlight from './components/Spotlight'
 import About from './components/About'
 import Experience from './components/Experience'
 import Projects from './components/Projects'
@@ -25,6 +26,9 @@ export default function App() {
       <div className="tan-geo-grid" aria-hidden="true" />
       <div className="tan-accent-line" aria-hidden="true" />
       <div className="tan-noise" aria-hidden="true" />
+
+      {/* 聚光灯跟随鼠标 — 径向渐变提亮光标区域 */}
+      <Spotlight />
 
       <div
         className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 lg:grid-cols-[380px_1fr]"

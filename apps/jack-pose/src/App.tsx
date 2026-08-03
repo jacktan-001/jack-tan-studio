@@ -8,6 +8,25 @@ const ProjectListPage = lazy(() => import('./pages/ProjectListPage').then(m => (
 const EditorPage = lazy(() => import('./pages/EditorPage').then(m => ({ default: m.EditorPage })))
 const PuzzlePage = lazy(() => import('./pages/PuzzlePage').then(m => ({ default: m.PuzzlePage })))
 
+/** 背景视觉层 — 暖色手工质感 */
+function BackgroundEffects() {
+  return (
+    <>
+      {/* 有机暖色气泡 */}
+      <div className="pose-warm-blobs" aria-hidden="true">
+        <div className="pose-warm-blob" />
+        <div className="pose-warm-blob" />
+        <div className="pose-warm-blob" />
+        <div className="pose-warm-blob" />
+      </div>
+      {/* 圆点网格 */}
+      <div className="pose-dot-grid" aria-hidden="true" />
+      {/* 纸张纹理 — 暖色噪点 */}
+      <div className="pose-paper-texture" aria-hidden="true" />
+    </>
+  )
+}
+
 function App() {
   useEffect(() => {
     // 注册 Service Worker
@@ -20,6 +39,8 @@ function App() {
 
   return (
     <ErrorBoundary>
+      {/* 背景视觉层 — 暖色手工质感 */}
+      <BackgroundEffects />
       {/* StudioBar 跨项目共享导航栏（fixed 定位，下方内容由 index.css 预留 64px 顶部间距） */}
       <StudioBar current="pose" />
       <HashRouter>

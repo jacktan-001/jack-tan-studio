@@ -19,8 +19,8 @@
   --color-border: var(--border);
   --color-border-hover: var(--border-hover);
 
-  --font-display: 'Space Grotesk', 'Noto Sans SC', sans-serif;
-  --font-body: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+  --font-display: 'Inter', 'Noto Sans SC', sans-serif;
+  --font-body: 'Inter', 'Noto Sans SC', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
@@ -29,14 +29,14 @@
    颜色变量（--bg, --text, --accent 等）由 ThemeProvider 动态注入。 */
 :root {
   /* 字体 */
-  --font-display: 'Space Grotesk', 'Noto Sans SC', sans-serif;
-  --font-body: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+  --font-display: 'Inter', 'Noto Sans SC', sans-serif;
+  --font-body: 'Inter', 'Noto Sans SC', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* 圆角 */
-  --radius: 16px;
-  --radius-sm: 10px;
-  --radius-lg: 20px;
+  /* 圆角 — 全局统一基准 */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 18px;
 
   /* 过渡 */
   --transition: 0.4s cubic-bezier(0.22, 1, 0.36, 1);
@@ -330,5 +330,205 @@ button {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==================== Studio 科幻未来视觉个性 ====================
+   设计理念：科幻·未来 — 像走进科技展览馆
+   - 入场动画：逐字分割 + stagger（字符逐一显现）
+   - 交互特色：磁性光标（mousemove 距离感应）
+   - 纹理：Canvas 星粒子 + 扫描线（StarField 组件）
+   - 发光：多层霓虹 text-shadow
+   ================================================== */
+
+/* 多层霓虹文字 — text-shadow 多层叠加 */
+.studio-neon-text {
+  text-shadow:
+    0 0 4px rgba(var(--accent-rgb), 0.8),
+    0 0 12px rgba(var(--accent-rgb), 0.5),
+    0 0 24px rgba(var(--accent-rgb), 0.3),
+    0 0 48px rgba(var(--accent-2-rgb), 0.2),
+    0 0 80px rgba(var(--accent-3-rgb), 0.1);
+}
+
+/* 霓虹文字 — 副色版本 */
+.studio-neon-text-2 {
+  text-shadow:
+    0 0 4px rgba(var(--accent-2-rgb), 0.8),
+    0 0 12px rgba(var(--accent-2-rgb), 0.5),
+    0 0 24px rgba(var(--accent-2-rgb), 0.3),
+    0 0 48px rgba(var(--accent-rgb), 0.2);
+}
+
+/* 霓虹脉冲 — 呼吸式发光 */
+@keyframes studio-neon-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 4px rgba(var(--accent-rgb), 0.6),
+      0 0 12px rgba(var(--accent-rgb), 0.4),
+      0 0 24px rgba(var(--accent-rgb), 0.2);
+  }
+  50% {
+    text-shadow:
+      0 0 6px rgba(var(--accent-rgb), 0.9),
+      0 0 18px rgba(var(--accent-rgb), 0.6),
+      0 0 36px rgba(var(--accent-rgb), 0.4),
+      0 0 60px rgba(var(--accent-2-rgb), 0.2);
+  }
+}
+
+.studio-neon-pulse {
+  animation: studio-neon-pulse 3s ease-in-out infinite;
+}
+
+/* 逐字分割入场 — 字符逐一显现 */
+@keyframes studio-char-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) rotateX(90deg);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+    filter: blur(0px);
+  }
+}
+
+.studio-char-split {
+  display: inline-block;
+}
+
+.studio-char-split .char {
+  display: inline-block;
+  opacity: 0;
+  animation: studio-char-reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 逐字入场延迟 — 自动为每个字符设置递增延迟 */
+.studio-char-split .char:nth-child(1) { animation-delay: 0.02s; }
+.studio-char-split .char:nth-child(2) { animation-delay: 0.06s; }
+.studio-char-split .char:nth-child(3) { animation-delay: 0.10s; }
+.studio-char-split .char:nth-child(4) { animation-delay: 0.14s; }
+.studio-char-split .char:nth-child(5) { animation-delay: 0.18s; }
+.studio-char-split .char:nth-child(6) { animation-delay: 0.22s; }
+.studio-char-split .char:nth-child(7) { animation-delay: 0.26s; }
+.studio-char-split .char:nth-child(8) { animation-delay: 0.30s; }
+.studio-char-split .char:nth-child(9) { animation-delay: 0.34s; }
+.studio-char-split .char:nth-child(10) { animation-delay: 0.38s; }
+.studio-char-split .char:nth-child(11) { animation-delay: 0.42s; }
+.studio-char-split .char:nth-child(12) { animation-delay: 0.46s; }
+.studio-char-split .char:nth-child(13) { animation-delay: 0.50s; }
+.studio-char-split .char:nth-child(14) { animation-delay: 0.54s; }
+.studio-char-split .char:nth-child(15) { animation-delay: 0.58s; }
+.studio-char-split .char:nth-child(16) { animation-delay: 0.62s; }
+.studio-char-split .char:nth-child(17) { animation-delay: 0.66s; }
+.studio-char-split .char:nth-child(18) { animation-delay: 0.70s; }
+.studio-char-split .char:nth-child(19) { animation-delay: 0.74s; }
+.studio-char-split .char:nth-child(20) { animation-delay: 0.78s; }
+.studio-char-split .char:nth-child(n+21) { animation-delay: 0.82s; }
+
+/* 磁性按钮 — 鼠标靠近时被吸引 */
+.studio-magnetic {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* 扫描线纹理 — CSS 备用（Canvas 为主） */
+.studio-scanline-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(var(--accent-rgb), 0.015) 2px,
+    rgba(var(--accent-rgb), 0.015) 4px
+  );
+  opacity: 0.5;
+}
+
+/* 全息边框 — 渐变流动边框 */
+.studio-holo-border {
+  position: relative;
+  background-clip: padding-box;
+  border: 1px solid transparent;
+}
+
+.studio-holo-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--accent-rgb), 0.4),
+    rgba(var(--accent-2-rgb), 0.4),
+    rgba(var(--accent-3-rgb), 0.4),
+    rgba(var(--accent-rgb), 0.4)
+  );
+  background-size: 300% 300%;
+  animation: studio-holo-flow 4s ease infinite;
+}
+
+@keyframes studio-holo-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* 数据流入场 — 从左侧滑入并带数据感 */
+@keyframes studio-data-stream {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.studio-data-stream {
+  animation: studio-data-stream 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 故障效果 — 微妙的 RGB 偏移 */
+@keyframes studio-glitch {
+  0%, 100% {
+    text-shadow: none;
+    transform: translate(0);
+  }
+  20% {
+    text-shadow: -1px 0 rgba(var(--accent-2-rgb), 0.8), 1px 0 rgba(var(--accent-3-rgb), 0.8);
+    transform: translate(0.5px, 0);
+  }
+  40% {
+    text-shadow: 1px 0 rgba(var(--accent-2-rgb), 0.8), -1px 0 rgba(var(--accent-3-rgb), 0.8);
+    transform: translate(-0.5px, 0);
+  }
+  60% {
+    text-shadow: none;
+    transform: translate(0);
+  }
+}
+
+.studio-glitch:hover {
+  animation: studio-glitch 0.3s ease;
+}
+
+/* 移动端：关闭部分重特效以保性能 */
+@media (max-width: 768px) {
+  .studio-neon-text {
+    text-shadow:
+      0 0 4px rgba(var(--accent-rgb), 0.6),
+      0 0 12px rgba(var(--accent-rgb), 0.3);
+  }
+  .studio-scanline-overlay {
+    opacity: 0.3;
   }
 }

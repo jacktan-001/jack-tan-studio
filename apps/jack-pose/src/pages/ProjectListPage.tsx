@@ -4,12 +4,14 @@
  * - 拼长图（直接进入拼图模式）
  * - 导入工程文件
  * 下方列出已有项目。自适应移动端和桌面端。
+ * 卡片使用 useTilt 实现 ±6° 3D 透视倾斜跟随光标，spring 弹性缩放入场。
  */
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProjectStore } from '../stores/projectStore'
 import { importProjectArchive } from '../lib/importExport'
 import { toast } from 'sonner'
+import { useTilt } from '../hooks/useTilt'
 
 export function ProjectListPage() {
   const navigate = useNavigate()
@@ -20,6 +22,14 @@ export function ProjectListPage() {
   const [title, setTitle] = useState('')
   const [showInput, setShowInput] = useState(false)
   const importRef = useRef<HTMLInputElement>(null)
+
+  // 3D tilt refs for entry cards
+  const tiltRef1 = useRef<HTMLButtonElement>(null)
+  const tiltRef2 = useRef<HTMLButtonElement>(null)
+  const tiltRef3 = useRef<HTMLButtonElement>(null)
+  useTilt(tiltRef1)
+  useTilt(tiltRef2)
+  useTilt(tiltRef3)
 
   const handleCreate = () => {
     const id = createProject(title)
@@ -57,7 +67,7 @@ export function ProjectListPage() {
     <div className="min-h-screen bg-bg text-primary">
       <main className="max-w-lg mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-10">
         {/* Hero */}
-        <div className="text-center mb-10 sm:mb-12">
+        <div className="text-center mb-10 sm:mb-12 pose-pop-in">
           <img
             src={`${import.meta.env.BASE_URL}hero-sm.png`}
             alt="Jack Pose"
@@ -67,7 +77,7 @@ export function ProjectListPage() {
             fetchPriority="high"
             className="w-44 h-44 sm:w-52 sm:h-52 mx-auto mb-6 rounded-3xl shadow-lg shadow-black/10"
           />
-          <h1 className="font-[Outfit] text-5xl sm:text-6xl font-extrabold tracking-tighter mb-3 text-primary">
+          <h1 className="text-5xl sm:text-6xl font-bold tracking-tighter mb-3 text-primary">
             JACK-POSE
           </h1>
           <p className="text-lg text-tertiary font-medium">
@@ -78,8 +88,9 @@ export function ProjectListPage() {
         {/* 三个一级入口 */}
         <div className="space-y-3 mb-12">
           <button
+            ref={tiltRef1}
             onClick={() => setShowInput((v) => !v)}
-            className={`w-full group relative overflow-hidden rounded-2xl border p-5 text-left transition hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] ${
+            className={`pose-tilt-card pose-pop-in w-full group relative overflow-hidden rounded-2xl border p-5 text-left transition hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] ${
               showInput
                 ? 'bg-accent-bg border-accent/40 text-accent ring-1 ring-accent/20'
                 : 'bg-surface border-outline text-primary hover:border-accent/30 hover:bg-[#FFF8EE]'
@@ -120,8 +131,9 @@ export function ProjectListPage() {
           )}
 
           <button
+            ref={tiltRef2}
             onClick={() => navigate('/puzzle')}
-            className="w-full group relative overflow-hidden rounded-2xl bg-surface border border-outline text-primary p-5 text-left transition hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] hover:border-accent/30 hover:bg-[#FFF8EE]"
+            className="pose-tilt-card pose-pop-in-delay-1 w-full group relative overflow-hidden rounded-2xl bg-surface border border-outline text-primary p-5 text-left transition hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] hover:border-accent/30 hover:bg-[#FFF8EE]"
           >
             <div className="relative z-10 flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-[#f093fb] to-[#f5576c]">
@@ -151,8 +163,9 @@ export function ProjectListPage() {
             }}
           />
           <button
+            ref={tiltRef3}
             onClick={() => importRef.current?.click()}
-            className="w-full group relative overflow-hidden rounded-2xl bg-surface border border-outline text-primary p-5 text-left transition hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] hover:border-accent/30 hover:bg-[#FFF8EE]"
+            className="pose-tilt-card pose-pop-in-delay-2 w-full group relative overflow-hidden rounded-2xl bg-surface border border-outline text-primary p-5 text-left transition hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] hover:border-accent/30 hover:bg-[#FFF8EE]"
           >
             <div className="relative z-10 flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-[#4facfe] to-[#00f2fe]">

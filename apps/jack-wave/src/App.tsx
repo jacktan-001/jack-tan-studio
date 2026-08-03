@@ -41,6 +41,7 @@ import {
 import { useAudioPlayer } from './hooks/useAudioPlayer';
 import { StudioBar } from '@jack-tan/studio-core';
 import { Hero } from './components/Hero';
+import RippleField from './components/RippleField';
 import { MonthlySection, type MonthlySectionRef } from './components/MonthlySection';
 import { MoodGrid } from './components/MoodGrid';
 import { MoodModal } from './components/MoodModal';
@@ -362,6 +363,14 @@ export default function App() {
 
       {/* StudioBar 跨项目共享导航栏（fixed 定位，下方内容由 index.css 预留 64px 顶部间距） */}
       <StudioBar current="wave" />
+
+      {/* 光晕呼吸 — 角落 radial-gradient 脉冲 */}
+      <div className="wave-halo-pulse" aria-hidden="true">
+        <div className="wave-halo-corner" />
+        <div className="wave-halo-corner" />
+      </div>
+      {/* 点击水波纹扩散 */}
+      <RippleField />
 
       {/* Hero 区域 */}
       <Hero onPlayCurrentMonth={handlePlayCurrentMonth} />
