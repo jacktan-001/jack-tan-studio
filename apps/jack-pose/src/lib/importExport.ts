@@ -255,7 +255,7 @@ export async function exportLongImage(
   if (imgs.length === 0) throw new Error('图片加载失败')
 
   // 每张图按裁剪设置计算输出单元尺寸
-  const cells = imgs.map((img, i) => calcBoxSize(img, crops[ids[i]]?.aspect ?? 'original', direction))
+  const cells = imgs.map((img, i) => calcBoxSize(img, crops[ids[i] ?? '']?.aspect ?? 'original', direction))
 
   let canvasW = 0
   let canvasH = 0
@@ -288,7 +288,7 @@ export async function exportLongImage(
   let startIndex = 0
 
   for (let i = 0; i < cells.length; i++) {
-    const cellSize = direction === 'vertical' ? cells[i].boxH : cells[i].boxW
+    const cellSize = direction === 'vertical' ? cells[i]!.boxH : cells[i]!.boxW
     if (currentSize + cellSize > MAX_CANVAS_DIMENSION && i > startIndex) {
       // 当前段已满，保存并开始新段
       segments.push({ startIndex, endIndex: i - 1, size: currentSize })
@@ -306,7 +306,7 @@ export async function exportLongImage(
   // 渲染每个分片并下载
   const padWidth = String(segments.length).length
   for (let seg = 0; seg < segments.length; seg++) {
-    const { startIndex: si, endIndex: ei, size } = segments[seg]
+    const { startIndex: si, endIndex: ei, size } = segments[seg]!
     const segCells = cells.slice(si, ei + 1)
     const segImgs = imgs.slice(si, ei + 1)
     const segIds = ids.slice(si, ei + 1)
@@ -357,9 +357,9 @@ async function renderLongImage(
   let x = 0
   let y = 0
   for (let i = 0; i < imgs.length; i++) {
-    const img = imgs[i]
-    const id = ids[i]
-    const { boxW, boxH } = cells[i]
+    const img = imgs[i]!
+    const id = ids[i] ?? ''
+    const { boxW, boxH } = cells[i]!
     drawCroppedImage(ctx, img, crops[id], x, y, boxW, boxH)
     if (direction === 'vertical') {
       y += boxH
@@ -413,7 +413,7 @@ export async function exportWechatCard(
   const twoCellSize = (GRID_W - GAP) / 2
   const n = imgs.length
   if (n === 1) {
-    const img = imgs[0]
+    const img = imgs[0]!
     const ratio = Math.min(GRID_W / img.naturalWidth, 960 / img.naturalHeight)
     gridH = Math.round(img.naturalHeight * ratio)
   } else if (n === 2 || n === 4) {
@@ -541,7 +541,7 @@ function wrapText(
   ctx: CanvasRenderingContext2D,
   text: string,
   maxWidth: number,
-  lineHeight: number,
+  _lineHeight: number,
 ): string[] {
   const paragraphs = text.split('\n')
   const lines: string[] = []
@@ -693,7 +693,7 @@ export async function copyCaption(
 
 /** 导出小红书缩略图排序为 PNG（含标题/正文 + 换行网格布局） */
 export async function exportXhsThumbnailStrip(
-  project: Project,
+  _project: Project,
   imageIds: string[],
   opts?: { title?: string; caption?: string; format?: ExportFormat },
 ): Promise<void> {
@@ -817,7 +817,7 @@ export async function exportXhsThumbnailStrip(
     ctx.quadraticCurveTo(x, y, x + r, y)
     ctx.closePath()
     ctx.clip()
-    ctx.drawImage(imgs[i], x, y, thumbSize, thumbSize)
+    ctx.drawImage(imgs[i]!, x, y, thumbSize, thumbSize)
     ctx.restore()
 
     // 序号

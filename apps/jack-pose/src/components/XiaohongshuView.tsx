@@ -43,7 +43,6 @@ export function XiaohongshuView({
   const onScroll = () => {
     const container = scrollRef.current
     if (!container || imageIds.length === 0) return
-    const center = container.scrollLeft + container.clientWidth / 2
     let nearest = 0
     let minDist = Infinity
     Array.from(container.children).forEach((child, i) => {
@@ -149,7 +148,7 @@ export function XiaohongshuView({
             horizontal
             dragThreshold={8}
             className="flex gap-2 overflow-x-auto hide-scrollbar pb-1"
-            renderItem={(id, idx, isDragging) => (
+            renderItem={(id, idx) => (
               <div
                 className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-hover ring-1 ${
                   idx === activeIndex ? 'ring-xhs' : 'ring-outline-light'

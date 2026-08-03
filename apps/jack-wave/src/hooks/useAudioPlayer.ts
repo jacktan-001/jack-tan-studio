@@ -14,7 +14,6 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Song } from '../types';
-import { safeUrl } from '../utils';
 import { fixAppleMusicUrl } from '@jack-tan/studio-core';
 
 /** localStorage 缓存 key */
@@ -136,15 +135,18 @@ export function useAudioPlayer(
       for (const id of Object.keys(songLibrary)) {
         const c = cache[id];
         if (c) {
-          if (c.previewUrl && c.previewUrl !== songLibrary[id].previewUrl) {
-            songLibrary[id].previewUrl = c.previewUrl;
-            updated = true;
-          }
-          if (c.trackViewUrl) {
-            songLibrary[id].trackViewUrl = fixAppleMusicUrl(c.trackViewUrl);
-          }
-          if (c.artworkUrl100) {
-            songLibrary[id].artworkUrl100 = c.artworkUrl100;
+          const song = songLibrary[id];
+          if (song) {
+            if (c.previewUrl && c.previewUrl !== song.previewUrl) {
+              song.previewUrl = c.previewUrl;
+              updated = true;
+            }
+            if (c.trackViewUrl) {
+              song.trackViewUrl = fixAppleMusicUrl(c.trackViewUrl);
+            }
+            if (c.artworkUrl100) {
+              song.artworkUrl100 = c.artworkUrl100;
+            }
           }
         }
       }
@@ -272,7 +274,7 @@ export function useAudioPlayer(
     }
     const nextIdx = idx + 1;
     currentIndexRef.current = nextIdx;
-    playSongInternal(list[nextIdx]);
+    playSongInternal(list[nextIdx]!);
   }, []);
 
   // === 内部播放歌曲（核心逻辑） ===

@@ -85,7 +85,7 @@ export function createManifest(
       ],
     },
   };
-  return { ...defaults[projectId] ?? defaults.studio, ...overrides };
+  return { ...defaults[projectId] ?? defaults.studio!, ...overrides };
 }
 
 /** 注入 manifest 到 document head */

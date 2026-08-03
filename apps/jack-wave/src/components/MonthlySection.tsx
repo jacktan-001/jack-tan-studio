@@ -27,15 +27,15 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
     useImperativeHandle(ref, () => ({
       playCurrentMonth: () => {
         setMonthIndex(0);
-        if (monthlyShares.length > 0 && monthlyShares[0].songList.length > 0) {
-          onPlay(monthlyShares[0].songList[0], monthlyShares[0].songList, 0);
+        if (monthlyShares.length > 0 && monthlyShares[0]!.songList.length > 0) {
+          onPlay(monthlyShares[0]!.songList[0]!, monthlyShares[0]!.songList, 0);
         }
       },
     }), [monthlyShares, onPlay]);
 
     if (!monthlyShares.length) return null;
 
-    const m = monthlyShares[monthIndex];
+    const m = monthlyShares[monthIndex]!;
 
     // 数组按月份降序排列（最新在前），← 浏览更早的月份，→ 浏览更新的月份
     const handleMonthChange = (dir: number) => {
@@ -46,7 +46,7 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
 
     const handlePlayByIndex = (index: number) => {
       if (m.songList[index]) {
-        onPlay(m.songList[index], m.songList, index);
+        onPlay(m.songList[index]!, m.songList, index);
       }
     };
 

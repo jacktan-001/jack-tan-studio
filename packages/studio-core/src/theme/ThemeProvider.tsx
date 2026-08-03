@@ -79,7 +79,7 @@ export function ThemeProvider({
   const mode: ThemeMode = setting === 'auto' ? systemMode : setting;
 
   const preset = useMemo<ThemePreset>(() => {
-    return themePresets[currentProjectId] ?? themePresets.studio;
+    return themePresets[currentProjectId] ?? themePresets.studio!;
   }, [currentProjectId]);
 
   // 监听系统主题变化

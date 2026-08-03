@@ -49,7 +49,7 @@ export const deployConfigs: Record<string, CloudflarePagesConfig> = {
 
 /** wrangler.toml 模板生成 */
 export function generateWranglerConfig(projectId: string): string {
-  const config = deployConfigs[projectId] ?? deployConfigs.studio;
+  const config = deployConfigs[projectId] ?? deployConfigs.studio!;
   const lines: string[] = [
     `name = "${projectId}"`,
     `compatibility_date = "2024-12-01"`,

@@ -116,17 +116,6 @@ export function PuzzlePage() {
     if (inputRef.current) inputRef.current.value = ''
   }
 
-  const move = (id: string, delta: number) => {
-    setOrder((prev) => {
-      const idx = prev.indexOf(id)
-      const next = [...prev]
-      const target = idx + delta
-      if (target < 0 || target >= next.length) return prev
-      ;[next[idx], next[target]] = [next[target], next[idx]]
-      return next
-    })
-  }
-
   const remove = async (id: string) => {
     // 释放 Object URL
     if (urls[id] && urls[id].startsWith('blob:')) {
