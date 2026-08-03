@@ -5,7 +5,7 @@
 // - iTunes API：Cache-First（减少跨域请求，缓存 1 小时）
 // - 音频/图片：Cache-First（大文件优先缓存）
 
-var CACHE_VERSION = 'jack-wave-v7';
+var CACHE_VERSION = 'jack-wave-v8';
 var STATIC_CACHE = CACHE_VERSION + '-static';
 var API_CACHE = CACHE_VERSION + '-api';
 var MEDIA_CACHE = CACHE_VERSION + '-media';
@@ -100,9 +100,15 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // 策略 4：静态资源 → Stale-While-Revalidate
+  // 策略 4：导航请求 → Network-First（保证拿到最新 HTML，避免部署后返回旧页面）
+  if (req.mode === 'navigate') {
+    e.respondWith(networkFirst(req, STATIC_CACHE, 300));
+    return;
+  }
+
+  // 策略 5：静态资源 → Stale-While-Revalidate
   // 先返回缓存（快速），同时后台更新
-  if (req.mode === 'navigate' || url.pathname.match(/\.(js|css|html|json|jpg|png|svg|woff2?)$/)) {
+  if (url.pathname.match(/\.(js|css|html|json|jpg|png|svg|woff2?)$/)) {
     e.respondWith(staleWhileRevalidate(req, STATIC_CACHE));
     return;
   }
