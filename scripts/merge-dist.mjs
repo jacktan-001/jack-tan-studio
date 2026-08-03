@@ -3,13 +3,13 @@
  *
  * 将四个应用的构建产物合并到一个输出目录 deploy/dist，
  * 使其部署到同一个 Cloudflare Pages 项目（jack-tan-studio）的子路径下：
- *   studio → /        (根)
- *   pose   → /jack-pose/
- *   wave   → /jack-wave/
- *   tan    → /jack-tan/
+ *   studio → /                 (根)
+ *   pose   → /projects/pose/
+ *   wave   → /projects/wave/
+ *   tan    → /projects/tan/
  *
- * 同时把 jack-wave 的 Pages Functions 重组到 deploy/functions/jack-wave/，
- * 使 API 路由映射为 /jack-wave/api/*（Pages Functions 按文件系统路径路由）。
+ * 同时把 jack-wave 的 Pages Functions 重组到 deploy/functions/projects/wave/，
+ * 使 API 路由映射为 /projects/wave/api/*（Pages Functions 按文件系统路径路由）。
  *
  * 用法: node scripts/merge-dist.mjs
  */
@@ -38,30 +38,52 @@ mkdirSync(dist, { recursive: true });
 mkdirSync(functions, { recursive: true });
 
 // 2. 合并静态产物
-copy(resolve(root, 'apps/studio/dist'), resolve(dist, '.')); // studio 在根
-copy(resolve(root, 'apps/jack-pose/dist'), resolve(dist, 'jack-pose'));
-copy(resolve(root, 'apps/jack-wave/dist'), resolve(dist, 'jack-wave'));
-copy(resolve(root, 'apps/jack-tan/dist'), resolve(dist, 'jack-tan'));
+// studio 在根，子应用统一放到 /projects/{id}/ 下
+copy(resolve(root, 'apps/studio/dist'), resolve(dist, '.'));
+copy(resolve(root, 'apps/jack-pose/dist'), resolve(dist, 'projects/pose'));
+copy(resolve(root, 'apps/jack-wave/dist'), resolve(dist, 'projects/wave'));
+copy(resolve(root, 'apps/jack-tan/dist'), resolve(dist, 'projects/tan'));
 
-// 3. 重组 wave Functions 到 /jack-wave/api/* 路由
+// 3. 重组 wave Functions 到 /projects/wave/api/* 路由
 const waveFn = resolve(root, 'apps/jack-wave/functions');
-copy(resolve(waveFn, 'api'), resolve(functions, 'jack-wave/api'));
-copy(resolve(waveFn, '_lib'), resolve(functions, 'jack-wave/_lib'));
+copy(resolve(waveFn, 'api'), resolve(functions, 'projects/wave/api'));
+copy(resolve(waveFn, '_lib'), resolve(functions, 'projects/wave/_lib'));
 
-// 4. 生成统一的 _redirects（子应用 SPA 回退在前，兜底在后）
-//    Pages 只对"不存在静态文件"的路径应用回退，已存在的静态资源正常直出。
+// 4. 生成统一的 _redirects：
+//    ① 旧 URL（/jack-xxx/ 和 /xxx/）301 永久重定向到新规范 URL，保留 SEO 和外链
+//    ② 子应用 SPA 回退：动态路由指向对应 index.html
+//    ③ 兜底：studio 的 SPA 回退
 const redirects = [
-  '/wave/* /jack-wave/:splat 301',
-  '/pose/* /jack-pose/:splat 301',
-  '/tan/* /jack-tan/:splat 301',
-  '/jack-pose/* /jack-pose/index.html 200',
-  '/jack-wave/* /jack-wave/index.html 200',
-  '/jack-tan/* /jack-tan/index.html 200',
+  // 旧路径 301 到新规范
+  '/jack-pose/* /projects/pose/:splat 301',
+  '/jack-wave/* /projects/wave/:splat 301',
+  '/jack-tan/* /projects/tan/:splat 301',
+  '/pose/* /projects/pose/:splat 301',
+  '/wave/* /projects/wave/:splat 301',
+  '/tan/* /projects/tan/:splat 301',
+  // SPA 回退（Pages 只对不存在静态文件的路径应用）
+  '/projects/pose/* /projects/pose/index.html 200',
+  '/projects/wave/* /projects/wave/index.html 200',
+  '/projects/tan/* /projects/tan/index.html 200',
   '/* /index.html 200',
 ].join('\n') + '\n';
 writeFileSync(resolve(dist, '_redirects'), redirects);
 
-// 5. 生成统一的 _headers（根级安全头 + 各子路径缓存规则）
+// 5. 生成 _routes.json：限制 Functions 触发范围，避免静态资源请求被计费
+const routesJson = {
+  version: 1,
+  include: ['/projects/wave/api/*'],
+  exclude: [
+    '/*.css', '/*.js', '/*.map', '/*.svg', '/*.png', '/*.jpg', '/*.jpeg', '/*.webp',
+    '/assets/*',
+    '/projects/*/assets/*',
+    '/projects/*/*.css',
+    '/projects/*/*.js',
+  ],
+};
+writeFileSync(resolve(dist, '_routes.json'), JSON.stringify(routesJson, null, 2));
+
+// 6. 生成统一的 _headers（根级安全头 + 各子路径缓存规则）
 const headers = `/*
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self' https: blob:; connect-src 'self' https://itunes.apple.com https://audio-ssl.itunes.apple.com; frame-ancestors 'none'
   X-Frame-Options: DENY
@@ -74,34 +96,34 @@ const headers = `/*
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-/jack-pose/assets/*
+/projects/pose/assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-/jack-wave/assets/*
+/projects/wave/assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-/jack-tan/assets/*
+/projects/tan/assets/*
   Cache-Control: public, max-age=31536000, immutable
 
 /*.html
   Cache-Control: no-cache, must-revalidate
 
-/jack-pose/*.html
+/projects/pose/*.html
   Cache-Control: no-cache, must-revalidate
 
-/jack-wave/*.html
+/projects/wave/*.html
   Cache-Control: no-cache, must-revalidate
 
-/jack-tan/*.html
+/projects/tan/*.html
   Cache-Control: no-cache, must-revalidate
 
-/jack-wave/sw.js
+/projects/pose/sw.js
   Cache-Control: no-cache, must-revalidate
 
-/jack-pose/sw.js
+/projects/wave/sw.js
   Cache-Control: no-cache, must-revalidate
 
-/jack-wave/api/*
+/projects/wave/api/*
   Cache-Control: no-store
 `;
 writeFileSync(resolve(dist, '_headers'), headers);

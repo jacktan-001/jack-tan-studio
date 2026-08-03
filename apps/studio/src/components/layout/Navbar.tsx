@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { Menu, X } from 'lucide-react'
@@ -68,30 +68,43 @@ export default function Navbar() {
       </Link>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} className="nav-links-desktop">
-        {projects.map((p) => (
-          <Link
-            key={p.id}
-            to={`/project/${p.id}`}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '10px',
-              fontSize: '14px',
-              fontWeight: 500,
-              color: 'var(--text-muted)',
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = 'var(--text)'
-              e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = 'var(--text-muted)'
-              e.currentTarget.style.background = 'transparent'
-            }}
-          >
-            {p.name}
-          </Link>
-        ))}
+        {projects.map((p) => {
+          const isLive = p.status === 'live'
+          const baseStyle: React.CSSProperties = {
+            padding: '8px 16px',
+            borderRadius: '10px',
+            fontSize: '14px',
+            fontWeight: 500,
+            color: isLive ? 'var(--text-muted)' : 'var(--text-dim)',
+            opacity: isLive ? 1 : 0.6,
+            cursor: isLive ? 'pointer' : 'default',
+            transition: 'all 0.3s',
+            textDecoration: 'none',
+          }
+          return (
+            <a
+              key={p.id}
+              href={p.url}
+              style={baseStyle}
+              onMouseEnter={(e) => {
+                if (!isLive) return
+                e.currentTarget.style.color = 'var(--text)'
+                e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = baseStyle.color as string
+                e.currentTarget.style.background = 'transparent'
+              }}
+            >
+              {p.name}
+              {!isLive && (
+                <span style={{ fontSize: '11px', marginLeft: '6px', opacity: 0.7 }}>
+                  soon
+                </span>
+              )}
+            </a>
+          )
+        })}
         <a
           href="https://github.com/jacktan-001"
           target="_blank"
@@ -142,20 +155,32 @@ export default function Navbar() {
               gap: '8px',
             }}
           >
-            {projects.map((p) => (
-              <Link
-                key={p.id}
-                to={`/project/${p.id}`}
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: '10px',
-                  background: 'rgba(255,255,255,0.04)',
-                  fontSize: '15px',
-                }}
-              >
-                {p.name} <span style={{ color: 'var(--text-dim)', marginLeft: '8px' }}>{p.tagline}</span>
-              </Link>
-            ))}
+            {projects.map((p) => {
+              const isLive = p.status === 'live'
+              return (
+                <a
+                  key={p.id}
+                  href={p.url}
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: '10px',
+                    background: 'rgba(255,255,255,0.04)',
+                    fontSize: '15px',
+                    color: 'var(--text)',
+                    opacity: isLive ? 1 : 0.6,
+                    textDecoration: 'none',
+                  }}
+                >
+                  {p.name}
+                  {!isLive && (
+                    <span style={{ fontSize: '12px', marginLeft: '8px', opacity: 0.7, color: 'var(--text-dim)' }}>
+                      soon
+                    </span>
+                  )}
+                  <span style={{ color: 'var(--text-dim)', marginLeft: '8px' }}>{p.tagline}</span>
+                </a>
+              )
+            })}
           </motion.div>
         )}
       </AnimatePresence>

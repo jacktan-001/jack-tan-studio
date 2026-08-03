@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
 
 export default defineConfig({
-  base: '/jack-pose/',
+  base: '/projects/pose/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
