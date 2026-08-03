@@ -135,11 +135,8 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
     const kv = context.env.JACK_WAVE_KV;
     await kv.delete(`submission:${id}`);
 
-    // 同步更新提交 ID 列表
-    const listRaw = await kv.get('submission:list');
-    const list: string[] = listRaw ? JSON.parse(listRaw) : [];
-    const filtered = list.filter((x) => x !== id);
-    await kv.put('submission:list', JSON.stringify(filtered));
+    // 无需维护 submission:list 索引 key
+    // 列表读取通过 kv.list({ prefix: 'submission:' }) 枚举，避免竞态条件
 
     return Response.json({ success: true });
   } catch (e: any) {

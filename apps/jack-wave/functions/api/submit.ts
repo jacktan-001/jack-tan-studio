@@ -208,13 +208,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     };
 
     // ---- 9. 存储提交记录到 KV ----
+    // 使用独立 key 存储每条提交，避免 read-modify-write 竞态条件
+    // 列表读取通过 kv.list({ prefix: 'submission:' }) 枚举，无需维护索引 key
     await kv.put(`submission:${submission.id}`, JSON.stringify(submission));
-
-    // ---- 10. 更新提交 ID 列表（最新的在前）----
-    const listRaw = await kv.get('submission:list');
-    const list: string[] = listRaw ? JSON.parse(listRaw) : [];
-    list.unshift(submission.id);
-    await kv.put('submission:list', JSON.stringify(list));
 
     return Response.json({
       success: true,

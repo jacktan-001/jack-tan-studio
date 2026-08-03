@@ -88,14 +88,19 @@ const routesJson = {
 writeFileSync(resolve(dist, '_routes.json'), JSON.stringify(routesJson, null, 2));
 
 // 6. 生成统一的 _headers（根级安全头 + 各子路径缓存规则）
+//    全局使用宽松 CSP（jack-wave 需要 unsafe-inline），jack-pose 单独覆盖为严格 CSP
 const headers = `/*
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self' https: blob:; connect-src 'self' https://itunes.apple.com https://audio-ssl.itunes.apple.com; frame-ancestors 'none'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Cross-Origin-Opener-Policy: same-origin
-  X-XSS-Protection: 1; mode=block
+  Cross-Origin-Resource-Policy: same-origin
+
+/projects/jack-pose/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
