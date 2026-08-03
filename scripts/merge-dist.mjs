@@ -61,6 +61,10 @@ const redirects = [
   '/pose/* /projects/jack-pose/:splat 301',
   '/wave/* /projects/jack-wave/:splat 301',
   '/tan/* /projects/jack-tan/:splat 301',
+  // 此前线上版本曾部署在 /projects/{id}/，保留 301 避免已收藏/分享的旧链接失效
+  '/projects/pose/* /projects/jack-pose/:splat 301',
+  '/projects/wave/* /projects/jack-wave/:splat 301',
+  '/projects/tan/* /projects/jack-tan/:splat 301',
   // SPA 回退（Pages 只对不存在静态文件的路径应用）
   '/projects/jack-pose/* /projects/jack-pose/index.html 200',
   '/projects/jack-wave/* /projects/jack-wave/index.html 200',
