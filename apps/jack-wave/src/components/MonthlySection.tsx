@@ -191,6 +191,13 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
             src={safeUrl(m.coverImage) || ''}
             alt="月度歌单封面"
             loading="lazy"
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (!img.dataset.fallback) {
+                img.dataset.fallback = '1';
+                img.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" rx="16" fill="%230d9488"/><path d="M60 100 Q80 70 100 100 T140 100" stroke="%2314b8a6" stroke-width="3" fill="none" opacity="0.6"/><path d="M60 120 Q80 90 100 120 T140 120" stroke="%232dd4bf" stroke-width="2" fill="none" opacity="0.4"/><circle cx="100" cy="95" r="20" fill="%2364d8c0" opacity="0.3"/></svg>');
+              }
+            }}
             style={{
               width: '200px',
               height: '200px',

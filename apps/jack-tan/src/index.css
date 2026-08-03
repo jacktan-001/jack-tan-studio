@@ -13,6 +13,8 @@
   /* Accent colors — 桥接 studio-core ThemeProvider 变量 */
   --color-accent: var(--accent, #7c3aed);
   --color-accent-hover: var(--accent-2, #3b82f6);
+  --color-accent-3: var(--accent-3, #6366f1);
+  --color-accent-4: var(--accent-4, #8b5cf6);
   --color-accent-bg: rgba(var(--accent-rgb, 124, 58, 237), 0.08);
 
   /* Neutral palette — 映射到 CSS 变量以支持暗色模式切换 */
@@ -30,36 +32,74 @@
   --color-neutral-900: var(--color-neutral-900);
 }
 
-/* ==================== Light Theme (default) ==================== */
+/* ==================== Light Theme (default) ====================
+   蓝色商务基调 — 浅色模式使用极淡的蓝白背景，
+   中性色保持纯净以确保文字可读性。 */
 :root {
   --color-white: #ffffff;
   --color-black: #000000;
-  --color-neutral-50: #fafafa;
-  --color-neutral-100: #f5f5f5;
-  --color-neutral-200: #e5e5e5;
-  --color-neutral-300: #d4d4d4;
-  --color-neutral-400: #a3a3a3;
-  --color-neutral-500: #737373;
-  --color-neutral-600: #525252;
-  --color-neutral-700: #404040;
-  --color-neutral-800: #262626;
-  --color-neutral-900: #171717;
+  --color-neutral-50: #fafbfd;
+  --color-neutral-100: #f3f5fa;
+  --color-neutral-200: #e5e9f2;
+  --color-neutral-300: #d1d7e6;
+  --color-neutral-400: #9ba4be;
+  --color-neutral-500: #6b7494;
+  --color-neutral-600: #4a5170;
+  --color-neutral-700: #333a55;
+  --color-neutral-800: #1e2238;
+  --color-neutral-900: #111426;
+
+  /* 背景渐变变量 — 蓝色商务微光 */
+  --tan-body-bg-top: #f5f8fe;
+  --tan-body-bg-bottom: #eef2fa;
+  --tan-body-glow: rgba(59, 130, 246, 0.06);
+  --tan-blob-opacity: 0.16;
+
+  /* StudioBar 兼容变量 — 与 studio-core theme.css 对齐，蓝色商务调 */
+  --bg: #f5f8fe;
+  --bg-surface: #ffffff;
+  --bg-elevated: #eef2fa;
+  --bg-glass: rgba(255, 255, 255, 0.65);
+  --text: #111426;
+  --text-muted: #6b7494;
+  --text-dim: #9ba4be;
+  --border: rgba(17, 20, 38, 0.08);
+  --border-hover: rgba(17, 20, 38, 0.16);
 }
 
-/* ==================== Dark Theme ==================== */
+/* ==================== Dark Theme ====================
+   深蓝商务暗色模式 — 使用深海军蓝作为背景基调，
+   中性色带蓝灰色调，增强商务质感。 */
 :root[data-theme="dark"] {
-  --color-white: #0c0c14;
-  --color-black: #f5f5f7;
-  --color-neutral-50: #12121e;
-  --color-neutral-100: #1a1a2e;
-  --color-neutral-200: #27272a;
-  --color-neutral-300: #3f3f46;
-  --color-neutral-400: #71717a;
-  --color-neutral-500: #a1a1aa;
-  --color-neutral-600: #c4c4c8;
-  --color-neutral-700: #d4d4d8;
-  --color-neutral-800: #e4e4e7;
-  --color-neutral-900: #f5f5f7;
+  --color-white: #080b16;
+  --color-black: #f5f7fc;
+  --color-neutral-50: #0d111e;
+  --color-neutral-100: #131829;
+  --color-neutral-200: #1e2438;
+  --color-neutral-300: #2d3550;
+  --color-neutral-400: #586284;
+  --color-neutral-500: #8a93b4;
+  --color-neutral-600: #b8c0d8;
+  --color-neutral-700: #d0d6e8;
+  --color-neutral-800: #e4e8f4;
+  --color-neutral-900: #f5f7fc;
+
+  /* 背景渐变变量 — 深蓝微光 */
+  --tan-body-bg-top: #06080f;
+  --tan-body-bg-bottom: #080b16;
+  --tan-body-glow: rgba(59, 130, 246, 0.1);
+  --tan-blob-opacity: 0.22;
+
+  /* StudioBar 兼容变量 */
+  --bg: #06080f;
+  --bg-surface: #0d111e;
+  --bg-elevated: #131829;
+  --bg-glass: rgba(13, 17, 30, 0.55);
+  --text: #f5f7fc;
+  --text-muted: #8a93b4;
+  --text-dim: #586284;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.16);
 }
 
 /* ==================== Base ==================== */
@@ -75,13 +115,33 @@ html {
 
 body {
   margin: 0;
-  background-color: var(--color-white);
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, var(--tan-body-glow), transparent 70%),
+    linear-gradient(180deg, var(--tan-body-bg-top), var(--tan-body-bg-bottom));
+  background-attachment: fixed;
   color: var(--color-neutral-900);
   font-family: var(--font-sans);
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.2s, color 0.2s;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(var(--accent-rgb, 124, 58, 237), 0.2);
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent, #7c3aed);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 锚点跳转时为固定导航栏留出空间 */
+section[id] {
+  scroll-margin-top: 80px;
 }
 
 /* ==================== Components ==================== */
@@ -122,12 +182,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-neutral-300);
+  background: linear-gradient(180deg, var(--color-accent, #7c3aed), var(--color-accent-hover, #3b82f6));
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-neutral-400);
+  background: linear-gradient(180deg, var(--color-accent-hover, #3b82f6), var(--color-accent, #7c3aed));
 }
 
 /* ==================== Accessibility ==================== */
@@ -147,73 +207,102 @@ body {
 /* ==================== Reduced Motion ==================== */
 
 @media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-    animation: none !important;
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
 /* ==================== Jack Tan 独有视觉语言 ====================
-   设计理念：蓝色商务精炼质感
+   设计理念：蓝色商务精炼质感 + 色彩泡泡 + 毛玻璃
+   与 Studio 设计语言保持一致：
+   - 色彩泡泡：紫/蓝/靛蓝多色泡泡在毛玻璃下方流动
    - 斜线纹理：细密对角线条
    - 几何网格：精密方格
    - 精确滑入：精确缓动入场
    - 精炼光影：蓝色冷调阴影
-   - 专业渐变线：顶部光带
+   - 专业渐变线：顶部流动光带
+   - 毛玻璃卡片：半透明 + backdrop-filter
+   - 噪点纹理：微妙的颗粒感
    ================================================== */
 
-/* 斜线纹理 */
+/* 噪点纹理 — 增加质感 */
+.tan-noise {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+:root[data-theme="dark"] .tan-noise {
+  opacity: 0.04;
+}
+
+/* 斜线纹理 — 增强可见度 */
 .tan-diagonal-texture {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.025;
+  opacity: 0.03;
   background-image: repeating-linear-gradient(
     135deg,
     var(--color-accent, #7c3aed) 0,
     var(--color-accent, #7c3aed) 1px,
     transparent 1px,
-    transparent 12px
+    transparent 14px
   );
-  mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
 }
 
 :root[data-theme="dark"] .tan-diagonal-texture {
-  opacity: 0.04;
+  opacity: 0.05;
 }
 
-/* 几何网格 — 精密方格 */
+/* 几何网格 — 精密方格，增强可见度 */
 .tan-geo-grid {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.02;
+  opacity: 0.025;
   background-image:
     linear-gradient(var(--color-accent, #7c3aed) 1px, transparent 1px),
     linear-gradient(90deg, var(--color-accent, #7c3aed) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse 70% 60% at center, black 5%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at center, black 5%, transparent 75%);
 }
 
 :root[data-theme="dark"] .tan-geo-grid {
-  opacity: 0.05;
+  opacity: 0.06;
 }
 
-/* 精炼蓝色光带 — 顶部 */
+/* 精炼蓝色光带 — 顶部流动，增强发光 */
 .tan-accent-line {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  z-index: 1;
-  background: linear-gradient(90deg, transparent, var(--color-accent, #7c3aed), var(--color-accent-hover, #3b82f6), transparent);
+  height: 3px;
+  z-index: 2;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--color-accent, #7c3aed),
+    var(--color-accent-hover, #3b82f6),
+    var(--accent-3, #6366f1),
+    transparent
+  );
   background-size: 200% 100%;
   animation: tan-line-flow 8s ease infinite;
+  box-shadow: 0 0 16px rgba(var(--accent-rgb, 124, 58, 237), 0.35);
   pointer-events: none;
 }
 
@@ -222,7 +311,10 @@ body {
   50% { background-position: 100% 50%; }
 }
 
-/* 商务蓝色光斑 */
+/* ==================== 色彩泡泡 ====================
+   紫/蓝/靛蓝多色泡泡在毛玻璃下方流动，
+   增强蓝色商务感的同时保持鲜明特色。 */
+
 .tan-blue-blobs {
   position: fixed;
   inset: 0;
@@ -234,34 +326,64 @@ body {
 .tan-blue-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.12;
-  animation: tan-blob-drift 25s ease-in-out infinite;
+  filter: blur(100px);
+  opacity: var(--tan-blob-opacity, 0.16);
+  animation: tan-blob-drift 28s ease-in-out infinite;
+  will-change: transform;
 }
 
+/* 泡泡 1 — 紫色，右上 */
 .tan-blue-blob:nth-child(1) {
-  width: 400px;
-  height: 400px;
+  width: 480px;
+  height: 480px;
   background: radial-gradient(circle, var(--color-accent, #7c3aed), transparent 70%);
-  top: -15%;
-  right: -5%;
+  top: -12%;
+  right: -8%;
+  animation-delay: 0s;
+  animation-duration: 30s;
 }
 
+/* 泡泡 2 — 蓝色，左下 */
 .tan-blue-blob:nth-child(2) {
-  width: 320px;
-  height: 320px;
+  width: 380px;
+  height: 380px;
   background: radial-gradient(circle, var(--color-accent-hover, #3b82f6), transparent 70%);
   bottom: -10%;
-  left: -5%;
-  animation-delay: -10s;
+  left: -6%;
+  animation-delay: -8s;
+  animation-duration: 26s;
+}
+
+/* 泡泡 3 — 靛蓝，中部偏右 */
+.tan-blue-blob:nth-child(3) {
+  width: 340px;
+  height: 340px;
+  background: radial-gradient(circle, var(--accent-3, #6366f1), transparent 70%);
+  top: 40%;
+  left: 45%;
+  animation-delay: -16s;
+  animation-duration: 32s;
+}
+
+/* 泡泡 4 — 紫罗兰，左上偏下 */
+.tan-blue-blob:nth-child(4) {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, var(--accent-4, #8b5cf6), transparent 70%);
+  top: 15%;
+  left: 20%;
+  animation-delay: -22s;
+  animation-duration: 24s;
 }
 
 @keyframes tan-blob-drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-50px, 40px) scale(1.05); }
+  33% { transform: translate(60px, -40px) scale(1.08); }
+  66% { transform: translate(-40px, 50px) scale(0.95); }
 }
 
-/* 精炼光影 */
+/* ==================== 精炼光影 ==================== */
+
 .tan-refined-shadow {
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.04),
@@ -271,7 +393,7 @@ body {
 
 .tan-refined-shadow:hover {
   box-shadow:
-    0 2px 8px rgba(var(--accent-rgb, 124, 58, 237), 0.08),
+    0 2px 8px rgba(var(--accent-rgb, 124, 58, 237), 0.1),
     0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
@@ -283,11 +405,12 @@ body {
 
 :root[data-theme="dark"] .tan-refined-shadow:hover {
   box-shadow:
-    0 2px 8px rgba(var(--accent-rgb, 124, 58, 237), 0.15),
+    0 2px 8px rgba(var(--accent-rgb, 124, 58, 237), 0.18),
     0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* 精确滑入 */
+/* ==================== 入场动画 ==================== */
+
 @keyframes tan-precise-slide-up {
   0% {
     opacity: 0;
@@ -331,9 +454,14 @@ body {
   transform: translateY(0);
 }
 
-/* 商务渐变文字 */
+/* ==================== 商务渐变文字 ==================== */
+
 .tan-gradient-text {
-  background: linear-gradient(135deg, var(--color-accent, #7c3aed), var(--color-accent-hover, #3b82f6));
+  background: linear-gradient(135deg,
+    var(--color-accent, #7c3aed),
+    var(--color-accent-hover, #3b82f6),
+    var(--accent-3, #6366f1)
+  );
   background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -346,21 +474,27 @@ body {
   50% { background-position: 100% 50%; }
 }
 
-/* 精炼卡片 — 微光边框 */
+/* ==================== 毛玻璃卡片 ====================
+   半透明背景 + backdrop-filter 实现毛玻璃效果，
+   色彩泡泡在卡片下方若隐若现，增强层次感。 */
+
 .tan-refined-card {
   position: relative;
-  border: 1px solid var(--color-neutral-200, #e5e5e5);
-  background: var(--color-white, #fff);
-  border-radius: 12px;
+  border: 1px solid var(--color-neutral-200, #e5e9f2);
+  background: color-mix(in srgb, var(--color-white, #fff) 78%, transparent);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 14px;
   overflow: hidden;
-  transition: border-color 0.3s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.3s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
 }
 
 :root[data-theme="dark"] .tan-refined-card {
-  border-color: var(--color-neutral-200, #27272a);
-  background: var(--color-neutral-50, #12121e);
+  border-color: var(--color-neutral-200, #1e2438);
+  background: color-mix(in srgb, var(--color-neutral-50, #0d111e) 72%, transparent);
 }
 
+/* 顶部流动光线 — hover 时显现 */
 .tan-refined-card::before {
   content: '';
   position: absolute;
@@ -368,21 +502,31 @@ body {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-accent, #7c3aed), transparent);
+  background: linear-gradient(90deg, transparent, var(--color-accent, #7c3aed), var(--color-accent-hover, #3b82f6), transparent);
   opacity: 0;
   transition: opacity 0.4s;
 }
 
 .tan-refined-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(var(--accent-rgb, 124, 58, 237), 0.2);
+  transform: translateY(-3px);
+  border-color: rgba(var(--accent-rgb, 124, 58, 237), 0.25);
+  box-shadow:
+    0 8px 40px rgba(var(--accent-rgb, 124, 58, 237), 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+:root[data-theme="dark"] .tan-refined-card:hover {
+  box-shadow:
+    0 8px 40px rgba(var(--accent-rgb, 124, 58, 237), 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .tan-refined-card:hover::before {
   opacity: 1;
 }
 
-/* 精确交错入场 */
+/* ==================== 精确交错入场 ==================== */
+
 .tan-stagger > * {
   opacity: 0;
   animation: tan-precise-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -395,27 +539,44 @@ body {
 .tan-stagger > *:nth-child(5) { animation-delay: 0.25s; }
 .tan-stagger > *:nth-child(6) { animation-delay: 0.3s; }
 
-/* 专业标签 */
+/* ==================== 专业标签 ==================== */
+
 .tan-tag {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 4px 11px;
+  border-radius: 6px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.02em;
   background: rgba(var(--accent-rgb, 124, 58, 237), 0.08);
   color: var(--color-accent, #7c3aed);
-  border: 1px solid rgba(var(--accent-rgb, 124, 58, 237), 0.12);
+  border: 1px solid rgba(var(--accent-rgb, 124, 58, 237), 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 :root[data-theme="dark"] .tan-tag {
-  background: rgba(var(--accent-rgb, 124, 58, 237), 0.12);
-  border-color: rgba(var(--accent-rgb, 124, 58, 237), 0.2);
+  background: rgba(var(--accent-rgb, 124, 58, 237), 0.14);
+  border-color: rgba(var(--accent-rgb, 124, 58, 237), 0.25);
 }
 
-/* 蓝色精炼发光 */
+/* ==================== 蓝色精炼发光 ==================== */
+
 .tan-blue-glow {
-  box-shadow: 0 0 1px rgba(var(--accent-rgb, 124, 58, 237), 0.3),
-              0 0 4px rgba(var(--accent-rgb, 124, 58, 237), 0.15);
+  box-shadow:
+    0 0 1px rgba(var(--accent-rgb, 124, 58, 237), 0.4),
+    0 0 8px rgba(var(--accent-rgb, 124, 58, 237), 0.2),
+    0 0 16px rgba(var(--accent-2-rgb, 59, 130, 246), 0.1);
+}
+
+/* ==================== 布局辅助 ====================
+   侧边栏在固定导航栏下方对齐（仅桌面端），
+   确保 sticky 定位不会被 StudioBar 遮挡。 */
+
+@media (min-width: 1024px) {
+  aside.sticky {
+    top: 64px;
+    height: calc(100vh - 64px);
+  }
 }

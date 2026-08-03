@@ -277,12 +277,12 @@ button {
   position: relative;
   z-index: 1;
   min-height: 100vh;
-  padding-top: 130px;
+  padding-top: 80px;
 }
 
 @media (max-width: 768px) {
   .page-wrap {
-    padding-top: 80px;
+    padding-top: 70px;
   }
 }
 

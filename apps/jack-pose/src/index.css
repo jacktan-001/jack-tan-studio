@@ -53,6 +53,18 @@
   --color-placeholder: #c7c7cc;
   --color-avatar: #C4956A;
 
+  /* 暖色调桥接 — 将 studio-core 共享中性色变量覆盖为暖色系，
+     使 StudioBar 等共享组件与 jack-pose 暖色基调一致 */
+  --bg: #FBF7F0;
+  --bg-surface: #FFFBF5;
+  --bg-elevated: #F5EFE6;
+  --bg-glass: rgba(255, 251, 245, 0.6);
+  --text: #1d1d1f;
+  --text-muted: #86868b;
+  --text-dim: #9B8E7E;
+  --border: rgba(193, 149, 106, 0.15);
+  --border-hover: rgba(193, 149, 106, 0.28);
+
   /* 主题色 — 桥接 studio-core（由 ThemeProvider 动态设置） */
   --color-accent: var(--accent, #ec4899);
   --color-accent-hover: var(--accent-2, #f43f5e);
@@ -60,21 +72,32 @@
 }
 
 :root[data-theme="dark"] {
-  --color-bg: #1a1a2e;
-  --color-surface: #242444;
-  --color-surface-2: #2a2a4a;
-  --color-hover: #303050;
-  --color-text: #f5f5f7;
-  --color-text-2: #a0a0b8;
-  --color-text-3: #7878a0;
-  --color-border: #383858;
-  --color-border-light: #34344f;
-  --color-border-strong: #44446a;
+  --color-bg: #1c1612;
+  --color-surface: #26201a;
+  --color-surface-2: #2c251e;
+  --color-hover: #332b22;
+  --color-text: #f5f0e8;
+  --color-text-2: #a89888;
+  --color-text-3: #7a6e60;
+  --color-border: #3a3028;
+  --color-border-light: #342a22;
+  --color-border-strong: #4a3e34;
   --color-wechat: #07C160;
   --color-xhs: #FF2442;
-  --color-divider: #383858;
-  --color-placeholder: #50506a;
+  --color-divider: #3a3028;
+  --color-placeholder: #5a4e44;
   --color-avatar: #C4956A;
+
+  /* 暖色调桥接 — 暗色模式下使用深暖色背景，使 StudioBar 等共享组件保持暖色基调 */
+  --bg: #1c1612;
+  --bg-surface: #26201a;
+  --bg-elevated: #2c251e;
+  --bg-glass: rgba(38, 32, 26, 0.5);
+  --text: #f5f0e8;
+  --text-muted: #a89888;
+  --text-dim: #7a6e60;
+  --border: rgba(193, 149, 106, 0.12);
+  --border-hover: rgba(193, 149, 106, 0.24);
 
   /* 主题色桥接（暗色模式下也跟随 studio-core） */
   --color-accent: var(--accent, #ec4899);
@@ -90,6 +113,8 @@
 
 html {
   -webkit-tap-highlight-color: transparent;
+  /* StudioBar 为 fixed 定位（约 64px），锚点跳转时预留顶部间距避免内容被遮挡 */
+  scroll-padding-top: 80px;
 }
 
 body {
@@ -100,6 +125,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg);
   color: var(--color-text);
+  /* StudioBar 为 fixed 定位（约 64px），为下方内容预留顶部空间 */
+  padding-top: 64px;
   transition: background-color 0.2s, color 0.2s;
 }
 
@@ -169,14 +196,20 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 9998;
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.8 0 0 0 0 0.6 0 0 0 0 0.4 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.8 0 0 0 0 0.6 0 0 0 0 0.4 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
   mix-blend-mode: multiply;
+  animation: pose-texture-drift 30s ease-in-out infinite;
 }
 
 :root[data-theme="dark"] .pose-paper-texture {
-  opacity: 0.06;
+  opacity: 0.1;
   mix-blend-mode: screen;
+}
+
+@keyframes pose-texture-drift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-2%, 1%); }
 }
 
 /* 圆点网格 — 取代线条网格 */
@@ -208,14 +241,14 @@ body {
 .pose-warm-blob {
   position: absolute;
   border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
-  filter: blur(80px);
-  opacity: 0.25;
+  filter: blur(70px);
+  opacity: 0.32;
   animation: pose-blob-morph 18s ease-in-out infinite;
 }
 
 .pose-warm-blob:nth-child(1) {
-  width: 420px;
-  height: 380px;
+  width: 460px;
+  height: 400px;
   background: radial-gradient(circle, var(--color-accent, #ec4899), transparent 70%);
   top: -8%;
   left: -3%;
@@ -223,8 +256,8 @@ body {
 }
 
 .pose-warm-blob:nth-child(2) {
-  width: 360px;
-  height: 320px;
+  width: 400px;
+  height: 340px;
   background: radial-gradient(circle, var(--color-accent-hover, #f43f5e), transparent 70%);
   bottom: -5%;
   right: -5%;
@@ -233,13 +266,28 @@ body {
 }
 
 .pose-warm-blob:nth-child(3) {
-  width: 280px;
-  height: 280px;
+  width: 300px;
+  height: 300px;
   background: radial-gradient(circle, #fbbf24, transparent 70%);
   top: 45%;
   left: 40%;
   animation-delay: -12s;
   border-radius: 63% 37% 41% 59% / 44% 56% 44% 56%;
+}
+
+.pose-warm-blob:nth-child(4) {
+  width: 240px;
+  height: 220px;
+  background: radial-gradient(circle, #fb923c, transparent 70%);
+  top: 20%;
+  right: 10%;
+  animation-delay: -9s;
+  border-radius: 59% 41% 63% 37% / 56% 44% 56% 44%;
+}
+
+:root[data-theme="dark"] .pose-warm-blob {
+  opacity: 0.22;
+  filter: blur(90px);
 }
 
 @keyframes pose-blob-morph {
@@ -260,15 +308,18 @@ body {
 /* 暖光发光 */
 .pose-warm-glow {
   box-shadow:
-    0 0 20px rgba(var(--accent-rgb, 236, 72, 153), 0.15),
-    0 0 40px rgba(251, 191, 36, 0.08),
+    0 0 24px rgba(var(--accent-rgb, 236, 72, 153), 0.18),
+    0 0 48px rgba(251, 191, 36, 0.1),
+    0 0 80px rgba(251, 146, 60, 0.06),
     0 4px 24px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root[data-theme="dark"] .pose-warm-glow {
   box-shadow:
-    0 0 24px rgba(var(--accent-rgb, 236, 72, 153), 0.25),
-    0 0 48px rgba(251, 191, 36, 0.12),
+    0 0 28px rgba(var(--accent-rgb, 236, 72, 153), 0.3),
+    0 0 56px rgba(251, 191, 36, 0.14),
+    0 0 90px rgba(251, 146, 60, 0.08),
     0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
@@ -305,14 +356,20 @@ body {
   animation: pose-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* 弹跳入场 — 延迟变体，用于错落入场效果 */
+.pose-pop-in-delay-1 { animation: pose-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s both; }
+.pose-pop-in-delay-2 { animation: pose-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.16s both; }
+.pose-pop-in-delay-3 { animation: pose-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.24s both; }
+
 /* 卡片翻转悬停 */
 .pose-card-tilt {
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .pose-card-tilt:hover {
-  transform: perspective(800px) rotateX(4deg) rotateY(-4deg) translateY(-4px);
+  transform: perspective(800px) rotateX(5deg) rotateY(-5deg) translateY(-6px) scale(1.01);
 }
 
 /* 暖色渐变文字 */
@@ -334,8 +391,126 @@ body {
 .pose-handcraft-border {
   border-radius: 16px 20px 16px 22px;
   border-width: 1.5px;
+  transition: border-radius 0.4s ease, transform 0.3s ease;
+}
+
+.pose-handcraft-border:hover {
+  border-radius: 20px 16px 22px 14px;
+  transform: translateY(-2px);
 }
 
 :root[data-theme="dark"] .pose-handcraft-border {
   border-radius: 18px 16px 22px 14px;
+}
+
+:root[data-theme="dark"] .pose-handcraft-border:hover {
+  border-radius: 16px 20px 14px 22px;
+}
+
+/* ==================== 与 Studio 一致的设计增强 ====================
+   毛玻璃 / 渐变边框 / 入场动画 / 光晕脉冲
+   设计语言与 Jack Tan Studio 保持一致：
+   - 毛玻璃半透明背景 + saturate 增强
+   - 渐变光边 hover 显现
+   - 入场动画：上滑淡入 / 缩放淡入
+   - 微光闪烁 / 光晕脉冲用于活跃状态
+   ================================================== */
+
+/* 毛玻璃效果 — 暖色版 */
+.pose-glass {
+  background: rgba(255, 251, 245, 0.72);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid var(--color-border);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.5), 0 4px 24px rgba(236, 72, 153, 0.06);
+}
+
+:root[data-theme="dark"] .pose-glass {
+  background: rgba(38, 32, 26, 0.72);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-color: rgba(236, 72, 153, 0.16);
+  box-shadow: inset 0 1px 0 0 rgba(236, 72, 153, 0.1), 0 4px 24px rgba(236, 72, 153, 0.12);
+}
+
+/* 渐变光边 — hover 时暖色光边显现 */
+.pose-gradient-border {
+  position: relative;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+.pose-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--color-accent, #ec4899), #fbbf24, var(--color-accent-hover, #f43f5e));
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.pose-gradient-border:hover::before {
+  opacity: 0.6;
+}
+
+/* 入场动画 — 上滑淡入 */
+@keyframes pose-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pose-fade-up {
+  animation: pose-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pose-fade-up-delay-1 { animation: pose-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+.pose-fade-up-delay-2 { animation: pose-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both; }
+.pose-fade-up-delay-3 { animation: pose-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both; }
+
+/* 入场动画 — 缩放淡入 */
+@keyframes pose-scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pose-scale-in {
+  animation: pose-scale-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 微光闪烁 — 用于强调元素 */
+@keyframes pose-shimmer {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.pose-shimmer {
+  animation: pose-shimmer 2.5s ease-in-out infinite;
+}
+
+/* 暖色光晕脉冲 — 用于活跃状态 */
+@keyframes pose-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(var(--accent-rgb, 236, 72, 153), 0.2);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(var(--accent-rgb, 236, 72, 153), 0.4);
+  }
+}
+
+.pose-glow-pulse {
+  animation: pose-glow-pulse 2s ease-in-out infinite;
 }

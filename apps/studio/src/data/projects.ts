@@ -86,7 +86,7 @@ export const projects: Project[] = [
   },
   {
     id: 'craft',
-    name: 'JackCraft',
+    name: 'Jack Craft',
     tagline: 'Creative Sandbox',
     description: '创意实验场。代码可视化、交互艺术、生成式设计 —— 探索技术与美学的交汇点。',
     icon: 'craft',

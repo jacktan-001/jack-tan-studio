@@ -88,6 +88,13 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
                 src={safeUrl(p.coverImage) || ''}
                 alt={`${p.title}封面`}
                 loading="lazy"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  if (!img.dataset.fallback) {
+                    img.dataset.fallback = '1';
+                    img.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%230d9488"/><circle cx="100" cy="80" r="30" fill="%2314b8a6" opacity="0.4"/><path d="M50 120 Q100 90 150 120" stroke="%232dd4bf" stroke-width="2" fill="none" opacity="0.5"/></svg>');
+                  }
+                }}
                 style={{
                   width: '100%',
                   height: '100%',

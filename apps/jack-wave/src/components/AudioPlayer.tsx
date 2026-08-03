@@ -80,6 +80,13 @@ export function AudioPlayer({ player }: AudioPlayerProps) {
         src={safeUrl(currentSong.artworkUrl100) || ''}
         alt="当前播放歌曲封面"
         loading="lazy"
+        onError={(e) => {
+          const img = e.currentTarget;
+          if (!img.dataset.fallback) {
+            img.dataset.fallback = '1';
+            img.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72"><rect width="72" height="72" rx="12" fill="%230d9488"/><circle cx="36" cy="36" r="16" fill="none" stroke="%2314b8a6" stroke-width="2"/><circle cx="36" cy="36" r="6" fill="%2364d8c0"/></svg>');
+          }
+        }}
         style={{
           width: '72px',
           height: '72px',

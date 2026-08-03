@@ -144,8 +144,9 @@ export function useAudioPlayer(
             if (c.trackViewUrl) {
               song.trackViewUrl = fixAppleMusicUrl(c.trackViewUrl);
             }
-            if (c.artworkUrl100) {
+            if (c.artworkUrl100 && c.artworkUrl100 !== song.artworkUrl100) {
               song.artworkUrl100 = c.artworkUrl100;
+              updated = true;
             }
           }
         }

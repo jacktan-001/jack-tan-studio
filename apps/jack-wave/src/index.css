@@ -44,7 +44,7 @@
   --card: rgba(255, 255, 255, 0.72);
   --card-solid: #fff;
   --card-hover: #f8fafc;
-  --nav-bg: rgba(255, 255, 255, 0.72);
+  --nav-bg: rgba(255, 255, 255, 0.8);
   --player-bg: rgba(255, 255, 255, 0.85);
 
   /* Border & Hover */
@@ -52,7 +52,7 @@
 
   /* Form */
   --input-bg: #fff;
-  --tag-bg: rgba(6, 182, 212, 0.1);
+  --tag-bg: rgba(13, 148, 136, 0.12);
 
   /* Status */
   --red: #ef4444;
@@ -85,15 +85,31 @@
   --card: rgba(30, 41, 59, 0.72);
   --card-solid: #1e293b;
   --card-hover: #334155;
-  --nav-bg: rgba(15, 23, 42, 0.72);
+  --nav-bg: rgba(15, 23, 42, 0.8);
   --player-bg: rgba(15, 23, 42, 0.85);
   --hover-bg: rgba(255, 255, 255, 0.05);
   --input-bg: #1e293b;
-  --tag-bg: rgba(6, 182, 212, 0.2);
+  --tag-bg: rgba(20, 184, 166, 0.22);
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
   --red: #f87171;
   --green: #4ade80;
+}
+
+/* ==================== Wave 冷绿色调偏移 ====================
+   在 studio-core 的 waveTheme（青色 #06b6d4）基础上，将 --teal 向冷绿色
+   偏移，强化音乐应用的冷色绿色质感。--accent（青色）保持不变以与
+   StudioBar 共享导航的强调色契约一致，仅本应用的 --teal/--teal-light
+   采用更偏绿的 teal 色阶。
+   #0d9488 / #14b8a6 与 index.html 的 theme-color meta 保持一致。 */
+:root[data-project='wave'] {
+  --teal: #0d9488;
+  --teal-light: #14b8a6;
+}
+
+:root[data-project='wave'][data-theme='dark'] {
+  --teal: #14b8a6;
+  --teal-light: #2dd4bf;
 }
 
 /* ==================== RESET ==================== */
@@ -107,6 +123,8 @@
 /* ==================== TYPOGRAPHY ==================== */
 html {
   scroll-behavior: smooth;
+  /* StudioBar 为 fixed 定位（约 64px），锚点跳转时预留顶部间距避免内容被遮挡 */
+  scroll-padding-top: 80px;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -324,6 +342,17 @@ textarea {
   .theme-toggle { width: 32px; height: 32px; }
 }
 
+/* ==================== StudioBar 顶部间距适配 ====================
+   StudioBar 采用 fixed 定位（高度约 64px），下方内容需预留顶部空间。
+   - Hero 自身已有 padding-top: 100px（内联样式），足以避开导航栏，
+     此处仅将其 min-height 从 100vh 调整为 calc(100vh - 64px)，
+     使首屏内容在导航栏下方完整呈现。
+   - 使用 !important 是为覆盖 Hero 组件的内联 minHeight 样式
+     （约束要求不修改 components/ 下的业务组件）。 */
+.hero {
+  min-height: calc(100vh - 64px) !important;
+}
+
 /* ==================== Jack Wave 独有视觉语言 ====================
    设计理念：冷色流动质感
    - 波纹纹理：SVG 水波叠加
@@ -339,15 +368,15 @@ textarea {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.06;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' preserveAspectRatio='xMidYMid slice'%3E%3Cpath d='M0,400 Q300,300 600,400 T1200,400 L1200,800 L0,800 Z' fill='none' stroke='%2306b6d4' stroke-width='1.5' opacity='0.6'/%3E%3Cpath d='M0,420 Q300,340 600,420 T1200,420' fill='none' stroke='%2314b8a6' stroke-width='1' opacity='0.4'/%3E%3Cpath d='M0,440 Q300,380 600,440 T1200,440' fill='none' stroke='%230ea5e9' stroke-width='0.8' opacity='0.3'/%3E%3C/svg%3E");
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' preserveAspectRatio='xMidYMid slice'%3E%3Cpath d='M0,400 Q300,300 600,400 T1200,400 L1200,800 L0,800 Z' fill='none' stroke='%230d9488' stroke-width='1.5' opacity='0.6'/%3E%3Cpath d='M0,420 Q300,340 600,420 T1200,420' fill='none' stroke='%2314b8a6' stroke-width='1' opacity='0.4'/%3E%3Cpath d='M0,440 Q300,380 600,440 T1200,440' fill='none' stroke='%230ea5e9' stroke-width='0.8' opacity='0.3'/%3E%3C/svg%3E");
   background-size: cover;
   background-position: center;
   animation: wave-flow 25s linear infinite;
 }
 
 :root[data-theme="dark"] .wave-ripple-texture {
-  opacity: 0.1;
+  opacity: 0.14;
 }
 
 @keyframes wave-flow {
@@ -368,12 +397,12 @@ textarea {
   justify-content: space-between;
   padding: 0 8px;
   pointer-events: none;
-  opacity: 0.12;
+  opacity: 0.18;
   gap: 4px;
 }
 
 :root[data-theme="dark"] .wave-eq-bars {
-  opacity: 0.18;
+  opacity: 0.26;
 }
 
 .wave-eq-bar {
@@ -407,7 +436,7 @@ textarea {
   position: absolute;
   border-radius: 40% 60% 70% 30% / 50% 60% 40% 50%;
   filter: blur(100px);
-  opacity: 0.2;
+  opacity: 0.26;
   animation: wave-liquid-move 22s ease-in-out infinite;
 }
 
@@ -428,6 +457,12 @@ textarea {
   right: -6%;
   animation-delay: -8s;
   border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+}
+
+/* 暗色模式下液态气泡更明显，增强冷绿色流动光斑氛围 */
+:root[data-theme="dark"] .wave-liquid-blob {
+  opacity: 0.34;
+  filter: blur(110px);
 }
 
 @keyframes wave-liquid-move {
@@ -519,18 +554,22 @@ textarea {
   50% { background-position: 100% 50%; }
 }
 
-/* 玻璃态 — 水色版 */
+/* 玻璃态 — 水色版（强化毛玻璃 + 冷绿色调高光） */
 .wave-glass {
   background: var(--card, rgba(255, 255, 255, 0.72));
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(20px) saturate(1.45);
+  -webkit-backdrop-filter: blur(20px) saturate(1.45);
   border: 1px solid var(--border);
   border-radius: var(--radius, 16px);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.4), 0 4px 24px rgba(13, 148, 136, 0.06);
 }
 
 :root[data-theme="dark"] .wave-glass {
   background: var(--card, rgba(30, 41, 59, 0.72));
-  border-color: rgba(6, 182, 212, 0.12);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-color: rgba(20, 184, 166, 0.18);
+  box-shadow: inset 0 1px 0 0 rgba(20, 184, 166, 0.1), 0 4px 24px rgba(13, 148, 136, 0.12);
 }
 
 /* 液态边框 — 流动 */

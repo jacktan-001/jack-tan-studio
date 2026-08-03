@@ -1,25 +1,12 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
-import { useTheme, ThemeToggleIcon } from '@jack-tan/studio-core'
+import { StudioBar } from '@jack-tan/studio-core'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
 const ProjectListPage = lazy(() => import('./pages/ProjectListPage').then(m => ({ default: m.ProjectListPage })))
 const EditorPage = lazy(() => import('./pages/EditorPage').then(m => ({ default: m.EditorPage })))
 const PuzzlePage = lazy(() => import('./pages/PuzzlePage').then(m => ({ default: m.PuzzlePage })))
-
-function ThemeToggle() {
-  const { mode, toggleMode } = useTheme()
-  return (
-    <button
-      onClick={toggleMode}
-      aria-label="切换深色/浅色模式"
-      className="w-9 h-9 flex items-center justify-center rounded-full bg-hover text-secondary hover:text-accent hover:bg-accent-bg transition"
-    >
-      <ThemeToggleIcon theme={mode} />
-    </button>
-  )
-}
 
 function App() {
   useEffect(() => {
@@ -33,6 +20,8 @@ function App() {
 
   return (
     <ErrorBoundary>
+      {/* StudioBar 跨项目共享导航栏（fixed 定位，下方内容由 index.css 预留 64px 顶部间距） */}
+      <StudioBar current="pose" />
       <HashRouter>
         <Suspense
           fallback={
@@ -50,9 +39,6 @@ function App() {
         </Suspense>
         <Toaster position="top-center" toastOptions={{ className: 'rounded-xl' }} />
       </HashRouter>
-      <div className="fixed bottom-4 right-4 z-50">
-        <ThemeToggle />
-      </div>
     </ErrorBoundary>
   )
 }

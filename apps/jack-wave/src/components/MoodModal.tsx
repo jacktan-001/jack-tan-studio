@@ -114,6 +114,13 @@ export function MoodModal({
             src={safeUrl(playlist.coverImage) || ''}
             alt={`${playlist.title}封面`}
             loading="lazy"
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (!img.dataset.fallback) {
+                img.dataset.fallback = '1';
+                img.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%230d9488"/><circle cx="32" cy="26" r="10" fill="%2314b8a6" opacity="0.5"/><path d="M16 40 Q32 28 48 40" stroke="%232dd4bf" stroke-width="1.5" fill="none" opacity="0.4"/></svg>');
+              }
+            }}
             style={{
               width: '64px',
               height: '64px',

@@ -55,7 +55,7 @@ function StatsSection() {
 
 function AboutSection() {
   return (
-    <section className="max-w-[900px] mx-auto px-6 py-30 text-center">
+    <section className="max-w-[900px] mx-auto px-6 py-24 text-center">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -88,7 +88,7 @@ function AboutSection() {
 
 function Footer() {
   return (
-    <footer className="border-t border-border px-6 pt-15 pb-10 mt-10">
+    <footer className="border-t border-border px-6 pt-16 pb-12 mt-12">
       <div className="max-w-[1000px] mx-auto flex flex-col items-center gap-8">
         <div className="flex gap-3 flex-wrap justify-center">
           {socialLinks.map((link) => (

@@ -126,6 +126,13 @@ export function SongList({ songs, currentSong, onPlay }: SongListProps) {
           src={safeUrl(s.artworkUrl100) || ''}
           alt=""
           loading="lazy"
+          onError={(e) => {
+            const img = e.currentTarget;
+            if (!img.dataset.fallback) {
+              img.dataset.fallback = '1';
+              img.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44"><rect width="44" height="44" rx="8" fill="%230d9488"/><path d="M16 16 L28 16 L28 28 L16 28 Z M18 18 L26 18 L26 26 L18 26 Z" fill="%2314b8a6" opacity="0.5"/><circle cx="22" cy="22" r="4" fill="%2364d8c0"/></svg>');
+            }
+          }}
           style={{
             width: '44px',
             height: '44px',

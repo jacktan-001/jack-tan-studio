@@ -39,7 +39,7 @@ import {
   sortMonthly,
 } from './data/musicData';
 import { useAudioPlayer } from './hooks/useAudioPlayer';
-import { Navbar } from './components/Navbar';
+import { StudioBar } from '@jack-tan/studio-core';
 import { Hero } from './components/Hero';
 import { MonthlySection, type MonthlySectionRef } from './components/MonthlySection';
 import { MoodGrid } from './components/MoodGrid';
@@ -360,8 +360,8 @@ export default function App() {
         跳到主要内容
       </a>
 
-      {/* 导航栏 */}
-      <Navbar />
+      {/* StudioBar 跨项目共享导航栏（fixed 定位，下方内容由 index.css 预留 64px 顶部间距） */}
+      <StudioBar current="wave" />
 
       {/* Hero 区域 */}
       <Hero onPlayCurrentMonth={handlePlayCurrentMonth} />
