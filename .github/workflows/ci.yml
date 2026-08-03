@@ -8,7 +8,6 @@ on:
 
 env:
   NODE_VERSION: '22'
-  PNPM_VERSION: '10'
 
 jobs:
   lint-and-build:
@@ -17,15 +16,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        # version 从 package.json 的 packageManager 字段自动读取
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
