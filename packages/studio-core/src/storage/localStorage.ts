@@ -139,6 +139,7 @@ export const storageKeys = {
   pwaPrompt: 'jack-tan-pwa-prompt-dismissed',
   adminToken: 'jack-tan-admin-token',
   projectConfig: 'jack-tan-project-config',
+  pendingProject: 'jack-tan-pending-project',
 } as const;
 
 /** 默认 TTL 常量 */

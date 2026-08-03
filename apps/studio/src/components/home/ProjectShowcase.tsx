@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ArrowUpRight, Lock } from 'lucide-react'
 import { projects, type Project } from '../../data/projects'
@@ -338,11 +339,9 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         <div style={{ display: 'flex', gap: '8px' }}>
           {!isComingSoon ? (
             <>
-              {/* 直接跳转到外部站点 */}
-              <a
-                href={project.url}
-                target="_blank"
-                rel="noopener noreferrer"
+              {/* 查看介绍页 */}
+              <Link
+                to={`/projects/${project.id}/intro`}
                 style={{
                   flex: 1,
                   display: 'inline-flex',
@@ -359,16 +358,48 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
                   transition: 'all 0.3s',
                   textDecoration: 'none',
                 }}
-                onMouseEnter={(e) => {
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
                   e.currentTarget.style.background = `rgba(${project.colorRgb}, 0.2)`
                   e.currentTarget.style.transform = 'translateY(-1px)'
                 }}
-                onMouseLeave={(e) => {
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
                   e.currentTarget.style.background = `rgba(${project.colorRgb}, 0.1)`
                   e.currentTarget.style.transform = 'translateY(0)'
                 }}
               >
-                访问站点 <ArrowUpRight size={14} />
+                查看介绍 <ArrowUpRight size={14} />
+              </Link>
+              {/* 直接跳转到外部站点 */}
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="直接访问子应用"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-muted)',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  transition: 'all 0.3s',
+                  textDecoration: 'none',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+                  e.currentTarget.style.color = 'var(--text)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                  e.currentTarget.style.color = 'var(--text-muted)'
+                }}
+              >
+                访问
               </a>
               {project.repo && (
                 <a
@@ -404,24 +435,36 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
               )}
             </>
           ) : (
-            <div style={{
-              flex: 1,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              padding: '10px 16px',
-              borderRadius: '10px',
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px dashed var(--border)',
-              color: 'var(--text-dim)',
-              fontSize: '13px',
-              fontWeight: 500,
-              cursor: 'not-allowed',
-            }}>
+            <Link
+              to={`/projects/${project.id}/intro`}
+              style={{
+                flex: 1,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '10px 16px',
+                borderRadius: '10px',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px dashed var(--border)',
+                color: 'var(--text-dim)',
+                fontSize: '13px',
+                fontWeight: 500,
+                textDecoration: 'none',
+                transition: 'all 0.3s',
+              }}
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+                e.currentTarget.style.color = 'var(--text-muted)'
+              }}
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
+                e.currentTarget.style.color = 'var(--text-dim)'
+              }}
+            >
               <Lock size={14} />
               敬请期待
-            </div>
+            </Link>
           )}
         </div>
       </div>

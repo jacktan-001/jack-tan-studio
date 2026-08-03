@@ -19,7 +19,7 @@ export default function ComingSoon({ project }: ComingSoonProps) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '120px 24px 80px',
+        padding: '60px 24px 80px',
       }}
     >
       <div

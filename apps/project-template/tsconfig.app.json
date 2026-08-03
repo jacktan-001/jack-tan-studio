@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "noEmit": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@jack-tan/studio-core": ["../../packages/studio-core/src/index.ts"],
+      "@jack-tan/studio-core/*": ["../../packages/studio-core/src/*"]
+    }
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../../packages/studio-core" }
+  ]
+}

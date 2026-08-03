@@ -4,6 +4,7 @@ import Navbar from './components/layout/Navbar'
 import CustomCursor from './components/ui/CustomCursor'
 import Home from './pages/Home'
 import ComingSoon from './pages/ComingSoon'
+import ProjectIntro from './pages/ProjectIntro'
 import { projects } from './data/projects'
 
 function BackgroundEffects() {
@@ -32,6 +33,15 @@ export default function App() {
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Home />} />
+
+            {/* 项目介绍页：/projects/:id/intro */}
+            {projects.map((p) => (
+              <Route
+                key={`intro-${p.id}`}
+                path={`/projects/${p.id}/intro`}
+                element={<ProjectIntro />}
+              />
+            ))}
 
             {/* 项目路由：已上线的直接跳转到子应用目录；未上线的渲染 Coming Soon */}
             {projects.map((p) => (

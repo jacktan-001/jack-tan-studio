@@ -1,70 +1,145 @@
 # Jack Tan Studio
 
-个人项目集合 monorepo，集成多个独立应用，共享设计系统与技术栈。
+个人创意工作室 Monorepo —— 门户 + 多子应用统一部署。
+
+[![Deploy to Cloudflare Pages](https://img.shields.io/badge/Cloudflare%20Pages-jacktan--studio-f38020?logo=cloudflare)](https://jacktan-studio.pages.dev)
+
+## 项目愿景
+
+把 Jack Wave（音乐随记）、Jack Pose（社媒排版）、Jack Tan（个人主页）以及未来的 Jack Lens / Jack Cast / JackCraft 整合到同一个门户下，统一品牌、统一导航、独立部署路径。
 
 ## 技术栈
 
-- **前端框架**: React 19 + TypeScript 5.7 + Vite 6
-- **样式**: Tailwind CSS v4 + CSS 变量主题系统
-- **动画**: Motion 12 + GSAP 3.12
-- **状态**: Zustand
-- **后端**: Cloudflare Pages Functions + KV
-- **构建**: Turborepo 2 + pnpm 9
+- **Monorepo**：pnpm workspaces + Turborepo
+- **前端**：React 19 + TypeScript 5.7 + Vite 6 + Tailwind CSS v4
+- **动画**：Framer Motion（motion/react）、CSS View Transitions API
+- **部署**：Cloudflare Pages + Functions，单 Pages 项目合并产物
+- **CI/CD**：GitHub Actions（typecheck / lint / build）
 
-## 项目结构
+## 仓库结构
 
-```
+```text
 jack-tan-studio/
-├── packages/studio-core/    # 共享七层基础包
-│   ├── tokens/              # 设计令牌（颜色、间距、圆角、字体）
-│   ├── utils/               # 工具函数（安全、格式化、DOM、URL）
-│   ├── storage/             # 存储抽象（localStorage、KV、缓存）
-│   ├── theme/               # 主题系统（ThemeProvider、预设、切换）
-│   ├── pwa/                 # PWA 支持（Service Worker、安装提示）
-│   ├── deploy/              # 部署配置（安全头、重定向、Cloudflare）
-│   └── effects/             # 视觉效果（动效、过渡、霓虹发光）
 ├── apps/
-│   ├── studio/              # Studio 门户（项目导航入口）
-│   ├── jack-pose/           # 图片排版工具
-│   ├── jack-wave/           # 音乐日志（含 Pages Functions）
-│   └── jack-tan/            # 个人作品集
-├── turbo.json               # Turborepo 构建编排
-└── pnpm-workspace.yaml      # pnpm 工作区配置
+│   ├── studio/          # 门户首页（根路径 /）
+│   ├── jack-wave/       # 音乐随记（/projects/jack-wave/）
+│   ├── jack-pose/       # 社媒排版（/projects/jack-pose/）
+│   ├── jack-tan/        # 个人主页（/projects/jack-tan/）
+│   └── project-template/# 子应用脚手架（阶段三新增）
+├── packages/
+│   └── studio-core/     # 共享层：主题、PWA、部署配置、工具函数
+├── scripts/
+│   └── merge-dist.mjs   # 合并产物到 deploy/dist
+└── deploy/              # Cloudflare Pages 部署产物
 ```
 
-## 快速开始
+## 路由映射
+
+| 路径 | 应用 | 说明 |
+| --- | --- | --- |
+| `/` | studio | 门户首页 |
+| `/projects/jack-wave/*` | jack-wave | 音乐随记（SPA 回退） |
+| `/projects/jack-pose/*` | jack-pose | 社媒排版（HashRouter） |
+| `/projects/jack-tan/*` | jack-tan | 个人主页 |
+| `/projects/:id/intro` | studio | 项目介绍页（阶段二新增） |
+| `/projects/:id` | studio | 未上线项目显示 Coming Soon |
+| `/jack-wave/*` 等旧路径 | — | 301 永久重定向到新规范 URL |
+
+## 本地开发
 
 ```bash
 # 安装依赖
 pnpm install
 
-# 启动所有应用
+# 启动所有应用（turbo dev）
 pnpm dev
 
-# 启动单个应用
-pnpm dev:studio    # http://localhost:5173
-pnpm dev:pose      # http://localhost:5174
-pnpm dev:wave      # http://localhost:5175
-pnpm dev:tan       # http://localhost:5176
+# 单独启动某个应用
+pnpm dev:studio
+pnpm dev:wave
+pnpm dev:pose
+pnpm dev:tan
 
-# 构建所有应用
+# 构建全部
 pnpm build
 
-# 类型检查
+# 合并产物（生成 deploy/dist）
+pnpm merge
+
+# 类型检查 / 代码检查
 pnpm typecheck
+pnpm lint
 ```
 
-## 主题系统
+## 构建与部署
 
-每个应用通过 `ThemeProvider` 注入独特的色彩主题，共享底层设计语言：
+```bash
+# 1. 构建全部子应用
+pnpm build
 
-| 应用 | projectId | 色系 | 风格 |
-|------|-----------|------|------|
-| Studio | `studio` | 紫色系 | 科幻科技感 |
-| Jack Pose | `pose` | 暖色系 | 手工质感 |
-| Jack Wave | `wave` | 冷色系绿色 | 自然流动 |
-| Jack Tan | `tan` | 蓝色系 | 商务精炼 |
+# 2. 合并产物并生成 _redirects / _routes.json / _headers
+pnpm merge
 
-## 部署
+# 3. 部署到 Cloudflare Pages
+pnpm wrangler pages deploy deploy/dist --project-name jacktan-studio
+```
 
-详见 [DEPLOYMENT.md](./DEPLOYMENT.md)
+## 工程约定
+
+1. **子应用资源路径**：必须使用相对路径或 `import.meta.env.BASE_URL`，禁止写死 `/filename.ext`，否则子路径部署会 404。
+2. **子应用不渲染 StudioBar**：每个子应用自己管理主题切换按钮，避免双重导航栏。
+3. **主题系统**：通过 `@jack-tan/studio-core` 的 `ThemeProvider` 设置 `data-project`，由 `theme.css` 映射为项目色。
+4. **跨应用跳转**：Navbar 使用原生 `<a>` 跳转 + View Transitions API，实现伪 SPA 体验。
+
+## 阶段二 / 三 关键改动
+
+- 导航栏重构为「全局导航 + 产品矩阵」两层。
+- 新增 `/projects/:id/intro` 项目介绍页。
+- 引入 View Transitions API 跨应用过渡。
+- Navbar 悬停项目时预览目标项目主题色，并通过 `localStorage` 传递主题 hint。
+- `ThemeProvider` 消费 pending project hint，子应用可感知是否从 Studio 进入。
+- 添加 `apps/project-template` 子应用脚手架。
+- 添加 `scripts/verify-routes.mjs` 路由一致性检查，并接入 GitHub Actions CI 质量门禁。
+
+## 阶段三：架构演进（Router Worker + 多 Pages）
+
+当前采用「单 Cloudflare Pages 项目 + merge-dist 合并产物」模式，适合 3-4 个已上线应用。当 Jack Lens / Jack Cast / JackCraft 陆续上线后，建议迁移到以下架构：
+
+```text
+用户请求 → Router Worker → Service Bindings → 各子应用 Pages 项目
+                    ↓
+            HTMLRewriter 注入统一导航栏 + 主题 CSS
+```
+
+### 拆分后的 Pages 项目规划
+
+| Pages 项目 | 源码路径 | 部署路径 | Build Watch Paths |
+| --- | --- | --- | --- |
+| `jacktan-studio` | `apps/studio` | `/` | `apps/studio/*, packages/studio-core/*` |
+| `jacktan-wave` | `apps/jack-wave` | `/projects/jack-wave/` | `apps/jack-wave/*, packages/studio-core/*` |
+| `jacktan-pose` | `apps/jack-pose` | `/projects/jack-pose/` | `apps/jack-pose/*, packages/studio-core/*` |
+| `jacktan-tan` | `apps/jack-tan` | `/projects/jack-tan/` | `apps/jack-tan/*, packages/studio-core/*` |
+| `jacktan-lens` | `apps/jack-lens` | `/projects/jack-lens/` | `apps/jack-lens/*, packages/studio-core/*` |
+
+### Build Watch Paths 配置
+
+在每个 Pages 项目的 Cloudflare Dashboard → Settings → Build & deployments → Build watch paths 中配置：
+
+```text
+Include: apps/jack-wave/*, packages/studio-core/*
+Exclude: apps/jack-pose/*, apps/jack-tan/*, apps/studio/*
+```
+
+这样修改 Jack Wave 不会触发 Pose / Tan / Studio 的重复构建。配合 Turborepo Remote Caching 可进一步缩短 CI 时间。
+
+### Router Worker 职责
+
+- 按路径分发给对应 Pages 项目（Service Bindings）。
+- 用 `HTMLRewriter` 在子应用 HTML 中注入统一导航栏、主题 CSS、`View Transitions` 兼容层。
+- 重写静态资源路径前缀，确保子应用独立部署时资源不 404。
+
+> 当前阶段暂不拆分 Pages 项目，保留单 Pages 合并部署。拆分前需要先在 Dashboard 中完成 Build Watch Paths 和 Service Bindings 配置。
+
+## 许可证
+
+MIT © Jack Tan

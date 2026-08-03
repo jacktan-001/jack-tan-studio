@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <!-- 反闪屏：在 React 渲染前应用主题，避免明暗/项目色闪烁 -->
+    <script>(function(){try{var r=localStorage.getItem('jack-tan-theme');var v=r?JSON.parse(r):null;var m=(v==='light'||v==='dark')?v:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');var d=document.documentElement;d.setAttribute('data-theme',m);d.setAttribute('data-project','template');}catch(e){}})();</script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Template | Jack Tan Studio</title>
+    <meta name="description" content="子应用模板 —— 复制后替换为实际项目描述" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

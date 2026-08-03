@@ -25,6 +25,7 @@ import {
 } from './presets';
 import { storageKeys } from '../storage/localStorage';
 import * as storage from '../storage/localStorage';
+import { consumePendingProject } from './bridge';
 
 export interface ThemeContextValue {
   /** 当前模式（light/dark） */
@@ -35,6 +36,8 @@ export interface ThemeContextValue {
   preset: ThemePreset;
   /** 当前项目 ID */
   projectId: string;
+  /** 是否刚从 Studio 导航进入（一次性，消费后重置） */
+  enteredFromStudio: boolean;
   /** 设置模式 */
   setMode: (mode: ThemeModeSetting) => void;
   /** 切换暗/亮模式 */
@@ -63,6 +66,15 @@ export function ThemeProvider({
   });
   const [currentProjectId, setCurrentProjectId] = useState(projectId);
   const [systemMode, setSystemMode] = useState<ThemeMode>(getSystemThemeMode());
+  const [enteredFromStudio, setEnteredFromStudio] = useState(false);
+
+  // 消费 Studio 导航留下的 project hint，用于主题/进入动画一致性
+  useEffect(() => {
+    const pending = consumePendingProject();
+    if (pending && pending === projectId) {
+      setEnteredFromStudio(true);
+    }
+  }, [projectId]);
 
   const mode: ThemeMode = setting === 'auto' ? systemMode : setting;
 
@@ -106,11 +118,12 @@ export function ThemeProvider({
       setting,
       preset,
       projectId: currentProjectId,
+      enteredFromStudio,
       setMode: handleSetMode,
       toggleMode: handleToggleMode,
       setProject: handleSetProject,
     }),
-    [mode, setting, preset, currentProjectId, handleSetMode, handleToggleMode, handleSetProject],
+    [mode, setting, preset, currentProjectId, enteredFromStudio, handleSetMode, handleToggleMode, handleSetProject],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

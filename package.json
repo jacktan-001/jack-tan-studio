@@ -12,6 +12,7 @@
     "dev:tan": "turbo dev --filter=@jack-tan/jack-tan",
     "build": "turbo build",
     "merge": "node scripts/merge-dist.mjs",
+    "verify": "node scripts/verify-routes.mjs",
     "build:studio": "turbo build --filter=@jack-tan/studio-app",
     "build:pose": "turbo build --filter=@jack-tan/jack-pose",
     "build:wave": "turbo build --filter=@jack-tan/jack-wave",

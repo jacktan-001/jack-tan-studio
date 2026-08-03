@@ -277,6 +277,37 @@ button {
   position: relative;
   z-index: 1;
   min-height: 100vh;
+  padding-top: 130px;
+}
+
+@media (max-width: 768px) {
+  .page-wrap {
+    padding-top: 80px;
+  }
+}
+
+/* View Transitions API — 跨应用跳转的伪 SPA 过渡 */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root) {
+    animation: vt-fade-out 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  ::view-transition-new(root) {
+    animation: vt-fade-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  ::view-transition-old(studio-navbar),
+  ::view-transition-new(studio-navbar) {
+    animation: none;
+  }
+}
+
+@keyframes vt-fade-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.98); }
+}
+
+@keyframes vt-fade-in {
+  from { opacity: 0; transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* Scroll reveal */
