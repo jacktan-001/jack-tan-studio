@@ -4,7 +4,7 @@
  * 截图上传含图片压缩
  */
 
-import { useRef, useState } from 'react';
+import { useOptimistic, useRef, useState, useTransition } from 'react';
 import type { SubmitPayload } from '../types';
 import { safeUrl } from '../utils';
 
@@ -15,6 +15,14 @@ export interface SubmitFormProps {
 
 type TabType = 'link' | 'manual' | 'screenshot';
 
+/**
+ * 提交状态：
+ * - idle：空闲，可填写并提交
+ * - submitting：提交中（乐观状态，点击后立即显示）
+ * - success：提交成功，展示感谢页
+ */
+type SubmissionStatus = 'idle' | 'submitting' | 'success';
+
 export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
   const [activeTab, setActiveTab] = useState<TabType>('link');
   const [linkUrl, setLinkUrl] = useState('');
@@ -24,9 +32,16 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
   const [description, setDescription] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [screenshotData, setScreenshotData] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 提交状态：真实状态由 useState 持有，useOptimistic 在 transition 中立即乐观显示 "submitting"。
+  // 后台异步执行真实 API 调用；transition 结束后乐观值自动回退到真实状态。
+  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('idle');
+  const [optimisticStatus, addOptimisticStatus] = useOptimistic(
+    submissionStatus,
+    (_current, next: SubmissionStatus) => next,
+  );
+  const [, startTransition] = useTransition();
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
@@ -67,7 +82,7 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     // 验证
     if (activeTab === 'link' && linkUrl && !safeUrl(linkUrl)) {
       onToast('请输入有效的链接（以 http:// 或 https:// 开头）');
@@ -77,8 +92,6 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
       onToast('请填写歌单名称和您的名字');
       return;
     }
-
-    setSubmitting(true);
 
     const payload: SubmitPayload = {
       type: activeTab,
@@ -93,35 +106,43 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
       payload.screenshotData = screenshotData;
     }
 
-    try {
-      const res = await fetch(import.meta.env.BASE_URL + 'api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setShowSuccess(true);
-        // 5 秒后恢复表单
-        setTimeout(() => {
-          setShowSuccess(false);
-          setSubmitting(false);
-          setLinkUrl('');
-          setSongListText('');
-          setPlaylistName('');
-          setAuthorName('');
-          setDescription('');
-          setSelectedTags([]);
-          setScreenshotData(null);
-        }, 5000);
-      } else {
-        onToast('提交失败: ' + (data.error || '未知错误'));
-        setSubmitting(false);
+    // 在 transition 中提交：addOptimisticStatus 立即把 UI 切到 "submitting"，
+    // 真实 API 调用在后台异步进行。transition 结束后乐观值自动回退到真实状态。
+    startTransition(async () => {
+      addOptimisticStatus('submitting');
+
+      try {
+        const res = await fetch(import.meta.env.BASE_URL + 'api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.success) {
+          // 成功：更新真实状态为 success（乐观值回退后 UI 自然显示成功页）
+          setSubmissionStatus('success');
+          // 5 秒后恢复表单
+          setTimeout(() => {
+            setSubmissionStatus('idle');
+            setLinkUrl('');
+            setSongListText('');
+            setPlaylistName('');
+            setAuthorName('');
+            setDescription('');
+            setSelectedTags([]);
+            setScreenshotData(null);
+          }, 5000);
+        } else {
+          // 失败：回退到 idle 并提示错误
+          setSubmissionStatus('idle');
+          onToast('提交失败: ' + (data.error || '未知错误'));
+        }
+      } catch {
+        // 网络错误：回退到 idle
+        setSubmissionStatus('idle');
+        onToast('网络错误，请稍后重试');
       }
-    } catch {
-      onToast('网络错误，请稍后重试');
-      setSubmitting(false);
-    }
+    });
   };
 
   const tabs: { key: TabType; label: string }[] = [
@@ -171,7 +192,7 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
           margin: '0 auto',
         }}
       >
-        {!showSuccess ? (
+        {optimisticStatus !== 'success' ? (
           <>
             {/* Tabs */}
             <div
@@ -450,7 +471,7 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
               className="btn-submit"
               onClick={handleSubmit}
               type="button"
-              disabled={submitting}
+              disabled={optimisticStatus === 'submitting'}
               style={{
                 width: '100%',
                 padding: '14px',
@@ -462,11 +483,11 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
                 transition: 'all .2s',
                 marginTop: '8px',
                 border: 'none',
-                cursor: submitting ? 'not-allowed' : 'pointer',
-                opacity: submitting ? 0.6 : 1,
+                cursor: optimisticStatus === 'submitting' ? 'not-allowed' : 'pointer',
+                opacity: optimisticStatus === 'submitting' ? 0.6 : 1,
               }}
             >
-              {submitting ? '提交中...' : '提交推荐'}
+              {optimisticStatus === 'submitting' ? '提交中...' : '提交推荐'}
             </button>
           </>
         ) : (

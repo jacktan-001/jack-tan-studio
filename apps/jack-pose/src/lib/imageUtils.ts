@@ -78,21 +78,25 @@ export async function convertHEICtoJPEG(file: File, quality = 0.9): Promise<Blob
 
 // ==================== 图片尺寸 ====================
 
-export function getImageDimensions(blob: Blob): Promise<{ width: number; height: number }> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    const url = URL.createObjectURL(blob)
-    img.onload = () => {
-      const { naturalWidth: width, naturalHeight: height } = img
-      URL.revokeObjectURL(url)
-      resolve({ width, height })
-    }
-    img.onerror = () => {
-      URL.revokeObjectURL(url)
-      reject(new Error('图片加载失败，无法获取尺寸'))
-    }
-    img.src = url
-  })
+/**
+ * 使用 createImageBitmap 加载图片，自动应用 EXIF 方向
+ * createImageBitmap 的 imageOrientation: 'from-image' 选项会读取
+ * EXIF Orientation 标签并自动旋转/翻转图片到正确方向
+ */
+async function loadImageBitmap(blob: Blob): Promise<ImageBitmap> {
+  try {
+    return await createImageBitmap(blob, { imageOrientation: 'from-image' })
+  } catch {
+    // 某些旧浏览器不支持 imageOrientation 选项，回退到普通加载
+    return await createImageBitmap(blob)
+  }
+}
+
+export async function getImageDimensions(blob: Blob): Promise<{ width: number; height: number }> {
+  const bitmap = await loadImageBitmap(blob)
+  const { width, height } = bitmap
+  bitmap.close()
+  return { width, height }
 }
 
 // ==================== 图片压缩 ====================
@@ -100,59 +104,43 @@ export function getImageDimensions(blob: Blob): Promise<{ width: number; height:
 /**
  * 压缩图片：如果最长边超过 MAX_IMAGE_DIMENSION 则等比缩小
  * 始终以 JPEG 输出（质量 COMPRESS_QUALITY），减少 IndexedDB 存储体积
+ * 使用 createImageBitmap 加载以自动应用 EXIF 方向校正
  */
 export async function compressImage(blob: Blob): Promise<Blob> {
+  const bitmap = await loadImageBitmap(blob)
+
+  let { width: w, height: h } = bitmap
+
+  // 等比缩放
+  if (w > MAX_IMAGE_DIMENSION || h > MAX_IMAGE_DIMENSION) {
+    const ratio = Math.min(MAX_IMAGE_DIMENSION / w, MAX_IMAGE_DIMENSION / h)
+    w = Math.round(w * ratio)
+    h = Math.round(h * ratio)
+  }
+
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    bitmap.close()
+    throw new Error('Canvas 上下文不可用')
+  }
+  // 白底（防止透明 PNG 变黑）
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, w, h)
+  ctx.drawImage(bitmap, 0, 0, w, h)
+  bitmap.close()
+
   return new Promise((resolve, reject) => {
-    const img = new Image()
-    const url = URL.createObjectURL(blob)
-
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-
-      let { naturalWidth: w, naturalHeight: h } = img
-
-      // 无需压缩
-      if (w <= MAX_IMAGE_DIMENSION && h <= MAX_IMAGE_DIMENSION && blob.type === 'image/jpeg' && blob.size < 2 * 1024 * 1024) {
-        resolve(blob)
-        return
-      }
-
-      // 等比缩放
-      if (w > MAX_IMAGE_DIMENSION || h > MAX_IMAGE_DIMENSION) {
-        const ratio = Math.min(MAX_IMAGE_DIMENSION / w, MAX_IMAGE_DIMENSION / h)
-        w = Math.round(w * ratio)
-        h = Math.round(h * ratio)
-      }
-
-      const canvas = document.createElement('canvas')
-      canvas.width = w
-      canvas.height = h
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        reject(new Error('Canvas 上下文不可用'))
-        return
-      }
-      // 白底（防止透明 PNG 变黑）
-      ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, w, h)
-      ctx.drawImage(img, 0, 0, w, h)
-
-      canvas.toBlob(
-        (out) => {
-          if (out) resolve(out)
-          else reject(new Error('图片压缩失败'))
-        },
-        'image/jpeg',
-        COMPRESS_QUALITY,
-      )
-    }
-
-    img.onerror = () => {
-      URL.revokeObjectURL(url)
-      reject(new Error('图片加载失败，无法压缩'))
-    }
-
-    img.src = url
+    canvas.toBlob(
+      (out) => {
+        if (out) resolve(out)
+        else reject(new Error('图片压缩失败'))
+      },
+      'image/jpeg',
+      COMPRESS_QUALITY,
+    )
   })
 }
 
@@ -220,44 +208,32 @@ export async function generateThumbnail(
   maxWidth = 300,
   quality = 0.8,
 ): Promise<Blob> {
+  const bitmap = await loadImageBitmap(file)
+
+  const ratio = Math.min(maxWidth / bitmap.width, 1)
+  const width = Math.floor(bitmap.width * ratio)
+  const height = Math.floor(bitmap.height * ratio)
+
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    bitmap.close()
+    throw new Error('Canvas 上下文不可用')
+  }
+  ctx.drawImage(bitmap, 0, 0, width, height)
+  bitmap.close()
+
   return new Promise((resolve, reject) => {
-    const img = new Image()
-    const url = URL.createObjectURL(file)
-
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        reject(new Error('Canvas 上下文不可用'))
-        return
-      }
-
-      const ratio = Math.min(maxWidth / img.naturalWidth, 1)
-      const width = Math.floor(img.naturalWidth * ratio)
-      const height = Math.floor(img.naturalHeight * ratio)
-
-      canvas.width = width
-      canvas.height = height
-      ctx.drawImage(img, 0, 0, width, height)
-
-      canvas.toBlob(
-        (blob) => {
-          if (blob) resolve(blob)
-          else reject(new Error('缩略图生成失败'))
-        },
-        'image/jpeg',
-        quality,
-      )
-    }
-
-    img.onerror = () => {
-      URL.revokeObjectURL(url)
-      reject(new Error('图片加载失败，无法生成缩略图'))
-    }
-
-    img.src = url
+    canvas.toBlob(
+      (blob) => {
+        if (blob) resolve(blob)
+        else reject(new Error('缩略图生成失败'))
+      },
+      'image/jpeg',
+      quality,
+    )
   })
 }
 

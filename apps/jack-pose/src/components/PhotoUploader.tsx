@@ -146,6 +146,9 @@ export function PhotoUploader({ projectId, platform }: Props) {
                   <img
                     src={urls[ph.id]}
                     alt={ph.name}
+                    width={400}
+                    height={400}
+                    loading="lazy"
                     className="w-full h-full object-cover cursor-pointer"
                     onClick={() => togglePlatformImage(projectId, platform, ph.id)}
                   />

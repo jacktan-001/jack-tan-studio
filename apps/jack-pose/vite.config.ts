@@ -14,11 +14,19 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     chunkSizeWarningLimit: 1500,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'state-vendor': ['zustand', 'sonner'],
+        manualChunks(id) {
+          if (
+            id.includes('node_modules/react') ||
+            id.includes('node_modules/react-dom') ||
+            id.includes('node_modules/react-router')
+          ) {
+            return 'react-vendor'
+          }
+          if (id.includes('node_modules/zustand') || id.includes('node_modules/sonner')) {
+            return 'state-vendor'
+          }
         },
       },
     },

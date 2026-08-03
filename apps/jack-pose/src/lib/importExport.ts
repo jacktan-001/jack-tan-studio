@@ -10,6 +10,9 @@ import { genId } from '../types'
 import { getPhoto, blobToDataUrl, dataUrlToBlob } from './idb'
 import { useProjectStore } from '../stores/projectStore'
 
+/** 导出图片格式：png（无损/透明）、webp（高压缩）、avif（更高压缩，兼容性较差） */
+export type ExportFormat = 'png' | 'webp' | 'avif'
+
 /** 在 canvas 上绘制小熊头像 */
 function drawAvatar(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
   // ears
@@ -34,12 +37,56 @@ function drawAvatar(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: nu
   ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.2, r * 0.15, r * 0.1, 0, 0, Math.PI * 2); ctx.fill()
 }
 
-/** 触发下载 */
-function download(blob: Blob, fileName: string): void {
+/** 根据 Blob 实际类型推断文件扩展名（兼容 avif 回退到 webp 的情况） */
+function getExtFromBlob(blob: Blob): string {
+  switch (blob.type) {
+    case 'image/png':
+      return '.png'
+    case 'image/webp':
+      return '.webp'
+    case 'image/avif':
+      return '.avif'
+    default:
+      return '.png'
+  }
+}
+
+/** 把文件名替换为指定格式对应的扩展名（基于 Blob 实际类型，正确处理 avif 回退） */
+function applyExt(fileName: string, blob: Blob): string {
+  const ext = getExtFromBlob(blob)
+  const dotIdx = fileName.lastIndexOf('.')
+  if (dotIdx > 0) return fileName.slice(0, dotIdx) + ext
+  return fileName + ext
+}
+
+/**
+ * 把 Canvas 转为 Blob，按格式生成并处理兼容性回退
+ * - png：无损，支持透明
+ * - webp：quality 0.92
+ * - avif：quality 0.85，浏览器不支持时自动回退到 webp
+ */
+async function canvasToBlob(canvas: HTMLCanvasElement, format: ExportFormat): Promise<Blob> {
+  const mimeType = format === 'png' ? 'image/png' : format === 'webp' ? 'image/webp' : 'image/avif'
+  const quality = format === 'png' ? undefined : format === 'webp' ? 0.92 : 0.85
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((b) => {
+      if (b && b.type === mimeType) resolve(b)
+      else if (format === 'avif') {
+        // AVIF 不被支持（返回的 blob 类型不匹配），回退到 webp
+        canvas.toBlob((b2) => (b2 ? resolve(b2) : reject(new Error('生成失败'))), 'image/webp', 0.92)
+      } else if (b) resolve(b)
+      else reject(new Error('生成失败'))
+    }, mimeType, quality)
+  })
+}
+
+/** 触发下载；传入 format 时按 Blob 实际类型修正文件名扩展名 */
+function download(blob: Blob, fileName: string, format?: ExportFormat): void {
+  const finalName = format ? applyExt(fileName, blob) : fileName
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = fileName
+  a.download = finalName
   document.body.appendChild(a)
   a.click()
   a.remove()
@@ -177,7 +224,12 @@ function drawCroppedImage(
  * - 默认使用平台全部已选图；传入 imageIds 则只拼接这些
  * - 支持纵向/横向拼接
  * - 支持每张图单独裁剪
+ * - 超长图自动分片：当画布尺寸超过浏览器限制时自动拆分为多个文件
  */
+// 浏览器 Canvas 最大安全尺寸（Safari 移动端约 4096，桌面端约 16384，Chrome 32767）
+// 取 16384 作为安全上限，兼容绝大多数设备
+const MAX_CANVAS_DIMENSION = 16384
+
 export async function exportLongImage(
   project: Project,
   platform: Platform,
@@ -186,6 +238,7 @@ export async function exportLongImage(
     direction?: 'vertical' | 'horizontal'
     crops?: Record<string, CropSettings>
     fileName?: string
+    format?: ExportFormat
   },
 ): Promise<void> {
   const ids = opts?.imageIds ?? project.platforms[platform].imageIds
@@ -195,12 +248,14 @@ export async function exportLongImage(
 
   const direction = opts?.direction ?? 'vertical'
   const crops = opts?.crops ?? {}
+  // 长图默认 webp：压缩率更高，画质损失极小
+  const format: ExportFormat = opts?.format ?? 'webp'
 
   const { imgs } = await loadPlatformImages(ids)
   if (imgs.length === 0) throw new Error('图片加载失败')
 
   // 每张图按裁剪设置计算输出单元尺寸
-  const cells = imgs.map((img) => calcBoxSize(img, crops[ids[imgs.indexOf(img)]]?.aspect ?? 'original', direction))
+  const cells = imgs.map((img, i) => calcBoxSize(img, crops[ids[i]]?.aspect ?? 'original', direction))
 
   let canvasW = 0
   let canvasH = 0
@@ -212,6 +267,85 @@ export async function exportLongImage(
     canvasH = Math.max(...cells.map((c) => c.boxH))
   }
 
+  const stamp = new Date(project.createdAt).toISOString().slice(0, 10)
+  const baseFileName = opts?.fileName ?? `${project.title}_${platform}_${stamp}.png`
+
+  // 检查是否超过浏览器 Canvas 最大尺寸
+  const exceedsLimit =
+    (direction === 'vertical' && canvasH > MAX_CANVAS_DIMENSION) ||
+    (direction === 'horizontal' && canvasW > MAX_CANVAS_DIMENSION)
+
+  if (!exceedsLimit) {
+    // 单张画布可以容纳，直接渲染
+    const blob = await renderLongImage(imgs, ids, cells, crops, direction, canvasW, canvasH, format)
+    download(blob, baseFileName, format)
+    return
+  }
+
+  // 超长图分片：按 MAX_CANVAS_DIMENSION 拆分为多个段
+  const segments: { startIndex: number; endIndex: number; size: number }[] = []
+  let currentSize = 0
+  let startIndex = 0
+
+  for (let i = 0; i < cells.length; i++) {
+    const cellSize = direction === 'vertical' ? cells[i].boxH : cells[i].boxW
+    if (currentSize + cellSize > MAX_CANVAS_DIMENSION && i > startIndex) {
+      // 当前段已满，保存并开始新段
+      segments.push({ startIndex, endIndex: i - 1, size: currentSize })
+      startIndex = i
+      currentSize = cellSize
+    } else {
+      currentSize += cellSize
+    }
+  }
+  // 最后一段
+  if (startIndex < cells.length) {
+    segments.push({ startIndex, endIndex: cells.length - 1, size: currentSize })
+  }
+
+  // 渲染每个分片并下载
+  const padWidth = String(segments.length).length
+  for (let seg = 0; seg < segments.length; seg++) {
+    const { startIndex: si, endIndex: ei, size } = segments[seg]
+    const segCells = cells.slice(si, ei + 1)
+    const segImgs = imgs.slice(si, ei + 1)
+    const segIds = ids.slice(si, ei + 1)
+
+    let segW: number, segH: number
+    if (direction === 'vertical') {
+      segW = canvasW
+      segH = size
+    } else {
+      segW = size
+      segH = canvasH
+    }
+
+    // 调整裁剪偏移量：每段的起始坐标从 0 开始
+    const segCrops = { ...crops }
+    const blob = await renderLongImage(segImgs, segIds, segCells, segCrops, direction, segW, segH, format)
+
+    // 在文件名中插入分片编号（扩展名由 download 按 Blob 实际类型修正）
+    const dotIdx = baseFileName.lastIndexOf('.')
+    const name = dotIdx > 0 ? baseFileName.slice(0, dotIdx) : baseFileName
+    const segLabel = String(seg + 1).padStart(padWidth, '0')
+    download(blob, `${name}_part${segLabel}`, format)
+  }
+}
+
+/**
+ * 渲染长图到 Canvas 并返回 Blob
+ * 内部函数，供 exportLongImage 单片或分片调用
+ */
+async function renderLongImage(
+  imgs: HTMLImageElement[],
+  ids: string[],
+  cells: { boxW: number; boxH: number }[],
+  crops: Record<string, CropSettings>,
+  direction: 'vertical' | 'horizontal',
+  canvasW: number,
+  canvasH: number,
+  format: ExportFormat,
+): Promise<Blob> {
   const canvas = document.createElement('canvas')
   canvas.width = canvasW
   canvas.height = canvasH
@@ -234,23 +368,19 @@ export async function exportLongImage(
     }
   }
 
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (b) => (b ? resolve(b) : reject(new Error('长图生成失败'))),
-      'image/png',
-    )
-  })
-
-  const stamp = new Date(project.createdAt).toISOString().slice(0, 10)
-  const fileName = opts?.fileName ?? `${project.title}_${platform}_${stamp}.png`
-  download(blob, fileName)
+  return canvasToBlob(canvas, format)
 }
 
 /**
  * 导出朋友圈完整卡片 PNG
  * 绘制头像、昵称、文案、九宫格、时间、点赞评论栏
  */
-export async function exportWechatCard(project: Project): Promise<void> {
+export async function exportWechatCard(
+  project: Project,
+  opts?: { format?: ExportFormat },
+): Promise<void> {
+  // 朋友圈卡片默认 png：需要保留透明背景与无损画质
+  const format: ExportFormat = opts?.format ?? 'png'
   const content = project.platforms.wechat
   const { imgs } = await loadPlatformImages(content.imageIds)
 
@@ -400,15 +530,10 @@ export async function exportWechatCard(project: Project): Promise<void> {
   ctx.fillText('♥ 赞', PAD + 32, footerY + footerH / 2)
   ctx.fillText('💬 评论', PAD + 220, footerY + footerH / 2)
 
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (b) => (b ? resolve(b) : reject(new Error('卡片生成失败'))),
-      'image/png',
-    )
-  })
+  const blob = await canvasToBlob(canvas, format)
 
   const stamp = new Date(project.createdAt).toISOString().slice(0, 10)
-  download(blob, `${project.title}_朋友圈_${stamp}.png`)
+  download(blob, `${project.title}_朋友圈_${stamp}.png`, format)
 }
 
 /** 按最大宽度折行文本 */
@@ -570,9 +695,11 @@ export async function copyCaption(
 export async function exportXhsThumbnailStrip(
   project: Project,
   imageIds: string[],
-  opts?: { title?: string; caption?: string },
+  opts?: { title?: string; caption?: string; format?: ExportFormat },
 ): Promise<void> {
   if (imageIds.length === 0) throw new Error('没有图片')
+  // 缩略图排序默认 png，保持与原行为一致
+  const format: ExportFormat = opts?.format ?? 'png'
 
   // 加载图片
   const imgs: HTMLImageElement[] = []
@@ -706,14 +833,6 @@ export async function exportXhsThumbnailStrip(
   }
 
   // 下载
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, 'image/png')
-  )
-  if (!blob) throw new Error('生成失败')
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `小红书缩略图_${imageIds.length}张.png`
-  a.click()
-  URL.revokeObjectURL(url)
+  const blob = await canvasToBlob(canvas, format)
+  download(blob, `小红书缩略图_${imageIds.length}张.png`, format)
 }

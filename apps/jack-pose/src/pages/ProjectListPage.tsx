@@ -61,6 +61,10 @@ export function ProjectListPage() {
           <img
             src={`${import.meta.env.BASE_URL}hero-sm.png`}
             alt="Jack Pose"
+            width={208}
+            height={208}
+            loading="eager"
+            fetchPriority="high"
             className="w-44 h-44 sm:w-52 sm:h-52 mx-auto mb-6 rounded-3xl shadow-lg shadow-black/10"
           />
           <h1 className="font-[Outfit] text-5xl sm:text-6xl font-extrabold tracking-tighter mb-3 text-primary">

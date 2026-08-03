@@ -1,9 +1,8 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
-import { useTheme } from '@jack-tan/studio-core'
+import { useTheme, ThemeToggleIcon } from '@jack-tan/studio-core'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import { ThemeToggleIcon } from './lib/theme'
 
 const ProjectListPage = lazy(() => import('./pages/ProjectListPage').then(m => ({ default: m.ProjectListPage })))
 const EditorPage = lazy(() => import('./pages/EditorPage').then(m => ({ default: m.EditorPage })))

@@ -213,3 +213,96 @@ export function revokeAllPhotoUrls(): void {
   thumbUrlCache.forEach((url) => URL.revokeObjectURL(url))
   thumbUrlCache.clear()
 }
+
+// ==================== 存储配额管理 ====================
+
+/** 存储配额信息 */
+export interface StorageQuotaInfo {
+  usage: number
+  quota: number
+  percentage: number
+  isLow: boolean
+}
+
+/** 图片存储统计 */
+export interface StorageInfo {
+  photoCount: number
+  estimatedSize: number
+}
+
+/**
+ * 获取浏览器分配的存储配额与已用量
+ * 基于 navigator.storage.estimate()，不可用时返回 0
+ */
+export async function getStorageEstimate(): Promise<{ usage: number; quota: number }> {
+  if (typeof navigator !== 'undefined' && navigator.storage?.estimate) {
+    try {
+      const est = await navigator.storage.estimate()
+      return { usage: est.usage ?? 0, quota: est.quota ?? 0 }
+    } catch {
+      // estimate() 在某些环境可能抛错，降级返回 0
+    }
+  }
+  return { usage: 0, quota: 0 }
+}
+
+/**
+ * 检查存储配额使用情况
+ * - percentage：已用百分比（0-100）
+ * - isLow：剩余空间不足 10%（即已用 >= 90%）时为 true
+ */
+export async function checkStorageQuota(): Promise<StorageQuotaInfo> {
+  const { usage, quota } = await getStorageEstimate()
+  const percentage = quota > 0 ? (usage / quota) * 100 : 0
+  const isLow = quota > 0 && percentage >= 90
+  return { usage, quota, percentage, isLow }
+}
+
+/**
+ * 清理孤儿图片：删除不在 usedIds 集合中的所有图片（含缩略图）
+ * 同时释放对应的 objectURL 内存缓存
+ * @returns 实际删除的图片数量
+ */
+export async function cleanupOrphanedPhotos(usedIds: Set<string>): Promise<number> {
+  const allIds = await getAllPhotoIds()
+  const orphaned = allIds.filter((id) => !usedIds.has(id))
+  if (orphaned.length === 0) return 0
+  await deletePhotos(orphaned)
+  // 释放对应的 objectURL 缓存
+  orphaned.forEach((id) => revokePhotoUrl(id))
+  return orphaned.length
+}
+
+/**
+ * 获取图片存储统计：图片数量与估算占用大小（含原图 + 缩略图）
+ * 通过遍历所有 Blob 的 size 属性累加，单次事务读取
+ */
+export async function getStorageInfo(): Promise<StorageInfo> {
+  const allIds = await getAllPhotoIds()
+  let estimatedSize = 0
+
+  if (allIds.length > 0) {
+    const db = await openDB()
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction([STORE_PHOTOS, STORE_THUMBS], 'readonly')
+      const photoStore = tx.objectStore(STORE_PHOTOS)
+      const thumbStore = tx.objectStore(STORE_THUMBS)
+      allIds.forEach((id) => {
+        const pr = photoStore.get(id)
+        pr.onsuccess = () => {
+          const blob = pr.result as Blob | undefined
+          if (blob) estimatedSize += blob.size
+        }
+        const tr = thumbStore.get(id)
+        tr.onsuccess = () => {
+          const blob = tr.result as Blob | undefined
+          if (blob) estimatedSize += blob.size
+        }
+      })
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+  }
+
+  return { photoCount: allIds.length, estimatedSize }
+}

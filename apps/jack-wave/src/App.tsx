@@ -9,9 +9,26 @@
  * - 键盘快捷键（Space/ArrowLeft/ArrowRight/Escape）
  * - PWA Service Worker 注册
  * - iTunes URL 后台刷新
+ *
+ * KV 动态数据加载使用 React 19 的 use() + Suspense：
+ * - PublicDataProvider 在 Suspense 边界内通过 use(promise) 挂起并读取数据
+ * - fetch Promise 缓存在模块级 Map 中，避免每次渲染重复请求
+ * - 加载失败时 Promise 内部 catch 并 resolve 为 null，静默回退到静态数据
+ * - 额外的 ErrorBoundary 作为子树渲染异常的防御性兜底
  */
 
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import {
+  Component,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  use,
+  type ReactNode,
+} from 'react';
 import type { MoodPlaylist, MonthlyShare, Song } from './types';
 import {
   songLibrary,
@@ -32,12 +49,171 @@ import { AudioPlayer } from './components/AudioPlayer';
 import { Footer } from './components/Footer';
 import { Toast, useToast } from './components/Toast';
 
-export default function App() {
-  // === 数据状态 ===
-  const [moodPlaylists, setMoodPlaylists] = useState<MoodPlaylist[]>(normalizedMoodPlaylists);
-  const [monthlyShares, setMonthlyShares] = useState<MonthlyShare[]>(normalizedMonthlyShares);
-  const [allTags, setAllTags] = useState<string[]>(staticAllTags);
+/** /api/public-data 返回的 KV 公开数据结构 */
+interface PublicData {
+  moodPlaylists?: MoodPlaylist[];
+  monthlyShares?: MonthlyShare[];
+  allTags?: string[];
+}
 
+/** 合并 KV 动态数据与静态数据后的最终结构 */
+interface ResolvedData {
+  moodPlaylists: MoodPlaylist[];
+  monthlyShares: MonthlyShare[];
+  allTags: string[];
+}
+
+/** 静态回退数据（KV 加载失败或渲染异常时使用） */
+const staticResolvedData: ResolvedData = {
+  moodPlaylists: normalizedMoodPlaylists,
+  monthlyShares: normalizedMonthlyShares,
+  allTags: staticAllTags,
+};
+
+/**
+ * 模块级缓存：保存 /api/public-data 的 fetch Promise（同一 key 只创建一次）。
+ * Promise 内部 catch 错误并 resolve 为 null —— 这样 use() 永远不会因网络错误抛出，
+ * 静默回退到静态数据，同时避免「缓存的 rejected Promise 在后续渲染中反复抛错」。
+ */
+const publicDataPromiseCache = new Map<string, Promise<PublicData | null>>();
+
+function getPublicDataPromise(): Promise<PublicData | null> {
+  const key = 'public-data';
+  let promise = publicDataPromiseCache.get(key);
+  if (!promise) {
+    promise = fetch(import.meta.env.BASE_URL + 'api/public-data')
+      .then((r) => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json() as Promise<PublicData>;
+      })
+      .catch((err: Error) => {
+        // KV 加载失败时静默回退到静态数据，仅在控制台记录
+        console.warn('动态数据加载失败，使用静态数据:', err.message);
+        return null;
+      });
+    publicDataPromiseCache.set(key, promise);
+  }
+  return promise;
+}
+
+/**
+ * 合并 KV 动态数据与静态数据（逻辑与原 useEffect 中一致）：
+ * - moodPlaylists：KV 优先
+ * - monthlyShares：KV 优先，KV 缺失的月份从静态数据补充
+ * - allTags：KV 优先，缺失时回退静态
+ */
+function mergePublicData(raw: PublicData | null): ResolvedData {
+  if (raw && raw.moodPlaylists) {
+    const moodPlaylists = normalizePlaylists(raw.moodPlaylists as MoodPlaylist[]);
+
+    const kvMonthly = normalizePlaylists((raw.monthlyShares || []) as MonthlyShare[]);
+    const kvMonths = kvMonthly.map((p) => p.month);
+    for (const p of normalizedMonthlyShares) {
+      if (p.month && !kvMonths.includes(p.month)) {
+        kvMonthly.push(p);
+      }
+    }
+    const monthlyShares = sortMonthly(kvMonthly);
+
+    const allTags = raw.allTags ?? staticAllTags;
+
+    return { moodPlaylists, monthlyShares, allTags };
+  }
+  return staticResolvedData;
+}
+
+/** 数据加载 Suspense 兜底：KV 数据加载期间展示的轻量骨架 */
+function DataFallback() {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        maxWidth: '1100px',
+        margin: '0 auto',
+        padding: '120px 24px',
+        textAlign: 'center',
+        color: 'var(--gray-400)',
+        fontSize: '14px',
+      }}
+    >
+      <svg
+        width="28"
+        height="28"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        style={{ margin: '0 auto 12px', display: 'block' }}
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="9"
+          fill="none"
+          strokeWidth="3"
+          style={{ stroke: 'var(--gray-200)' }}
+        />
+        <path
+          d="M12 3a9 9 0 0 1 9 9"
+          fill="none"
+          strokeWidth="3"
+          strokeLinecap="round"
+          style={{ stroke: 'var(--teal)' }}
+        >
+          <animateTransform
+            attributeName="transform"
+            type="rotate"
+            from="0 12 12"
+            to="360 12 12"
+            dur="0.8s"
+            repeatCount="indefinite"
+          />
+        </path>
+      </svg>
+      正在加载歌单数据…
+    </div>
+  );
+}
+
+/**
+ * PublicDataProvider：使用 React 19 的 use() 读取缓存的 fetch Promise。
+ * 在 Suspense 边界内挂起，数据就绪后通过 render-prop 把合并后的数据传给子树。
+ */
+function PublicDataProvider({
+  children,
+}: {
+  children: (data: ResolvedData) => ReactNode;
+}) {
+  const raw = use(getPublicDataPromise());
+  const data = useMemo(() => mergePublicData(raw), [raw]);
+  return <>{children(data)}</>;
+}
+
+/**
+ * 错误边界：作为 use() 的防御性兜底。
+ * 正常情况下 fetch Promise 已在内部 catch（resolve 为 null → 静态数据），
+ * 此边界仅捕获子树渲染过程中可能出现的意外异常，回退到静态数据子树。
+ */
+class PublicDataErrorBoundary extends Component<
+  { fallback: ReactNode; children: ReactNode },
+  { hasError: boolean }
+> {
+  state: { hasError: boolean } = { hasError: false };
+
+  static getDerivedStateFromError(): { hasError: boolean } {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.warn('动态数据渲染异常，使用静态数据:', error.message);
+  }
+
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
+export default function App() {
   // === Toast 通知 ===
   const { message, show, showToast, hideToast } = useToast();
 
@@ -53,37 +229,6 @@ export default function App() {
 
   // === MonthlySection ref（用于"播放本月歌单"） ===
   const monthlyRef = useRef<MonthlySectionRef>(null);
-
-  // === 加载 KV 动态数据 ===
-  useEffect(() => {
-    fetch(import.meta.env.BASE_URL + 'api/public-data')
-      .then((r) => {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      })
-      .then((d) => {
-        if (d && d.moodPlaylists) {
-          setMoodPlaylists(normalizePlaylists(d.moodPlaylists as MoodPlaylist[]));
-
-          // 合并 KV 月度数据和静态数据：KV 中缺少的月份从静态数据补充
-          const kvMonthly = normalizePlaylists((d.monthlyShares || []) as MonthlyShare[]);
-          const staticMonthly = normalizedMonthlyShares;
-          const kvMonths = kvMonthly.map((p) => p.month);
-          for (const p of staticMonthly) {
-            if (p.month && !kvMonths.includes(p.month)) {
-              kvMonthly.push(p);
-            }
-          }
-          setMonthlyShares(sortMonthly(kvMonthly));
-
-          if (d.allTags) setAllTags(d.allTags);
-        }
-      })
-      .catch((err) => {
-        // KV 加载失败时静默回退到静态数据，仅在控制台记录
-        console.warn('动态数据加载失败，使用静态数据:', err.message);
-      });
-  }, []);
 
   // === 键盘快捷键 ===
   useEffect(() => {
@@ -157,10 +302,42 @@ export default function App() {
     setIsMoodModalOpen(false);
   }, []);
 
-  /** 选中的心情歌单 */
-  const selectedMood = selectedMoodId
-    ? moodPlaylists.find((p) => p.id === selectedMoodId) ?? null
-    : null;
+  /**
+   * 渲染依赖 KV 数据的子树（月度歌单 / 心情歌单 / 推荐表单 / 心情弹窗）。
+   * 抽成函数便于复用：成功时用 KV 合并数据渲染、错误边界兜底时用静态数据渲染同一份结构。
+   */
+  const renderDataSections = (data: ResolvedData) => {
+    const selectedMood = selectedMoodId
+      ? data.moodPlaylists.find((p) => p.id === selectedMoodId) ?? null
+      : null;
+
+    return (
+      <>
+        {/* 月度歌单 */}
+        <MonthlySection
+          ref={monthlyRef}
+          monthlyShares={data.monthlyShares}
+          currentSong={player.currentSong}
+          onPlay={handlePlay}
+        />
+
+        {/* 心情歌单 */}
+        <MoodGrid moodPlaylists={data.moodPlaylists} onOpenMood={handleOpenMood} />
+
+        {/* 推荐表单 */}
+        <SubmitForm allTags={data.allTags} onToast={showToast} />
+
+        {/* 心情歌单弹窗 */}
+        <MoodModal
+          playlist={selectedMood}
+          show={isMoodModalOpen}
+          onClose={handleCloseMood}
+          currentSong={player.currentSong}
+          onPlay={handlePlay}
+        />
+      </>
+    );
+  };
 
   return (
     <>
@@ -189,34 +366,18 @@ export default function App() {
       {/* Hero 区域 */}
       <Hero onPlayCurrentMonth={handlePlayCurrentMonth} />
 
-      {/* 月度歌单 */}
-      <MonthlySection
-        ref={monthlyRef}
-        monthlyShares={monthlyShares}
-        currentSong={player.currentSong}
-        onPlay={handlePlay}
-      />
-
-      {/* 心情歌单 */}
-      <MoodGrid moodPlaylists={moodPlaylists} onOpenMood={handleOpenMood} />
-
-      {/* 推荐表单 */}
-      <SubmitForm allTags={allTags} onToast={showToast} />
+      {/* 依赖 KV 动态数据的区域：use() + Suspense，加载失败静默回退静态数据 */}
+      <Suspense fallback={<DataFallback />}>
+        <PublicDataErrorBoundary fallback={renderDataSections(staticResolvedData)}>
+          <PublicDataProvider>{renderDataSections}</PublicDataProvider>
+        </PublicDataErrorBoundary>
+      </Suspense>
 
       {/* 页脚 */}
       <Footer />
 
       {/* 底部播放器 */}
       <AudioPlayer player={player} />
-
-      {/* 心情歌单弹窗 */}
-      <MoodModal
-        playlist={selectedMood}
-        show={isMoodModalOpen}
-        onClose={handleCloseMood}
-        currentSong={player.currentSong}
-        onPlay={handlePlay}
-      />
 
       {/* Toast 通知 */}
       <Toast message={message} show={show} onHide={hideToast} />

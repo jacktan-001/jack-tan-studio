@@ -1,11 +1,17 @@
 {
+  "id": "/projects/jack-tan/",
   "name": "Jack-Tan | Personal Portfolio",
   "short_name": "Jack-Tan",
   "description": "9年民航安全体系深耕者，监管数字化转型实践者",
   "start_url": "/projects/jack-tan/",
+  "scope": "/projects/jack-tan/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#f7f8fa",
   "theme_color": "#2d4a7a",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "categories": ["business", "portfolio", "productivity"],
   "icons": [
     {
       "src": "/projects/jack-tan/icons/icon-192.png",
@@ -24,6 +30,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "关于我",
+      "short_name": "关于",
+      "description": "查看个人简介与经历",
+      "url": "/projects/jack-tan/#about"
+    },
+    {
+      "name": "项目经验",
+      "short_name": "项目",
+      "description": "浏览项目经验与成果",
+      "url": "/projects/jack-tan/#projects"
     }
   ]
 }

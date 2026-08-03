@@ -30,16 +30,8 @@ function StatsSection() {
   ]
 
   return (
-    <section style={{
-      maxWidth: '1000px',
-      margin: '0 auto',
-      padding: '40px 24px',
-    }}>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '16px',
-      }}>
+    <section className="max-w-[1000px] mx-auto px-6 py-10">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
         {stats.map((s, i) => (
           <motion.div
             key={s.label}
@@ -47,33 +39,13 @@ function StatsSection() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: i * 0.08 }}
-            className="glass"
-            style={{
-              padding: '28px',
-              textAlign: 'center',
-            }}
+            className="glass p-7 text-center"
           >
-            <div style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '48px',
-              fontWeight: 700,
-              letterSpacing: '-0.04em',
-              background: 'linear-gradient(135deg, var(--text), var(--text-muted))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              lineHeight: 1,
-            }}>{s.value}</div>
-            <div style={{
-              fontSize: '14px',
-              color: 'var(--text-muted)',
-              marginTop: '8px',
-            }}>{s.label}</div>
-            <div style={{
-              fontSize: '11px',
-              fontFamily: 'var(--font-mono)',
-              color: 'var(--text-dim)',
-              marginTop: '4px',
-            }}>{s.sub}</div>
+            <div className="font-display text-5xl font-bold tracking-tight leading-none bg-clip-text text-transparent bg-[linear-gradient(135deg,var(--text),var(--text-muted))]">
+              {s.value}
+            </div>
+            <div className="text-sm text-text-muted mt-2">{s.label}</div>
+            <div className="text-[11px] font-mono text-text-dim mt-1">{s.sub}</div>
           </motion.div>
         ))}
       </div>
@@ -83,72 +55,30 @@ function StatsSection() {
 
 function AboutSection() {
   return (
-    <section style={{
-      maxWidth: '900px',
-      margin: '0 auto',
-      padding: '120px 24px',
-      textAlign: 'center',
-    }}>
+    <section className="max-w-[900px] mx-auto px-6 py-30 text-center">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '6px 14px',
-          borderRadius: '100px',
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid var(--border)',
-          marginBottom: '20px',
-          fontSize: '12px',
-          fontFamily: 'var(--font-mono)',
-          color: 'var(--text-muted)',
-        }}>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-border mb-5 text-xs font-mono text-text-muted">
           ABOUT
         </div>
-        <h2 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(28px, 4vw, 44px)',
-          fontWeight: 600,
-          letterSpacing: '-0.03em',
-          marginBottom: '24px',
-          lineHeight: 1.2,
-        }}>
+        <h2 className="font-display text-[clamp(28px,4vw,44px)] font-semibold tracking-tight mb-6 leading-tight">
           以技术为基，以<span className="gradient-text">创意</span>为翼
         </h2>
-        <p style={{
-          fontSize: '16px',
-          color: 'var(--text-muted)',
-          lineHeight: 1.8,
-          maxWidth: '640px',
-          margin: '0 auto',
-        }}>
+        <p className="text-base text-text-muted leading-relaxed max-w-[640px] mx-auto">
           Jack Tan Studio 是一个个人创意集合平台，整合了音乐随记、社媒排版工具和个人职业展示。
           底层采用 React + TypeScript + Vite + Framer Motion + Three.js 技术栈，
           部署于 Cloudflare Pages 全球边缘网络。未来将持续集成更多创意工具和实验性项目。
         </p>
 
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '10px',
-          justifyContent: 'center',
-          marginTop: '40px',
-        }}>
+        <div className="flex flex-wrap gap-2.5 justify-center mt-10">
           {['React 19', 'TypeScript', 'Vite', 'Framer Motion', 'Three.js', 'GSAP', 'Cloudflare Pages', 'PWA'].map((tech) => (
-            <span key={tech} style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid var(--border)',
-              fontSize: '13px',
-              fontFamily: 'var(--font-mono)',
-              color: 'var(--text-muted)',
-            }}>{tech}</span>
+            <span key={tech} className="px-4 py-2 rounded-lg bg-white/[0.04] border border-border text-[13px] font-mono text-text-muted">
+              {tech}
+            </span>
           ))}
         </div>
       </motion.div>
@@ -158,20 +88,9 @@ function AboutSection() {
 
 function Footer() {
   return (
-    <footer style={{
-      borderTop: '1px solid var(--border)',
-      padding: '60px 24px 40px',
-      marginTop: '40px',
-    }}>
-      <div style={{
-        maxWidth: '1000px',
-        margin: '0 auto',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '32px',
-      }}>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+    <footer className="border-t border-border px-6 pt-15 pb-10 mt-10">
+      <div className="max-w-[1000px] mx-auto flex flex-col items-center gap-8">
+        <div className="flex gap-3 flex-wrap justify-center">
           {socialLinks.map((link) => (
             <a
               key={link.label}
@@ -179,30 +98,7 @@ function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               data-cursor-hover
-              style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '12px',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid var(--border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--text-muted)',
-                transition: 'all 0.3s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'
-                e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)'
-                e.currentTarget.style.color = 'var(--accent)'
-                e.currentTarget.style.transform = 'translateY(-3px)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
-                e.currentTarget.style.borderColor = 'var(--border)'
-                e.currentTarget.style.color = 'var(--text-muted)'
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
+              className="w-11 h-11 rounded-xl bg-white/[0.04] border border-border flex items-center justify-center text-text-muted transition-all duration-300 hover:bg-accent/10 hover:border-accent/30 hover:text-accent hover:-translate-y-1"
               title={link.label}
             >
               {socialIcons[link.icon]}
@@ -210,21 +106,11 @@ function Footer() {
           ))}
         </div>
 
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '14px',
-            fontWeight: 500,
-            color: 'var(--text-muted)',
-            marginBottom: '8px',
-          }}>
+        <div className="text-center">
+          <div className="font-display text-sm font-medium text-text-muted mb-2">
             Jack Tan Studio
           </div>
-          <div style={{
-            fontSize: '12px',
-            color: 'var(--text-dim)',
-            fontFamily: 'var(--font-mono)',
-          }}>
+          <div className="text-xs text-text-dim font-mono">
             © 2026 · Built with React + Vite · Deployed on Cloudflare Pages
           </div>
         </div>

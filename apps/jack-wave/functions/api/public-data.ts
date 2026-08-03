@@ -3,7 +3,19 @@
 // 前端加载时调用此接口，KV 有数据则返回，否则回退到静态 __DATA__
 // ============================================================
 
+import { handlePreflight, withCors } from '../_lib/cors';
+
+// OPTIONS 预检处理
+export const onRequestOptions: PagesFunction<Env> = (context) => {
+  return handlePreflight(context.request, context.env);
+};
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
+  const response = await handleGet(context);
+  return withCors(response, context.request, context.env);
+};
+
+async function handleGet(context: PagesFunctionContext<Env>): Promise<Response> {
   try {
     const kv = context.env.JACK_WAVE_KV;
     const raw = await kv.get('data:playlists');
@@ -58,4 +70,4 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       },
     );
   }
-};
+}

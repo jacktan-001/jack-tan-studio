@@ -2,6 +2,13 @@
 // 提交列表管理接口 - 并行查询 + 分页 + 状态过滤
 // ============================================================
 
+import { handlePreflight, withCors } from '../_lib/cors';
+
+// OPTIONS 预检处理
+export const onRequestOptions: PagesFunction<Env> = (context) => {
+  return handlePreflight(context.request, context.env);
+};
+
 // 默认分页参数
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -38,6 +45,11 @@ function parseIntParam(value: string | null, defaultValue: number): number {
 
 // ---- GET: 获取提交列表（支持分页和状态过滤）----
 export const onRequestGet: PagesFunction<Env> = async (context) => {
+  const response = await handleGet(context);
+  return withCors(response, context.request, context.env);
+};
+
+async function handleGet(context: PagesFunctionContext<Env>): Promise<Response> {
   const url = new URL(context.request.url);
   const password =
     url.searchParams.get('password') || context.request.headers.get('x-admin-password');
@@ -117,10 +129,15 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   } catch (e: any) {
     return Response.json({ error: e.message }, { status: 500 });
   }
-};
+}
 
 // ---- DELETE: 删除指定提交记录 ----
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
+  const response = await handleDelete(context);
+  return withCors(response, context.request, context.env);
+};
+
+async function handleDelete(context: PagesFunctionContext<Env>): Promise<Response> {
   const url = new URL(context.request.url);
   const password =
     url.searchParams.get('password') || context.request.headers.get('x-admin-password');
@@ -142,4 +159,4 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
   } catch (e: any) {
     return Response.json({ error: e.message }, { status: 500 });
   }
-};
+}

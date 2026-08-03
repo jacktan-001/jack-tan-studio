@@ -13,5 +13,18 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    rolldownOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'react-vendor'
+          }
+          if (id.includes('packages/studio-core')) {
+            return 'studio-core'
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
   },
 })

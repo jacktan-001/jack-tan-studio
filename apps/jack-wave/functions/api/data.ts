@@ -2,6 +2,13 @@
 // 数据管理接口 - 带结构校验和时序安全密码比较
 // ============================================================
 
+import { handlePreflight, withCors } from '../_lib/cors';
+
+// OPTIONS 预检处理
+export const onRequestOptions: PagesFunction<Env> = (context) => {
+  return handlePreflight(context.request, context.env);
+};
+
 // 最大数据大小限制：5MB
 const MAX_DATA_SIZE = 5 * 1024 * 1024;
 
@@ -86,6 +93,11 @@ function validateDataStructure(body: any): { valid: boolean; error?: string } {
 
 // ---- GET: 从 KV 读取当前歌单数据（或返回 null 表示使用静态种子数据）----
 export const onRequestGet: PagesFunction<Env> = async (context) => {
+  const response = await handleGet(context);
+  return withCors(response, context.request, context.env);
+};
+
+async function handleGet(context: PagesFunctionContext<Env>): Promise<Response> {
   const url = new URL(context.request.url);
 
   // 时序安全密码验证
@@ -104,10 +116,15 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   } catch (e: any) {
     return Response.json({ error: e.message }, { status: 500 });
   }
-};
+}
 
 // ---- PUT: 保存更新后的歌单数据到 KV ----
 export const onRequestPut: PagesFunction<Env> = async (context) => {
+  const response = await handlePut(context);
+  return withCors(response, context.request, context.env);
+};
+
+async function handlePut(context: PagesFunctionContext<Env>): Promise<Response> {
   // 时序安全密码验证
   const password = context.request.headers.get('x-admin-password');
   if (!password) {
@@ -142,10 +159,15 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   } catch (e: any) {
     return Response.json({ error: e.message }, { status: 500 });
   }
-};
+}
 
 // ---- DELETE: 清除 KV 数据（重置为静态种子数据）----
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
+  const response = await handleDelete(context);
+  return withCors(response, context.request, context.env);
+};
+
+async function handleDelete(context: PagesFunctionContext<Env>): Promise<Response> {
   const url = new URL(context.request.url);
 
   // 时序安全密码验证
@@ -161,4 +183,4 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
   } catch (e: any) {
     return Response.json({ error: e.message }, { status: 500 });
   }
-};
+}

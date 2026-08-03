@@ -2,6 +2,13 @@
 // 提交接口 - 带限流和输入校验
 // ============================================================
 
+import { handlePreflight, withCors } from '../_lib/cors';
+
+// OPTIONS 预检处理
+export const onRequestOptions: PagesFunction<Env> = (context) => {
+  return handlePreflight(context.request, context.env);
+};
+
 // 允许的提交类型白名单
 const ALLOWED_TYPES = ['link', 'manual', 'screenshot'] as const;
 
@@ -90,6 +97,11 @@ function isValidUrl(url: string): boolean {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const response = await handleSubmit(context);
+  return withCors(response, context.request, context.env);
+};
+
+async function handleSubmit(context: PagesFunctionContext<Env>): Promise<Response> {
   try {
     // 优先使用独立的限流 KV（如已配置），否则回退到主 KV
     const rateLimitKv = context.env.SUBMISSION_RATE_LIMIT || context.env.JACK_WAVE_KV;
@@ -220,4 +232,4 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   } catch (e: any) {
     return Response.json({ error: '提交失败: ' + e.message }, { status: 500 });
   }
-};
+}

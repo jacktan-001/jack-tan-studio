@@ -1,22 +1,48 @@
 /**
- * Jack-Pose Service Worker
+ * Jack-Pose Service Worker v2.0
+ * - 预缓存：核心静态资源在 install 时缓存，确保离线可用
  * - 导航请求：Network First（离线时回退缓存）
  * - 哈希静态资源（/assets/）：Cache First
  * - Google Fonts：Stale While Revalidate
  */
 
-const CACHE_VERSION = 'jack-pose-v1'
+const CACHE_VERSION = 'jack-pose-v2'
+const PRECACHE_CACHE = `${CACHE_VERSION}-precache`
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`
 
-// 子路径部署：从 SW scope 推导 base（如 /pose/）
+// 子路径部署：从 SW scope 推导 base（如 /projects/jack-pose/）
 const BASE = new URL(self.registration.scope).pathname
+function p(path) { return BASE + path.replace(/^\//, '') }
 
-// ==================== Install ====================
-self.addEventListener('install', () => {
+// 预缓存核心资源（构建时已知路径，不含 hash）
+var PRECACHE_ASSETS = [
+  p('/'),
+  p('/index.html'),
+  p('/manifest.json'),
+  p('/hero-sm.png'),
+  p('/favicon.png'),
+  p('/icon-192.png'),
+  p('/icon-512.png'),
+  p('/apple-touch-icon.png'),
+]
+
+// ==================== Install：预缓存核心资源 ====================
+self.addEventListener('install', function(e) {
+  e.waitUntil(
+    caches.open(PRECACHE_CACHE).then(function(cache) {
+      return Promise.allSettled(
+        PRECACHE_ASSETS.map(function(url) {
+          return cache.add(url).catch(function(err) {
+            console.warn('SW: 预缓存失败', url, err)
+          })
+        })
+      )
+    })
+  )
   self.skipWaiting()
 })
 
-// ==================== Activate ====================
+// ==================== Activate：清理旧缓存 ====================
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches
@@ -51,13 +77,13 @@ self.addEventListener('fetch', (e) => {
             return res
           })
           .catch(() =>
-            caches.match(req).then((r) => r || caches.match(BASE)),
+            caches.match(req).then((r) => r || caches.match(BASE + 'index.html')),
           ),
       )
       return
     }
 
-    // 哈希静态资源：Cache First
+    // 哈希静态资源：Cache First（Vite 构建产物，文件名含 hash，可长期缓存）
     if (url.pathname.startsWith(BASE + 'assets/')) {
       e.respondWith(
         caches.match(req).then(

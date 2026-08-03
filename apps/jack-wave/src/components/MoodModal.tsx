@@ -1,12 +1,14 @@
 /**
  * MoodModal — 心情歌单详情弹窗
  * 点击心情歌单卡片后弹出，展示歌单信息和歌曲列表
+ * 包含 focus trap、Escape 关闭、点击遮罩关闭等无障碍特性
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { MoodPlaylist, Song } from '../types';
 import { SongList } from './SongList';
 import { safeUrl } from '../utils';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 export interface MoodModalProps {
   playlist: MoodPlaylist | null;
@@ -23,6 +25,11 @@ export function MoodModal({
   currentSong,
   onPlay,
 }: MoodModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus trap + 焦点恢复
+  useFocusTrap(dialogRef, show && !!playlist);
+
   // Escape 键关闭弹窗
   useEffect(() => {
     if (!show) return;
@@ -43,14 +50,15 @@ export function MoodModal({
     }
   };
 
+  const titleId = 'mood-modal-title';
+  const descId = 'mood-modal-desc';
+
   return (
     <div
       className={`modal-overlay${show ? ' active' : ''}`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      role="dialog"
-      aria-modal="true"
       style={{
         position: 'fixed',
         inset: 0,
@@ -68,6 +76,12 @@ export function MoodModal({
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descId}
+        tabIndex={-1}
         className="modal"
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -82,6 +96,7 @@ export function MoodModal({
           transform: show ? 'translateY(0)' : 'translateY(20px)',
           transition: 'transform .25s',
           boxShadow: 'var(--shadow-lg)',
+          outline: 'none',
         }}
       >
         <div
@@ -97,7 +112,7 @@ export function MoodModal({
           <img
             className="modal-cover"
             src={safeUrl(playlist.coverImage) || ''}
-            alt="歌单封面"
+            alt={`${playlist.title}封面`}
             loading="lazy"
             style={{
               width: '64px',
@@ -109,12 +124,14 @@ export function MoodModal({
           />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
+              id={titleId}
               className="modal-title"
               style={{ fontSize: '20px', fontWeight: 700 }}
             >
               {playlist.title}
             </div>
             <div
+              id={descId}
               className="modal-subtitle"
               style={{ fontSize: '13px', color: 'var(--gray-500)' }}
             >
@@ -124,7 +141,7 @@ export function MoodModal({
           <button
             className="modal-close"
             onClick={onClose}
-            aria-label="关闭"
+            aria-label="关闭弹窗"
             style={{
               width: '36px',
               height: '36px',
