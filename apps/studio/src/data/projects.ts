@@ -2,6 +2,8 @@ export interface Project {
   id: string;
   name: string;
   tagline: string;
+  /** 功能定位（一句话说明项目是做什么的） */
+  positioning?: string;
   description: string;
   icon: string;
   color: string;
@@ -57,45 +59,33 @@ export const projects: Project[] = [
     status: 'live',
   },
   {
-    id: 'lens',
-    name: 'Jack Lens',
-    tagline: 'Visual Insights',
-    description: '数据可视化与洞察工具。将复杂信息转化为直观的视觉叙事，让数据自己说话。',
-    icon: 'lens',
-    color: '#8b5cf6',
-    colorRgb: '139, 92, 246',
-    url: '/projects/lens',
-    repo: '',
-    tech: ['D3.js', 'Canvas', 'WebSocket', 'Cloudflare D1'],
-    features: ['实时数据流', '交互式图表', '自定义仪表盘', '数据导出'],
-    status: 'coming-soon',
-  },
-  {
     id: 'cast',
     name: 'Jack Cast',
     tagline: 'Audio Stories',
-    description: '个人播客与音频故事平台。录制、剪辑、发布一站式，让声音成为创意的载体。',
+    positioning: '个人播客与音频内容平台',
+    description: '把灵感录成声音。Jack Cast 面向个人创作者，打通录制、剪辑、发布与订阅全流程，让每一段声音都被收藏与分享。',
     icon: 'cast',
     color: '#f59e0b',
     colorRgb: '245, 158, 11',
     url: '/projects/cast',
     repo: '',
     tech: ['Web Audio API', 'MediaRecorder', 'R2 Storage', 'Podcast RSS'],
-    features: ['音频录制', '在线剪辑', 'RSS 订阅', '波形可视化'],
+    features: ['一键录音与波形可视化', '在线剪辑与多轨合成', '自动生成 Podcast RSS 订阅源', '云端存储与全球分发'],
     status: 'coming-soon',
   },
   {
     id: 'craft',
     name: 'Jack Craft',
     tagline: 'Creative Sandbox',
-    description: '创意实验场。代码可视化、交互艺术、生成式设计 —— 探索技术与美学的交汇点。',
+    positioning: '生成式艺术与交互创意实验场',
+    description: '代码即画笔。Jack Craft 探索技术与美学的交汇点，汇集生成式艺术、着色器实验与交互装置，让每一个脑洞都能实时呈现。',
     icon: 'craft',
     color: '#10b981',
     colorRgb: '16, 185, 129',
     url: '/projects/craft',
     repo: '',
     tech: ['WebGL', 'Three.js', 'GLSL Shaders', 'GSAP'],
-    features: ['生成式艺术', '着色器实验', '交互装置', '代码可视化'],
+    features: ['生成式艺术与算法美学', 'GLSL 着色器实时实验', 'WebGL 交互装置', '代码可视化创意组件'],
     status: 'coming-soon',
   },
 ];
