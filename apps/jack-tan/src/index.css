@@ -150,26 +150,44 @@ section[id] {
 
 .section-reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(28px);
+  clip-path: inset(10% 0 10% 0 round 12px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              clip-path 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .section-reveal.visible {
   opacity: 1;
   transform: translateY(0);
+  clip-path: inset(0 0 0 0 round 0);
 }
 
 /* ==================== Utilities ==================== */
 
 .card-hover {
-  transition: all 0.3s ease-out;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.45s ease;
 }
 
 .card-hover:hover {
-  transform: translateY(-2px);
-  border-color: var(--color-neutral-300);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  transform: translateY(-4px);
+  border-color: rgba(var(--accent-rgb, 124, 58, 237), 0.35);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08),
+              0 2px 12px rgba(var(--accent-rgb, 124, 58, 237), 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-reveal {
+    clip-path: none;
+    transition: opacity 0.3s ease;
+  }
+  .card-hover,
+  .card-hover:hover {
+    transform: none;
+    transition: none;
+  }
 }
 
 /* ==================== Scrollbar ==================== */

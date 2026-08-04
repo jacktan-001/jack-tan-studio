@@ -532,3 +532,15 @@ button {
     opacity: 0.3;
   }
 }
+
+/* ==================== 安全区适配（刘海屏/_home 指示条） ==================== */
+.studio-navbar {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.studio-footer {
+  padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px));
+}
+.nav-mobile-menu {
+  padding-top: calc(70px + env(safe-area-inset-top, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react';
 import type { MoodPlaylist, Song } from '../types';
 import { SongList } from './SongList';
 import { safeUrl } from '../utils';
+import { playlistCover } from '../data/musicData';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
 export interface MoodModalProps {
@@ -111,7 +112,7 @@ export function MoodModal({
         >
           <img
             className="modal-cover"
-            src={safeUrl(playlist.coverImage) || ''}
+            src={safeUrl(playlistCover(playlist)) || ''}
             alt={`${playlist.title}封面`}
             loading="lazy"
             onError={(e) => {

@@ -688,3 +688,23 @@ textarea {
     animation-duration: 0.6s;
   }
 }
+
+/* ==================== 封面动效：悬停呼吸缩放 ==================== */
+.mood-cover,
+.monthly-cover {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mood-cover-wrap:hover .mood-cover,
+.monthly-cover:hover {
+  transform: scale(1.06);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mood-cover,
+  .monthly-cover {
+    transition: none;
+  }
+  .mood-cover-wrap:hover .mood-cover,
+  .monthly-cover:hover {
+    transform: none;
+  }
+}

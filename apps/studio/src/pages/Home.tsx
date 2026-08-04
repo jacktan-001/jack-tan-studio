@@ -88,7 +88,7 @@ function AboutSection() {
 
 function Footer() {
   return (
-    <footer className="border-t border-border px-6 pt-16 pb-12 mt-12">
+    <footer className="studio-footer border-t border-border px-6 pt-16 pb-12 mt-12">
       <div className="max-w-[1000px] mx-auto flex flex-col items-center gap-8">
         <div className="flex gap-3 flex-wrap justify-center">
           {socialLinks.map((link) => (

@@ -150,13 +150,13 @@ export default function Hero() {
         >
           <a
             ref={magneticExploreRef}
-            href="/projects/jack-wave/intro"
+            href="/projects/wave/intro"
             data-cursor-hover
             className="studio-magnetic"
             onClick={(e) => {
               e.preventDefault()
               setPendingProject('wave')
-              navigateWithTransition('/projects/jack-wave/intro')
+              navigateWithTransition('/projects/wave/intro')
             }}
             style={{
               display: 'inline-flex',
@@ -245,6 +245,7 @@ export default function Hero() {
       <style>{`
         .hero-section {
           min-height: calc(100vh - 130px);
+          min-height: calc(100dvh - 130px);
           display: flex;
           align-items: center;
           justify-content: center;

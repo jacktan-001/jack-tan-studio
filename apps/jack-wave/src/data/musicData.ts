@@ -507,6 +507,26 @@ export function normalizePlaylists<T extends { songs?: string[]; songList?: Song
   return playlists.map(normalizePlaylist);
 }
 
+/** 把 iTunes 封面 URL 升级到更大尺寸（默认 600x600） */
+export function upgradeArtwork(url: string | undefined, size = 600): string {
+  if (!url) return '';
+  return url.replace(/\d+x\d+bb/, `${size}x${size}bb`);
+}
+
+/**
+ * 歌单封面自动获取：
+ * 优先使用歌单自带 coverImage；否则从第一首有封面的歌曲自动派生（放大到 600x600）；
+ * 都没有时返回空串，由组件走渐变/SVG 兜底。
+ */
+export function playlistCover(p: {
+  coverImage?: string;
+  songList?: Song[];
+}): string {
+  if (p.coverImage) return p.coverImage;
+  const first = (p.songList || []).find((s) => s.artworkUrl100);
+  return first ? upgradeArtwork(first.artworkUrl100) : '';
+}
+
 /** 按月份降序排列（最新月份在前） */
 export function sortMonthly<T extends { month?: string }>(playlists: T[]): T[] {
   return [...playlists].sort((a, b) => (b.month ?? '').localeCompare(a.month ?? ''));

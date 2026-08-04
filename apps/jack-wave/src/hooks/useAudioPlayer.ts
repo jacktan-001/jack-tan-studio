@@ -406,6 +406,22 @@ export function useAudioPlayer(
     refreshSongUrls().catch((e) => console.warn('URL 刷新失败:', e));
   }, [refreshSongUrls]);
 
+  // === 动态跟踪：定时 + 回到前台时刷新封面/URL ===
+  useEffect(() => {
+    const INTERVAL = 10 * 60 * 1000;
+    const timer = setInterval(() => {
+      refreshSongUrls().catch(() => {});
+    }, INTERVAL);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refreshSongUrls().catch(() => {});
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [refreshSongUrls]);
+
   // === 清理 ===
 
   useEffect(() => {

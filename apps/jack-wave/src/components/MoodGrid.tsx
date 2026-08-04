@@ -5,6 +5,7 @@
 
 import type { MoodPlaylist } from '../types';
 import { safeUrl } from '../utils';
+import { playlistCover } from '../data/musicData';
 
 export interface MoodGridProps {
   moodPlaylists: MoodPlaylist[];
@@ -85,7 +86,7 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
             >
               <img
                 className="mood-cover"
-                src={safeUrl(p.coverImage) || ''}
+                src={safeUrl(playlistCover(p)) || ''}
                 alt={`${p.title}封面`}
                 loading="lazy"
                 onError={(e) => {
