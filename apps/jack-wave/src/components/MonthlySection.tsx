@@ -6,7 +6,7 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import type { MonthlyShare, Song } from '../types';
 import { SongList } from './SongList';
-import { safeUrl } from '../utils';
+import { safeUrl, artworkSrc } from '../utils';
 import { playlistCover } from '../data/musicData';
 
 export interface MonthlySectionProps {
@@ -189,7 +189,7 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
         >
           <img
             className="monthly-cover"
-            src={safeUrl(playlistCover(m)) || ''}
+            src={artworkSrc(playlistCover(m)) || ''}
             alt="月度歌单封面"
             loading="lazy"
             onError={(e) => {

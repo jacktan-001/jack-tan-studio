@@ -9,7 +9,7 @@
 
 import { useRef } from 'react';
 import type { Song } from '../types';
-import { safeUrl } from '../utils';
+import { safeUrl, artworkSrc } from '../utils';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 export interface SongListProps {
@@ -123,7 +123,7 @@ export function SongList({ songs, currentSong, onPlay }: SongListProps) {
         )}
         <img
           className="song-cover"
-          src={safeUrl(s.artworkUrl100) || ''}
+          src={artworkSrc(s.artworkUrl100) || ''}
           alt=""
           loading="lazy"
           onError={(e) => {

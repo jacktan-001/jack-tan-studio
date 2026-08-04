@@ -12,7 +12,7 @@
  */
 
 import type { UseAudioPlayerReturn } from '../hooks/useAudioPlayer';
-import { safeUrl } from '../utils';
+import { safeUrl, artworkSrc } from '../utils';
 import { fixAppleMusicUrl } from '@jack-tan/studio-core';
 
 export interface AudioPlayerProps {
@@ -77,7 +77,7 @@ export function AudioPlayer({ player }: AudioPlayerProps) {
       {/* 封面 */}
       <img
         className="player-cover"
-        src={safeUrl(currentSong.artworkUrl100) || ''}
+        src={artworkSrc(currentSong.artworkUrl100) || ''}
         alt="当前播放歌曲封面"
         loading="lazy"
         onError={(e) => {
