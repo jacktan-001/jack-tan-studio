@@ -23,6 +23,10 @@ export const onRequest = async (context) => {
   const asset = await env.ASSETS.fetch(request);
   if (asset.status !== 404) return asset;
 
+  // 1.5 带扩展名的缺失文件（如打错的图片/脚本 URL）直接返回真实 404，
+  //     不做 SPA 回退 —— 避免软 404，也让 <img>/<script> 加载失败语义正确。
+  if (/\.[a-z0-9]+$/i.test(new URL(request.url).pathname)) return asset;
+
   // 2. 静态资源不存在 → SPA 回退到子应用入口
   //    注意必须显式请求 index.html：ASSETS.fetch 不会把目录路径解析成 index.html，
   //    直接取目录会得到 404。Pages 对 /index.html 的 308 规范化由 fetch 自动跟随。

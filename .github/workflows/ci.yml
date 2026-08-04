@@ -87,9 +87,12 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           COMMIT_MSG="$(git log -1 --pretty=%s)"
-          # 注意：pnpm exec 会把工作目录重置到仓库根，因此必须写全路径 deploy/dist，
-          # 不能先 `cd deploy` 再用相对路径 `dist`（会解析到不存在的根目录 dist）。
-          pnpm exec wrangler pages deploy deploy/dist \
+          # 注意两个 cwd 陷阱：
+          # 1. pnpm exec 会把工作目录重置到仓库根，因此不能先 `cd deploy`；
+          # 2. wrangler 从「当前工作目录」发现 functions/ 目录，必须用 --cwd deploy
+          #    指到 deploy/（functions 在 deploy/functions），否则 Functions 会被
+          #    静默跳过 —— 曾导致 /projects/jack-wave/api/* 与 SPA 回退全部 404。
+          pnpm exec wrangler --cwd deploy pages deploy dist \
             --project-name jacktan-studio \
             --branch main \
             --commit-hash "${GITHUB_SHA}" \
