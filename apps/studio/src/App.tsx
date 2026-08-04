@@ -1,5 +1,4 @@
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
-import { AnimatePresence } from 'motion/react'
 import Navbar from './components/layout/Navbar'
 import CustomCursor from './components/ui/CustomCursor'
 import StarField from './components/effects/StarField'
@@ -34,8 +33,9 @@ export default function App() {
       <BackgroundEffects />
       <Navbar />
       <div className="page-wrap">
-        <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
+        {/* N-2：用 key + CSS .studio-page-fade 实现路由切换淡入，替代 AnimatePresence（去除首屏 Motion 依赖） */}
+        <div key={location.pathname} className="studio-page-fade">
+          <Routes location={location}>
             <Route path="/" element={<Home />} />
 
             {/* 项目介绍页：/projects/:id/intro */}
@@ -65,7 +65,7 @@ export default function App() {
             {/* 兜底 404 回首页 */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </AnimatePresence>
+        </div>
       </div>
     </>
   )

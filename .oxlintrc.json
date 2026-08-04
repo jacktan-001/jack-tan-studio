@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "env": { "browser": true, "node": true, "es2024": true },
+  "globals": { "import.meta": "readonly" },
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/deploy/**",
+    "**/coverage/**",
+    "**/public/vendor/**",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ],
+  "plugins": ["typescript", "react", "jsx-a11y", "import"],
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-debugger": "error",
+    "no-alert": "warn"
+  }
+}
