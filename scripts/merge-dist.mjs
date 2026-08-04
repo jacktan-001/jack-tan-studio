@@ -146,13 +146,11 @@ const redirects = [
 writeFileSync(resolve(dist, '_redirects'), redirects);
 
 // 5. 生成 _routes.json：限定 Functions 触发范围
-//    include：三个子应用前缀（SPA 回退 catch-all）+ jack-wave 的 API
-//    exclude：带扩展名的静态资源直接走 Pages 静态服务，不进 Function（省计费、降延迟）。
-//    注意：exclude 掉的缺失文件会直接返回真实 404（404.html），这正是期望行为。
-const staticExtExcludes = [
-  'css', 'js', 'map', 'json', 'svg', 'png', 'jpg', 'jpeg', 'webp', 'gif',
-  'ico', 'txt', 'xml', 'webmanifest', 'woff', 'woff2', 'ttf', 'otf', 'mp3', 'm4a', 'mp4', 'html',
-];
+//    注意：_routes.json 的通配符只在路径末尾可靠（官方示例均为 trailing `*`，
+//    `/projects/*/*.js` 这类中段通配实测不生效），因此 exclude 只列 assets 目录。
+//    子应用根级的少量静态文件（avatar.jpg / manifest.json / sw.js 等）会经过
+//    catch-all Function 回源 ASSETS，行为正确，仅多一次 Function 调用
+//    （免费额度 10 万次/天，对本站点足够）。
 const routesJson = {
   version: 1,
   include: [
@@ -162,9 +160,9 @@ const routesJson = {
   ],
   exclude: [
     '/assets/*',
-    '/projects/*/assets/*',
-    ...staticExtExcludes.map((ext) => `/*.${ext}`),
-    ...staticExtExcludes.map((ext) => `/projects/*/*.${ext}`),
+    '/projects/jack-pose/assets/*',
+    '/projects/jack-wave/assets/*',
+    '/projects/jack-tan/assets/*',
   ],
 };
 writeFileSync(resolve(dist, '_routes.json'), JSON.stringify(routesJson, null, 2));
