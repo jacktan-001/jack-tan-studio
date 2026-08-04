@@ -60,9 +60,25 @@
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
       }
     </script>
+    <style>
+      .boot-skeleton{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#fff;color:#64748b;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+      .boot-logo{font-size:18px;font-weight:600;letter-spacing:.04em;opacity:.7}
+      .boot-spinner{width:34px;height:34px;border-radius:50%;border:3px solid #e2e8f0;border-top-color:#0d9488;animation:boot-spin 1s linear infinite}
+      @keyframes boot-spin{to{transform:rotate(360deg)}}
+      @media (prefers-color-scheme:dark){.boot-skeleton{background:#0f172a;color:#94a3b8}.boot-spinner{border-color:#334155;border-top-color:#2dd4bf}}
+      .boot-noscript{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;color:#475569;background:#fff;line-height:1.6}
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="boot-skeleton" aria-hidden="true">
+        <div class="boot-logo">Jack-Wave</div>
+        <div class="boot-spinner"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
+    <noscript>
+      <div class="boot-noscript">本站点需要启用 JavaScript 才能正常运行。请开启 JavaScript 后刷新页面。</div>
+    </noscript>
   </body>
 </html>
