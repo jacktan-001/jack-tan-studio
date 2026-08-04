@@ -168,7 +168,8 @@ const routesJson = {
 writeFileSync(resolve(dist, '_routes.json'), JSON.stringify(routesJson, null, 2));
 
 // 6. 生成统一的 _headers（根级安全头 + 各子路径缓存规则）
-//    全局使用宽松 CSP（jack-wave 需要 unsafe-inline），jack-pose 单独覆盖为严格 CSP
+//    全局 CSP 已含 'unsafe-inline'（index.html 内联 importmap 必需）。jack-pose 的覆盖规则
+//    必须与全局 script-src 对齐，否则浏览器取交集后会拦截内联 importmap 导致白屏。
 const headers = `/*
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self' https: blob:; connect-src 'self' https://itunes.apple.com https://audio-ssl.itunes.apple.com https://cloudflareinsights.com; frame-ancestors 'none'
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
@@ -180,7 +181,10 @@ const headers = `/*
   Cross-Origin-Resource-Policy: same-origin
 
 /projects/jack-pose/*
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://cloudflareinsights.com; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  # 注意：script-src 必须保留 'unsafe-inline'，因为 index.html 内的 <script type="importmap">
+  # 是内联脚本；缺 'unsafe-inline' 会被浏览器拦截 importmap 注册，导致 React 无法解析白屏。
+  # 该规则会覆盖上方全局 /* 规则（_headers 后匹配者生效），故此处需与全局 script-src 对齐。
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://itunes.apple.com https://audio-ssl.itunes.apple.com https://cloudflareinsights.com; media-src 'self' blob: https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
