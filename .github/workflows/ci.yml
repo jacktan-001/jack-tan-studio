@@ -82,8 +82,9 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           COMMIT_MSG="$(git log -1 --pretty=%s)"
-          cd deploy
-          pnpm exec wrangler pages deploy dist \
+          # 注意：pnpm exec 会把工作目录重置到仓库根，因此必须写全路径 deploy/dist，
+          # 不能先 `cd deploy` 再用相对路径 `dist`（会解析到不存在的根目录 dist）。
+          pnpm exec wrangler pages deploy deploy/dist \
             --project-name jacktan-studio \
             --branch main \
             --commit-hash "${GITHUB_SHA}" \
