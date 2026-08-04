@@ -10,11 +10,11 @@
 
 ## 技术栈
 
-- **Monorepo**：pnpm workspaces + Turborepo
-- **前端**：React 19 + TypeScript 5.7 + Vite 6 + Tailwind CSS v4
-- **动画**：Framer Motion（motion/react）、CSS View Transitions API
+- **Monorepo**：pnpm 10 workspaces + Turborepo 2
+- **前端**：React 19 + TypeScript 5.8 + Vite 8（Rolldown）+ Tailwind CSS v4
+- **动画**：Motion（motion/react）、GSAP、CSS View Transitions API
 - **部署**：Cloudflare Pages + Functions，单 Pages 项目合并产物
-- **CI/CD**：GitHub Actions（typecheck / lint / build）
+- **CI/CD**：GitHub Actions（typecheck → build → merge → 路由校验 → 产物断言 → 部署）
 
 ## 仓库结构
 
@@ -41,9 +41,15 @@ jack-tan-studio/
 | `/projects/jack-wave/*` | jack-wave | 音乐随记（SPA 回退） |
 | `/projects/jack-pose/*` | jack-pose | 社媒排版（HashRouter） |
 | `/projects/jack-tan/*` | jack-tan | 个人主页 |
-| `/projects/:id/intro` | studio | 项目介绍页（阶段二新增） |
-| `/projects/:id` | studio | 未上线项目显示 Coming Soon |
+| `/projects/:id/intro` | studio | 项目介绍页 |
+| `/projects/:id`（已上线） | — | 301 到对应子应用 |
+| `/projects/:id`（未上线） | studio | 显示 Coming Soon |
 | `/jack-wave/*` 等旧路径 | — | 301 永久重定向到新规范 URL |
+| 其余未匹配路径 | — | `404.html` + 真实 404 状态码 |
+
+> **`_redirects` 规则顺序是有语义的**：`/projects/:id/intro` 必须排在旧路径 301 之前。
+> 否则 `/projects/wave/intro` 会被 `/projects/wave/*` 规则劫持到子应用（该 bug 已于 2026-08-04 修复）。
+> 全部规则由 `scripts/merge-dist.mjs` 依据 `apps/studio/src/data/projects.ts` 自动生成，请勿手写。
 
 ## 本地开发
 
@@ -84,12 +90,46 @@ pnpm merge
 pnpm wrangler pages deploy deploy/dist --project-name jacktan-studio
 ```
 
+## 访问分析（Web Analytics）
+
+站点已接入 Cloudflare Web Analytics，两种启用方式二选一：
+
+**方式 A（推荐，零代码）：Cloudflare Pages 原生集成**
+进入 Cloudflare 控制台 → `jacktan-studio` Pages 项目 → **Settings → Analytics** → 开启 **Web Analytics**。
+Cloudflare 会自动向所有页面注入 beacon，无需改动任何代码。
+
+**方式 B（CI 驱动，可控）：环境变量注入**
+1. 在 Cloudflare 控制台 **Web Analytics** 产品下新建一个站点，复制其 `token`；
+2. 在 GitHub 仓库 **Settings → Secrets** 中添加 `CLOUDFLARE_WEB_ANALYTICS_TOKEN`；
+3. CI 的 `pnpm merge` 步骤会读取该变量，向根路径与三个子应用的 `index.html` 注入
+   `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"..."}'></script>`。
+   未设置该变量时自动跳过，本地构建不受任何影响。
+
+> 两种方式不要同时启用，否则会出现两个 beacon 重复上报。
+> 无论哪种方式，`_headers` 的 CSP 已放行 `static.cloudflareinsights.com`（script-src）
+> 与 `cloudflareinsights.com`（connect-src），根策略与 jack-pose 严格策略均已覆盖。
+
 ## 工程约定
 
 1. **子应用资源路径**：必须使用相对路径或 `import.meta.env.BASE_URL`，禁止写死 `/filename.ext`，否则子路径部署会 404。
 2. **子应用不渲染 StudioBar**：每个子应用自己管理主题切换按钮，避免双重导航栏。
 3. **主题系统**：通过 `@jack-tan/studio-core` 的 `ThemeProvider` 设置 `data-project`，由 `theme.css` 映射为项目色。
 4. **跨应用跳转**：Navbar 使用原生 `<a>` 跳转 + View Transitions API，实现伪 SPA 体验。
+5. **路由与 SEO 单一数据源**：`projects.ts` 是唯一事实来源，`_redirects` / `sitemap.xml` 均由
+   `merge-dist.mjs` 自动派生。新增项目只需改 `projects.ts`，不要手动维护部署配置。
+6. **子应用 public/ 下不要放 `robots.txt` / `sitemap.xml`**：合并部署为单 origin 后只有根级文件生效，
+   子应用副本不可达且极易残留失效域名（历史事故）。SEO 文件统一在 `merge-dist.mjs` 中生成。
+7. **禁止本地 `wrangler pages deploy` 直发生产**：一律走 `main` 分支 CI，
+   由流水线注入 `--commit-hash` / `--commit-message`，保证线上版本可追溯到具体 commit。
+8. **依赖版本禁止写 `latest`**：必须使用明确的语义化范围，否则构建不可复现。
+
+## 站点 origin 变更清单
+
+绑定自定义域名时，以下位置需同步修改（当前值 `https://jacktan-studio.pages.dev`）：
+
+- `scripts/merge-dist.mjs` 的 `SITE_ORIGIN` 常量（robots.txt / sitemap.xml 由此派生）
+- 四个 `apps/*/index.html` 中的 `canonical`、`og:url`、`og:image`、`twitter:image`
+- `.github/workflows/ci.yml` 中产物校验步骤的 robots 断言字符串
 
 ## 阶段二 / 三 关键改动
 

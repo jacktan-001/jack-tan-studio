@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://jack-pose.pages.dev/sitemap.xml

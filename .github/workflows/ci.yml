@@ -36,6 +36,9 @@ jobs:
         run: pnpm build
 
       - name: Merge dists for single-origin deploy
+        env:
+          # 可选：设置后 merge 脚本会向各入口注入 Cloudflare Web Analytics beacon
+          CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
         run: pnpm merge
 
       - name: Route consistency check
@@ -47,15 +50,51 @@ jobs:
           test -f deploy/dist/_redirects
           test -f deploy/dist/_routes.json
           test -f deploy/dist/_headers
+          test -f deploy/dist/404.html
+          test -f deploy/dist/robots.txt
+          test -f deploy/dist/sitemap.xml
           test -f deploy/dist/projects/jack-wave/index.html
           test -f deploy/dist/projects/jack-pose/index.html
           test -f deploy/dist/projects/jack-tan/index.html
+          # SEO 产物内容校验：robots 必须声明 sitemap，且不得残留已失效的旧域名
+          grep -q "Sitemap: https://jacktan-studio.pages.dev/sitemap.xml" deploy/dist/robots.txt
+          ! grep -rqE "jacktan\.pages\.dev|jack-pose\.pages\.dev|jack-wave\.pages\.dev" deploy/dist/robots.txt deploy/dist/sitemap.xml
+          # 兜底规则必须已移除，否则未知路径会被软 404 吞掉
+          ! grep -qE '^/\* /index\.html 200' deploy/dist/_redirects
+          # Web Analytics beacon：仅当配置了 token 时校验已注入
+          if [ -n "${{ secrets.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}" ]; then
+            grep -q "data-cf-beacon" deploy/dist/index.html
+            grep -q "data-cf-beacon" deploy/dist/projects/jack-pose/index.html
+          fi
           echo "✅ Deploy artifacts verified"
 
       # 仅在 push 到 main 分支时部署（PR 不部署）
+      #
+      # 使用 pnpm exec 调用 lockfile 锁定的 wrangler 版本，而非 npx 拉取浮动版本，
+      # 保证部署工具链可复现。
+      #
+      # --commit-hash / --commit-message / --branch 让「线上版本 ⇄ git commit」可双向溯源，
+      # 避免再次出现「Cloudflare 有部署记录、仓库里却查无此提交」的断链情况。
       - name: Deploy to Cloudflare Pages
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: cd deploy && npx wrangler pages deploy dist --project-name jacktan-studio
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          COMMIT_MSG="$(git log -1 --pretty=%s)"
+          cd deploy
+          pnpm exec wrangler pages deploy dist \
+            --project-name jacktan-studio \
+            --branch main \
+            --commit-hash "${GITHUB_SHA}" \
+            --commit-message "${COMMIT_MSG}"
+
+      - name: Deployment summary
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          {
+            echo "### 部署完成"
+            echo ""
+            echo "- 提交: \`${GITHUB_SHA:0:8}\` $(git log -1 --pretty=%s)"
+            echo "- 生产: https://jacktan-studio.pages.dev"
+          } >> "$GITHUB_STEP_SUMMARY"
