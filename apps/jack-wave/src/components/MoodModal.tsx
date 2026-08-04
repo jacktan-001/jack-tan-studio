@@ -7,7 +7,7 @@
 import { useEffect, useRef } from 'react';
 import type { MoodPlaylist, Song } from '../types';
 import { SongList } from './SongList';
-import { safeUrl, artworkSrc } from '../utils';
+import { artworkSrc } from '../utils';
 import { playlistCover } from '../data/musicData';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 

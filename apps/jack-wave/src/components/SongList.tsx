@@ -9,7 +9,7 @@
 
 import { useRef } from 'react';
 import type { Song } from '../types';
-import { safeUrl, artworkSrc } from '../utils';
+import { artworkSrc } from '../utils';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 export interface SongListProps {
