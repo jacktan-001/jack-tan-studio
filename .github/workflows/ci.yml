@@ -120,6 +120,9 @@ jobs:
           name: deploy
           path: deploy
 
+      - name: Install dependencies (provides wrangler for pnpm exec)
+        run: pnpm install --frozen-lockfile
+
       - name: Deploy preview to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -191,6 +194,9 @@ jobs:
         with:
           name: deploy
           path: deploy
+
+      - name: Install dependencies (provides wrangler for pnpm exec)
+        run: pnpm install --frozen-lockfile
 
       - name: Deploy to Cloudflare Pages (production)
         env:
