@@ -1,7 +1,7 @@
-import { motion } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Sparkles, Clock } from 'lucide-react'
 import type { Project } from '../data/projects'
+import { Rise } from '../components/Rise'
 
 interface ComingSoonProps {
   project: Project
@@ -9,11 +9,7 @@ interface ComingSoonProps {
 
 export default function ComingSoon({ project }: ComingSoonProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    <Rise
       style={{
         minHeight: 'calc(100vh - 80px)',
         display: 'flex',
@@ -35,107 +31,79 @@ export default function ComingSoon({ project }: ComingSoonProps) {
         }}
       >
         {/* 项目标识 */}
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '22px',
-            background: `linear-gradient(135deg, ${project.color}, ${project.color}66)`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 28px',
-            boxShadow: `0 8px 40px rgba(${project.colorRgb}, 0.25)`,
-          }}
-        >
+        <Rise delay={0.1} style={{
+          width: '80px',
+          height: '80px',
+          borderRadius: '22px',
+          background: `linear-gradient(135deg, ${project.color}, ${project.color}66)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 28px',
+          boxShadow: `0 8px 40px rgba(${project.colorRgb}, 0.25)`,
+        }}>
           <ProjectIcon name={project.icon} color="#fff" />
-        </motion.div>
+        </Rise>
 
         {/* 状态标签 */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.4 }}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '6px 14px',
-            borderRadius: '100px',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid var(--border)',
-            fontSize: '12px',
-            fontFamily: 'var(--font-mono)',
-            color: 'var(--text-muted)',
-            marginBottom: '24px',
-          }}
-        >
+        <Rise delay={0.2} style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '6px 14px',
+          borderRadius: '100px',
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid var(--border)',
+          fontSize: '12px',
+          fontFamily: 'var(--font-mono)',
+          color: 'var(--text-muted)',
+          marginBottom: '24px',
+        }}>
           <Clock size={12} />
           COMING SOON
-        </motion.div>
+        </Rise>
 
         {/* 标题 */}
-        <motion.h1
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.4 }}
-          style={{
+        <Rise delay={0.25}>
+          <h1 style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(32px, 5vw, 52px)',
             fontWeight: 700,
             letterSpacing: '-0.03em',
             marginBottom: '12px',
             lineHeight: 1.1,
-          }}
-        >
-          {project.name}
-        </motion.h1>
+          }}>
+            {project.name}
+          </h1>
+        </Rise>
 
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.4 }}
-          style={{
-            fontSize: '18px',
-            color: 'var(--text-muted)',
-            marginBottom: '16px',
-          }}
-        >
+        <Rise delay={0.3} style={{
+          fontSize: '18px',
+          color: 'var(--text-muted)',
+          marginBottom: '16px',
+        }}>
           {project.tagline}
-        </motion.p>
+        </Rise>
 
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.4 }}
-          style={{
-            fontSize: '15px',
-            color: 'var(--text-dim)',
-            lineHeight: 1.7,
-            maxWidth: '520px',
-            margin: '0 auto 40px',
-          }}
-        >
+        <Rise delay={0.35} style={{
+          fontSize: '15px',
+          color: 'var(--text-dim)',
+          lineHeight: 1.7,
+          maxWidth: '520px',
+          margin: '0 auto 40px',
+        }}>
           {project.description}
-        </motion.p>
+        </Rise>
 
         {/* 特性预览 */}
         {project.features.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.4 }}
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '10px',
-              justifyContent: 'center',
-              marginBottom: '48px',
-            }}
-          >
+          <Rise delay={0.4} style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '10px',
+            justifyContent: 'center',
+            marginBottom: '48px',
+          }}>
             {project.features.map((feature) => (
               <span
                 key={feature}
@@ -151,15 +119,11 @@ export default function ComingSoon({ project }: ComingSoonProps) {
                 {feature}
               </span>
             ))}
-          </motion.div>
+          </Rise>
         )}
 
         {/* 返回首页 */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45, duration: 0.4 }}
-        >
+        <Rise delay={0.45}>
           <Link
             to="/"
             style={{
@@ -188,9 +152,9 @@ export default function ComingSoon({ project }: ComingSoonProps) {
             <ArrowLeft size={18} />
             返回 Studio 首页
           </Link>
-        </motion.div>
+        </Rise>
       </div>
-    </motion.div>
+    </Rise>
   )
 }
 

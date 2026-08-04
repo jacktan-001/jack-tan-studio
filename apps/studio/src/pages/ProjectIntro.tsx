@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { motion } from 'motion/react'
 import { ArrowLeft, ArrowUpRight, Lock, Sparkles, Zap, Layers, Radio, Wand2, Send } from 'lucide-react'
 import { setPendingProject, navigateWithTransition } from '@jack-tan/studio-core'
 import { projects, type Project } from '../data/projects'
+import { Rise } from '../components/Rise'
 
 /** 项目图标映射（与 ProjectShowcase / Navbar 保持一致） */
 function ProjectIcon({ project, size = 48 }: { project: Project; size?: number }) {
@@ -45,11 +45,9 @@ function ScreenshotCarousel({ project }: { project: Project }) {
       }}
     >
       {slides.map((slide, i) => (
-        <motion.div
+        <Rise
           key={slide.label}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 + i * 0.1, duration: 0.5 }}
+          delay={0.5 + i * 0.1}
           style={{
             aspectRatio: '16/10',
             borderRadius: '16px',
@@ -86,7 +84,7 @@ function ScreenshotCarousel({ project }: { project: Project }) {
           >
             {slide.label}
           </span>
-        </motion.div>
+        </Rise>
       ))}
     </div>
   )
@@ -109,11 +107,7 @@ export default function ProjectIntro() {
   const isLive = project.status === 'live'
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    <Rise
       style={{
         minHeight: 'calc(100vh - 130px)',
         padding: '60px 24px 120px',
@@ -122,12 +116,7 @@ export default function ProjectIntro() {
       }}
     >
       {/* 返回链接 */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        style={{ marginBottom: '40px' }}
-      >
+      <Rise delay={0.1} style={{ marginBottom: '40px' }}>
         <Link
           to="/"
           style={{
@@ -145,21 +134,16 @@ export default function ProjectIntro() {
           <ArrowLeft size={16} />
           返回 Studio
         </Link>
-      </motion.div>
+      </Rise>
 
       {/* 项目头图 */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.15, duration: 0.5 }}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '28px',
-          marginBottom: '48px',
-          flexWrap: 'wrap',
-        }}
-      >
+      <Rise delay={0.15} style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '28px',
+        marginBottom: '48px',
+        flexWrap: 'wrap',
+      }}>
         <div
           style={{
             width: '96px',
@@ -215,30 +199,21 @@ export default function ProjectIntro() {
             {project.tagline}
           </p>
         </div>
-      </motion.div>
+      </Rise>
 
       {/* 描述 */}
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25, duration: 0.4 }}
-        style={{
-          fontSize: '17px',
-          lineHeight: 1.8,
-          color: 'var(--text)',
-          maxWidth: '760px',
-          marginBottom: '40px',
-        }}
-      >
+      <Rise delay={0.25} style={{
+        fontSize: '17px',
+        lineHeight: 1.8,
+        color: 'var(--text)',
+        maxWidth: '760px',
+        marginBottom: '40px',
+      }}>
         {project.description}
-      </motion.p>
+      </Rise>
 
       {/* 功能特性 */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.4 }}
-      >
+      <Rise delay={0.3}>
         <h2
           style={{
             fontFamily: 'var(--font-display)',
@@ -258,11 +233,9 @@ export default function ProjectIntro() {
           }}
         >
           {project.features.map((feature, i) => (
-            <motion.div
+            <Rise
               key={feature}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 + i * 0.05 }}
+              delay={0.35 + i * 0.05}
               style={{
                 padding: '16px 18px',
                 borderRadius: '14px',
@@ -285,18 +258,13 @@ export default function ProjectIntro() {
                 }}
               />
               {feature}
-            </motion.div>
+            </Rise>
           ))}
         </div>
-      </motion.div>
+      </Rise>
 
       {/* 技术栈 */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.4 }}
-        style={{ marginBottom: '48px' }}
-      >
+      <Rise delay={0.4} style={{ marginBottom: '48px' }}>
         <h2
           style={{
             fontFamily: 'var(--font-display)',
@@ -325,14 +293,10 @@ export default function ProjectIntro() {
             </span>
           ))}
         </div>
-      </motion.div>
+      </Rise>
 
       {/* 截图轮播占位 */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.45, duration: 0.4 }}
-      >
+      <Rise delay={0.45}>
         <h2
           style={{
             fontFamily: 'var(--font-display)',
@@ -347,26 +311,21 @@ export default function ProjectIntro() {
           真实截图将在后续版本替换这些风格化占位图。
         </p>
         <ScreenshotCarousel project={project} />
-      </motion.div>
+      </Rise>
 
       {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6, duration: 0.5 }}
-        style={{
-          marginTop: '60px',
-          padding: '36px',
-          borderRadius: '20px',
-          background: `linear-gradient(135deg, rgba(${project.colorRgb}, 0.08) 0%, rgba(${project.colorRgb}, 0.03) 100%)`,
-          border: `1px solid rgba(${project.colorRgb}, 0.2)`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '24px',
-          flexWrap: 'wrap',
-        }}
-      >
+      <Rise delay={0.6} style={{
+        marginTop: '60px',
+        padding: '36px',
+        borderRadius: '20px',
+        background: `linear-gradient(135deg, rgba(${project.colorRgb}, 0.08) 0%, rgba(${project.colorRgb}, 0.03) 100%)`,
+        border: `1px solid rgba(${project.colorRgb}, 0.2)`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '24px',
+        flexWrap: 'wrap',
+      }}>
         <div>
           <h3
             style={{
@@ -463,7 +422,7 @@ export default function ProjectIntro() {
             </button>
           </form>
         )}
-      </motion.div>
-    </motion.div>
+      </Rise>
+    </Rise>
   )
 }

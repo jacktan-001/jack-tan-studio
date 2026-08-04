@@ -2,6 +2,18 @@
 <html lang="zh-CN">
   <head>
     <script>(function(){try{var r=localStorage.getItem('jack-tan-theme');var v=r?JSON.parse(r):null;var m=(v==='light'||v==='dark')?v:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');var d=document.documentElement;d.setAttribute('data-theme',m);d.setAttribute('data-project','tan');}catch(e){}})();</script>
+    <!-- 共享 vendor：与 studio / pose / wave 复用同一份 React / ReactDOM / ReactRouter（见 scripts/build-vendor.mjs） -->
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "/vendor/react.js",
+          "react/jsx-runtime": "/vendor/react.js",
+          "react-dom": "/vendor/react-dom.js",
+          "react-dom/client": "/vendor/react-dom.js",
+          "react-router-dom": "/vendor/react-router.js"
+        }
+      }
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Jack-Tan | Personal Portfolio | 站长主页・职业概览</title>

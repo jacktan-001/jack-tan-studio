@@ -90,6 +90,31 @@ pnpm merge
 pnpm wrangler pages deploy deploy/dist --project-name jacktan-studio
 ```
 
+## 分支策略（P1-3：禁止直推 main）
+
+CI（`.github/workflows/ci.yml`）已拆分为三个 job：
+
+- `build`：质量门禁（typecheck / 构建 / 路由校验 / 产物校验），产物以 artifact 传递给下游；
+- `preview`：PR 到 `main` 或 push 到 `develop` 时部署**预览环境**，并把预览地址评论回 PR；
+- `deploy-production`：仅 `push` 到 `main` 时把产物部署为**生产态**。
+
+工作流：**功能分支 → `develop` 集成分支 → 向 `main` 提 PR → CI 通过后合并**。
+
+> ⚠️ **分支保护需在 GitHub 手动开启**（本机无 `gh` CLI，无法用 API 设置）。
+> 仓库 **Settings → Branches → Add rule**，对 `main` 分支勾选：
+> - ✅ Require a pull request before merging
+> - ✅ Require status checks to pass before merging（勾选 `build` 与 `preview`）
+> - ✅ Require branches to be up to date before merging
+> - （可选）✅ Require approvals = 1
+>
+> 或在本地执行（需 `gh` 且已 `gh auth login`）：
+> ```bash
+> gh api repos/jacktan-001/jack-tan-studio/branches/main/protection \
+>   -X PUT -f required_pull_request_reviews='{"required_approving_review_count":1}' \
+>   -f required_status_checks='{"strict":true,"checks":[{"context":"build"},{"context":"preview"}]}' \
+>   -f enforce_admins=true
+> ```
+
 ## 访问分析（Web Analytics）
 
 站点已接入 Cloudflare Web Analytics，两种启用方式二选一：

@@ -1,16 +1,29 @@
 name: CI
 
+# P1-3：建立 develop / preview / PR 流程，杜绝直接推 main。
+# - push main / develop 与 PR 到 main 都触发流水线；
+# - build 负责质量门禁（typecheck / 构建 / 路由校验 / 产物校验），产物以 artifact 传递，
+#   避免每个 job 重复构建；
+# - preview job 在 PR 与 develop 推送时部署「预览环境」并把地址评论回 PR（需 PR 写权限）；
+# - deploy-production job 仅在 push 到 main 时把预览态切换为生产态。
+# 注意：main 分支还需在 GitHub 仓库设置里开启「分支保护」（见仓库 README / 下方说明），
+# 要求 PR 审查 + 必须通过本 CI（status check）才能合并，从机制上禁止直推 main。
+
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main]
 
+# 最小权限原则：默认只给读权限；仅 preview job 在需要写 PR 评论时单独提升。
+permissions:
+  contents: read
+
 env:
   NODE_VERSION: '22'
 
 jobs:
-  lint-and-build:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -73,15 +86,113 @@ jobs:
           fi
           echo "✅ Deploy artifacts verified"
 
-      # 仅在 push 到 main 分支时部署（PR 不部署）
-      #
-      # 使用 pnpm exec 调用 lockfile 锁定的 wrangler 版本，而非 npx 拉取浮动版本，
-      # 保证部署工具链可复现。
-      #
-      # --commit-hash / --commit-message / --branch 让「线上版本 ⇄ git commit」可双向溯源，
-      # 避免再次出现「Cloudflare 有部署记录、仓库里却查无此提交」的断链情况。
-      - name: Deploy to Cloudflare Pages
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      - name: Upload deploy artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy
+          path: deploy
+          if-no-files-found: error
+
+  preview:
+    # PR 到 main，或 push 到 develop 时部署预览环境；仅 PR 事件会评论预览地址。
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/develop'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Download deploy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: deploy
+          path: deploy
+
+      - name: Deploy preview to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          COMMIT_MSG="$(git log -1 --pretty=%s)"
+          PR_NUM="${{ github.event.pull_request.number }}"
+          # PR 用 preview-<编号>，develop 推送用 preview-develop，保证别名稳定可追踪。
+          BRANCH="preview-${PR_NUM:-develop}"
+          URL=$(pnpm exec wrangler --cwd deploy pages deploy dist \
+            --project-name jacktan-studio \
+            --branch "$BRANCH" \
+            --commit-hash "${GITHUB_SHA}" \
+            --commit-message "${COMMIT_MSG}" 2>&1 | grep -oE 'https://[^ ]+\.pages\.dev' | tail -1)
+          echo "PREVIEW_URL=$URL" >> "$GITHUB_ENV"
+          echo "预览部署地址: $URL"
+
+      - name: Comment preview URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = process.env.PREVIEW_URL;
+            const sha = context.sha.substring(0, 8);
+            const body = `### 🔍 预览部署已就绪\n\n- 提交: \`${sha}\`\n- 预览地址: ${url}\n\n> 此预览随 PR 更新自动刷新；合并到 main 后由生产流水线接管。`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const marker = '预览部署已就绪';
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  deploy-production:
+    # 仅 push 到 main 时生效：把产物部署为生产态。
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Download deploy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: deploy
+          path: deploy
+
+      - name: Deploy to Cloudflare Pages (production)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -99,7 +210,6 @@ jobs:
             --commit-message "${COMMIT_MSG}"
 
       - name: Deployment summary
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           {
             echo "### 部署完成"

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { motion, AnimatePresence } from 'motion/react'
 import { Menu, X, Sun, Moon, Lock, ArrowUpRight } from 'lucide-react'
 import { useTheme, setPendingProject, navigateWithTransition } from '@jack-tan/studio-core'
 import { projects, type Project } from '../../data/projects'
@@ -139,11 +138,8 @@ export default function Navbar() {
   const previewColor = activeProject ? activeProject.color : 'var(--accent)'
 
   return (
-    <motion.nav
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="studio-navbar"
+    <nav
+      className="studio-navbar studio-nav-in"
       style={{
         position: 'fixed',
         top: 0,
@@ -275,28 +271,24 @@ export default function Navbar() {
       </div>
 
       {/* ===== 移动端菜单 ===== */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="nav-mobile-menu"
-            style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              background: 'color-mix(in srgb, var(--bg) 95%, transparent)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              borderBottom: '1px solid var(--border)',
-              padding: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px',
-            }}
-          >
+      {menuOpen && (
+        <div
+          className="nav-mobile-menu studio-menu-in"
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            background: 'color-mix(in srgb, var(--bg) 95%, transparent)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderBottom: '1px solid var(--border)',
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+          }}
+        >
             <div style={{ color: 'var(--text-dim)', fontSize: '11px', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
               PROJECTS
             </div>
@@ -333,9 +325,8 @@ export default function Navbar() {
                 </a>
               )
             })}
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
 
       <style>{`
         .studio-navbar {
@@ -345,7 +336,7 @@ export default function Navbar() {
           .nav-product-row { display: none !important; }
           .nav-mobile-toggle { display: block !important; }
         }
-      `}</style>
-    </motion.nav>
+        `}</style>
+    </nav>
   )
 }

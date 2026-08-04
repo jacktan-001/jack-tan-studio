@@ -544,3 +544,64 @@ button {
   padding-top: calc(70px + env(safe-area-inset-top, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* ==================== N-2：用 CSS 动画替代 Motion（减小首屏 JS 体积） ====================
+   原先首页大量 entrance 动画依赖 Framer Motion，使 motion-vendor chunk（~120KB/39KB br）
+   被强行塞进首屏关键路径。现改为纯 CSS @keyframes + IntersectionObserver 触发，
+   仅在 Hero 这类确需物理弹簧/滚动联动的效果上保留 Motion（且已懒加载）。 */
+
+/* 通用「上浮淡入」入场动画：默认隐藏，进入视口后由 .is-visible 触发 */
+@keyframes studioFadeRise {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim-rise {
+  opacity: 0;
+  transform: translateY(24px);
+  will-change: opacity, transform;
+}
+.anim-rise.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  animation: studioFadeRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 导航栏入场（替代 motion.nav 的 initial/animate） */
+@keyframes studioNavIn {
+  from { opacity: 0; transform: translateY(-80px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.studio-nav-in {
+  animation: studioNavIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 路由切换淡入（替代 AnimatePresence 的 exit/enter） */
+@keyframes studioPageFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.studio-page-fade {
+  animation: studioPageFade 0.4s ease both;
+}
+
+/* 移动端菜单展开（替代 AnimatePresence 的 motion.div） */
+@keyframes studioMenuIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.studio-menu-in {
+  animation: studioMenuIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 尊重「减少动态效果」无障碍偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .anim-rise,
+  .anim-rise.is-visible,
+  .studio-nav-in,
+  .studio-page-fade,
+  .studio-menu-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

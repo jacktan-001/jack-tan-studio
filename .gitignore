@@ -34,3 +34,6 @@ npm-debug.log*
 
 # misc
 .cache
+
+# 共享 vendor 由 scripts/build-vendor.mjs 在构建时生成（见 P1-2）
+apps/studio/public/vendor/

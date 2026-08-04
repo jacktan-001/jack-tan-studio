@@ -19,10 +19,10 @@ var PRECACHE_ASSETS = [
   p('/'),
   p('/index.html'),
   p('/manifest.json'),
-  p('/hero-sm.png'),
+  p('/hero-sm.jpg'),
   p('/favicon.png'),
-  p('/icon-192.png'),
-  p('/icon-512.png'),
+  p('/icon-192.webp'),
+  p('/icon-512.webp'),
   p('/apple-touch-icon.png'),
 ]
 

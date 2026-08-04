@@ -1,8 +1,8 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'motion/react'
 import { ArrowUpRight, Lock } from 'lucide-react'
 import { projects, type Project } from '../../data/projects'
+import { Rise } from '../Rise'
 
 /** 每个项目的独特视觉风格预览 — 用 CSS 微缩呈现 */
 function VisualPreview({ project }: { project: Project }) {
@@ -191,25 +191,22 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   }
 
   return (
-    <motion.div
-      ref={ref}
-      onMouseMove={handleMouseMove}
-      initial={{ opacity: 0, y: 60 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-100px' }}
-      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-      style={{
-        position: 'relative',
-        borderRadius: 'var(--radius)',
-        overflow: 'hidden',
-        border: '1px solid var(--border)',
-        background: 'var(--bg-surface)',
-        transition: 'border-color 0.4s, transform 0.4s',
-        cursor: isComingSoon ? 'default' : 'pointer',
-        ...(isComingSoon
-          ? { opacity: 0.5, filter: 'grayscale(0.6)' }
-          : {}),
-      }}
+    <Rise delay={index * 0.1}>
+      <div
+        ref={ref}
+        onMouseMove={handleMouseMove}
+        style={{
+          position: 'relative',
+          borderRadius: 'var(--radius)',
+          overflow: 'hidden',
+          border: '1px solid var(--border)',
+          background: 'var(--bg-surface)',
+          transition: 'border-color 0.4s, transform 0.4s',
+          cursor: isComingSoon ? 'default' : 'pointer',
+          ...(isComingSoon
+            ? { opacity: 0.5, filter: 'grayscale(0.6)' }
+            : {}),
+        }}
       onMouseEnter={(e) => {
         if (isComingSoon) return
         e.currentTarget.style.borderColor = `rgba(${project.colorRgb}, 0.4)`
@@ -476,7 +473,8 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           50% { transform: scaleY(1); }
         }
       `}</style>
-    </motion.div>
+      </div>
+    </Rise>
   )
 }
 
@@ -533,13 +531,7 @@ export default function ProjectShowcase() {
       margin: '0 auto',
       padding: '80px 24px',
     }}>
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        style={{ marginBottom: '48px' }}
-      >
+      <Rise style={{ marginBottom: '48px' }}>
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -572,7 +564,7 @@ export default function ProjectShowcase() {
         }}>
           从音乐随记到社媒排版，再到个人作品集 —— 每一个作品都是独立的创意。Jack Lens、Jack Cast、JackCraft 正在路上。
         </p>
-      </motion.div>
+      </Rise>
 
       <div style={{
         display: 'grid',

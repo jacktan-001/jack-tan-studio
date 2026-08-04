@@ -1,23 +1,35 @@
-import { motion } from 'motion/react'
+import { lazy, Suspense } from 'react'
 import { socialLinks } from '../data/projects'
 import { socialIcons } from '../components/icons/SocialIcons'
-import Hero from '../components/home/Hero'
 import ProjectShowcase from '../components/home/ProjectShowcase'
+import { Rise } from '../components/Rise'
+
+// N-2：Hero 是站内唯一仍需 Framer Motion（滚动视差 + 弹簧光球）的组件，
+// 懒加载后 motion-vendor chunk 不再进入首屏关键路径，首屏 JS 体积显著下降。
+const Hero = lazy(() => import('../components/home/Hero'))
 
 export default function Home() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <Hero />
+    <div>
+      <Suspense
+        fallback={
+          <div
+            style={{
+              minHeight: 'calc(100dvh - 130px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          />
+        }
+      >
+        <Hero />
+      </Suspense>
       <StatsSection />
       <ProjectShowcase />
       <AboutSection />
       <Footer />
-    </motion.div>
+    </div>
   )
 }
 
@@ -33,20 +45,13 @@ function StatsSection() {
     <section className="max-w-[1000px] mx-auto px-6 py-10">
       <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
         {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: i * 0.08 }}
-            className="glass p-7 text-center"
-          >
+          <Rise key={s.label} delay={i * 0.08} className="glass p-7 text-center">
             <div className="font-display text-5xl font-bold tracking-tight leading-none bg-clip-text text-transparent bg-[linear-gradient(135deg,var(--text),var(--text-muted))]">
               {s.value}
             </div>
             <div className="text-sm text-text-muted mt-2">{s.label}</div>
             <div className="text-[11px] font-mono text-text-dim mt-1">{s.sub}</div>
-          </motion.div>
+          </Rise>
         ))}
       </div>
     </section>
@@ -56,12 +61,7 @@ function StatsSection() {
 function AboutSection() {
   return (
     <section className="max-w-[900px] mx-auto px-6 py-24 text-center">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
+      <Rise>
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-border mb-5 text-xs font-mono text-text-muted">
           ABOUT
         </div>
@@ -81,7 +81,7 @@ function AboutSection() {
             </span>
           ))}
         </div>
-      </motion.div>
+      </Rise>
     </section>
   )
 }
