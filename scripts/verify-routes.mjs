@@ -66,8 +66,9 @@ for (const project of liveProjects) {
     ok(`jack-${project.id}: merge-dist.mjs 拷贝规则正确`);
   }
 
-  // 2. _redirects 必须包含 SPA 回退
-  const fallbackLine = `/${expectedDir}/* /${expectedDir}/index.html 200`;
+  // 2. _redirects 必须包含 SPA 回退（目标用目录形式 `/`，避免 Cloudflare Pages
+  //    把 /index.html 规范化为 `/` 的 308 重定向破坏 200 重写）
+  const fallbackLine = `/${expectedDir}/* /${expectedDir}/ 200`;
   if (!redirects.includes(fallbackLine)) {
     fail(`jack-${project.id}: _redirects 缺少 SPA 回退\n   期望包含: ${fallbackLine}`);
   } else {

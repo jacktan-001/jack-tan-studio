@@ -93,7 +93,7 @@ copy(resolve(waveFn, '_lib'), resolve(functions, 'projects/jack-wave/_lib'));
 //      返回真实 404 状态码，避免搜索引擎判定为软 404（无限重复内容）。
 const redirects = [
   '# ① studio 项目介绍页（必须先于旧路径 301，否则会被劫持到子应用）',
-  ...projects.map((p) => `/projects/${p.id}/intro /index.html 200`),
+  ...projects.map((p) => `/projects/${p.id}/intro / 200`),
   '',
   '# ② 旧路径 301 到新规范 URL',
   '/jack-pose/* /projects/jack-pose/:splat 301',
@@ -111,12 +111,12 @@ const redirects = [
   ...liveProjects.map((p) => `/projects/${p.id} ${p.url} 301`),
   '',
   '# ④ 未上线项目的 Coming Soon 页，由 studio SPA 渲染',
-  ...upcomingProjects.map((p) => `/projects/${p.id} /index.html 200`),
+  ...upcomingProjects.map((p) => `/projects/${p.id} / 200`),
   '',
   '# ⑤ 子应用 SPA 回退（Pages 仅对不存在静态文件的路径应用）',
-  '/projects/jack-pose/* /projects/jack-pose/index.html 200',
-  '/projects/jack-wave/* /projects/jack-wave/index.html 200',
-  '/projects/jack-tan/* /projects/jack-tan/index.html 200',
+  '/projects/jack-pose/* /projects/jack-pose/ 200',
+  '/projects/jack-wave/* /projects/jack-wave/ 200',
+  '/projects/jack-tan/* /projects/jack-tan/ 200',
   '',
   '# ⑥ 无兜底规则 —— 未匹配路径由 404.html 接管并返回 404 状态码',
 ].join('\n') + '\n';
