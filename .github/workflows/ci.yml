@@ -56,6 +56,11 @@ jobs:
           test -f deploy/dist/projects/jack-wave/index.html
           test -f deploy/dist/projects/jack-pose/index.html
           test -f deploy/dist/projects/jack-tan/index.html
+          # SPA 回退必须走 Pages Function；_redirects 的 200 重写会吞掉子应用全部静态资源
+          test -f 'deploy/functions/projects/jack-wave/[[path]].js'
+          test -f 'deploy/functions/projects/jack-pose/[[path]].js'
+          test -f 'deploy/functions/projects/jack-tan/[[path]].js'
+          ! grep -qE '^/projects/jack-[a-z]+/\* /projects/jack-[a-z]+/ 200' deploy/dist/_redirects
           # SEO 产物内容校验：robots 必须声明 sitemap，且不得残留已失效的旧域名
           grep -q "Sitemap: https://jacktan-studio.pages.dev/sitemap.xml" deploy/dist/robots.txt
           ! grep -rqE "jacktan\.pages\.dev|jack-pose\.pages\.dev|jack-wave\.pages\.dev" deploy/dist/robots.txt deploy/dist/sitemap.xml

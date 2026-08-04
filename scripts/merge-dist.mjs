@@ -81,6 +81,29 @@ const waveFn = resolve(root, 'apps/jack-wave/functions');
 copy(resolve(waveFn, 'api'), resolve(functions, 'projects/jack-wave/api'));
 copy(resolve(waveFn, '_lib'), resolve(functions, 'projects/jack-wave/_lib'));
 
+// 3.5 为每个已上线子应用生成 SPA 回退 catch-all Function
+//
+// 为什么不用 _redirects 的 `/projects/jack-x/* /projects/jack-x/ 200`？
+// Pages 官方语义：_redirects 无条件优先于静态资源（"Redirects are always
+// followed, regardless of whether or not an asset matches the incoming
+// request"），会把子路径下的 avatar.jpg / manifest.json / assets/*.js 等
+// 真实文件也重写成 HTML —— 这正是 2026-08-04 线上子应用封面/头像/JS 全灭的根因。
+// 改为 Function 先回源 env.ASSETS，404 时才回退到子应用 index.html。
+const spaFallbackTemplate = readFileSync(
+  resolve(root, 'scripts/templates/spa-fallback.js'),
+  'utf-8',
+);
+for (const p of liveProjects) {
+  const appDir = `projects/jack-${p.id}`;
+  const targetDir = resolve(functions, appDir);
+  mkdirSync(targetDir, { recursive: true });
+  writeFileSync(
+    resolve(targetDir, '[[path]].js'),
+    spaFallbackTemplate.replaceAll('__APP_BASE__', `/${appDir}`),
+  );
+  console.log(`[merge] SPA 回退 Function -> /${appDir}/[[path]].js`);
+}
+
 // 4. 生成统一的 _redirects
 //
 // 规则顺序至关重要 —— Cloudflare Pages 自上而下匹配，命中即停：
@@ -88,7 +111,9 @@ copy(resolve(waveFn, '_lib'), resolve(functions, 'projects/jack-wave/_lib'));
 //      否则 /projects/wave/intro 会被 `/projects/wave/*` 301 劫持到子应用（历史 bug）。
 //   ② 旧 URL 301 永久重定向到新规范 URL，保留 SEO 权重与已分享的外链。
 //   ③ 未上线项目的 Coming Soon 页由 studio SPA 承载。
-//   ④ 子应用自身的 SPA 回退。
+//   ④ 子应用 SPA 回退由 Pages Functions（[[path]].js）实现，严禁在 _redirects
+//      里写 `/projects/jack-x/* ... 200` —— _redirects 无条件优先于静态资源，
+//      会把子应用所有真实文件（头像/封面/JS bundle）吞成 HTML。
 //   ⑤ 不设 `/* /index.html 200` 兜底 —— 未匹配路径交给 Pages 的 404.html，
 //      返回真实 404 状态码，避免搜索引擎判定为软 404（无限重复内容）。
 const redirects = [
@@ -113,25 +138,33 @@ const redirects = [
   '# ④ 未上线项目的 Coming Soon 页，由 studio SPA 渲染',
   ...upcomingProjects.map((p) => `/projects/${p.id} / 200`),
   '',
-  '# ⑤ 子应用 SPA 回退（Pages 仅对不存在静态文件的路径应用）',
-  '/projects/jack-pose/* /projects/jack-pose/ 200',
-  '/projects/jack-wave/* /projects/jack-wave/ 200',
-  '/projects/jack-tan/* /projects/jack-tan/ 200',
+  '# ⑤ 子应用 SPA 回退由 deploy/functions/projects/jack-*/[[path]].js 实现',
+  '#    （_redirects 无条件优先于静态资源，写 200 重写会吞掉子应用全部静态文件）',
   '',
   '# ⑥ 无兜底规则 —— 未匹配路径由 404.html 接管并返回 404 状态码',
 ].join('\n') + '\n';
 writeFileSync(resolve(dist, '_redirects'), redirects);
 
-// 5. 生成 _routes.json：限制 Functions 触发范围，避免静态资源请求被计费
+// 5. 生成 _routes.json：限定 Functions 触发范围
+//    include：三个子应用前缀（SPA 回退 catch-all）+ jack-wave 的 API
+//    exclude：带扩展名的静态资源直接走 Pages 静态服务，不进 Function（省计费、降延迟）。
+//    注意：exclude 掉的缺失文件会直接返回真实 404（404.html），这正是期望行为。
+const staticExtExcludes = [
+  'css', 'js', 'map', 'json', 'svg', 'png', 'jpg', 'jpeg', 'webp', 'gif',
+  'ico', 'txt', 'xml', 'webmanifest', 'woff', 'woff2', 'ttf', 'otf', 'mp3', 'm4a', 'mp4', 'html',
+];
 const routesJson = {
   version: 1,
-  include: ['/projects/jack-wave/api/*'],
+  include: [
+    '/projects/jack-pose/*',
+    '/projects/jack-wave/*',
+    '/projects/jack-tan/*',
+  ],
   exclude: [
-    '/*.css', '/*.js', '/*.map', '/*.svg', '/*.png', '/*.jpg', '/*.jpeg', '/*.webp',
     '/assets/*',
     '/projects/*/assets/*',
-    '/projects/*/*.css',
-    '/projects/*/*.js',
+    ...staticExtExcludes.map((ext) => `/*.${ext}`),
+    ...staticExtExcludes.map((ext) => `/projects/*/*.${ext}`),
   ],
 };
 writeFileSync(resolve(dist, '_routes.json'), JSON.stringify(routesJson, null, 2));

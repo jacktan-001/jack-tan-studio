@@ -28,11 +28,19 @@ interface StudioBarLink {
 }
 
 const LINKS: StudioBarLink[] = [
-  { id: 'studio', label: 'Studio', href: '/', color: '#7c3aed', colorRgb: '124, 58, 237' },
-  { id: 'wave', label: 'Wave', href: '/projects/jack-wave/', color: '#06b6d4', colorRgb: '6, 182, 212' },
-  { id: 'pose', label: 'Pose', href: '/projects/jack-pose/', color: '#ec4899', colorRgb: '236, 72, 153' },
-  { id: 'tan', label: 'Tan', href: '/projects/jack-tan/', color: '#3b82f6', colorRgb: '59, 130, 246' },
+  { id: 'studio', label: 'Jack Studio', href: '/', color: '#7c3aed', colorRgb: '124, 58, 237' },
+  { id: 'wave', label: 'Jack Wave', href: '/projects/jack-wave/', color: '#06b6d4', colorRgb: '6, 182, 212' },
+  { id: 'pose', label: 'Jack Pose', href: '/projects/jack-pose/', color: '#ec4899', colorRgb: '236, 72, 153' },
+  { id: 'tan', label: 'Jack Tan', href: '/projects/jack-tan/', color: '#3b82f6', colorRgb: '59, 130, 246' },
 ];
+
+/** 各子系统的全称品牌名（左侧品牌区使用） */
+const BRAND_NAMES: Record<StudioBarProject, { main: string; sub: string }> = {
+  studio: { main: 'Jack Tan', sub: 'Studio' },
+  wave: { main: 'Jack', sub: 'Wave' },
+  pose: { main: 'Jack', sub: 'Pose' },
+  tan: { main: 'Jack', sub: 'Tan' },
+};
 
 /** 项目小图标 */
 function NavIcon({ type, color, size = 16 }: { type: StudioBarProject; color: string; size?: number }) {
@@ -68,12 +76,20 @@ function NavIcon({ type, color, size = 16 }: { type: StudioBarProject; color: st
   return icons[type]
 }
 
+/** 子应用内部的快速跳转链接（如 jack-wave 的 本月推荐/心情歌单/推荐歌单） */
+export interface StudioBarQuickLink {
+  label: string;
+  href: string;
+}
+
 export interface StudioBarProps {
   /** 当前应用标识，用于高亮 */
   current: StudioBarProject;
+  /** 当前应用内部的锚点快速跳转按钮，展示在中间产品矩阵与主题按钮之间 */
+  quickLinks?: StudioBarQuickLink[];
 }
 
-export function StudioBar({ current }: StudioBarProps) {
+export function StudioBar({ current, quickLinks }: StudioBarProps) {
   const { mode, toggleMode } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [hoveredProject, setHoveredProject] = useState<StudioBarLink | null>(null);
@@ -86,6 +102,8 @@ export function StudioBar({ current }: StudioBarProps) {
 
   const activeProject = hoveredProject;
   const previewRgb = activeProject ? activeProject.colorRgb : '124, 58, 237';
+  const currentLink = LINKS.find((l) => l.id === current) ?? LINKS[0]!;
+  const brand = BRAND_NAMES[current];
 
   return (
     <nav
@@ -114,9 +132,10 @@ export function StudioBar({ current }: StudioBarProps) {
         fontFamily: "var(--font-body, 'Inter','Noto Sans SC',system-ui,-apple-system,sans-serif)",
       }}
     >
-      {/* ===== 左侧：Logo + 品牌名（点击返回 Studio） ===== */}
+      {/* ===== 左侧：当前子系统小 Logo + 全称品牌名（与 Studio 首页同一设计语言） ===== */}
       <a
-        href="/"
+        href={currentLink.href}
+        title={`${brand.main} ${brand.sub}`}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -132,20 +151,18 @@ export function StudioBar({ current }: StudioBarProps) {
             borderRadius: '8px',
             background: activeProject
               ? `linear-gradient(135deg, ${activeProject.color}, var(--accent-2, #ec4899))`
-              : 'linear-gradient(135deg, var(--accent, #7c3aed), var(--accent-2, #ec4899))',
+              : `linear-gradient(135deg, ${currentLink.color}, var(--accent-2, #ec4899))`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontWeight: 700,
-            fontSize: '15px',
             color: 'white',
             boxShadow: activeProject
               ? `0 4px 16px rgba(${previewRgb}, 0.4)`
-              : '0 4px 16px rgba(124, 58, 237, 0.3)',
+              : `0 4px 16px rgba(${currentLink.colorRgb}, 0.35)`,
             transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
           }}
         >
-          JT
+          <NavIcon type={current} color="#fff" size={17} />
         </div>
         <span
           className="studiobar-brand"
@@ -154,9 +171,10 @@ export function StudioBar({ current }: StudioBarProps) {
             fontSize: '15px',
             letterSpacing: '-0.02em',
             color: 'var(--text, #f5f5f7)',
+            whiteSpace: 'nowrap',
           }}
         >
-          Jack Tan <span style={{ color: 'var(--text-muted, #8888a0)', fontWeight: 400 }}>Studio</span>
+          {brand.main} <span style={{ color: 'var(--text-muted, #8888a0)', fontWeight: 400 }}>{brand.sub}</span>
         </span>
       </a>
 
@@ -206,6 +224,53 @@ export function StudioBar({ current }: StudioBarProps) {
           );
         })}
       </div>
+
+      {/* ===== 右侧：应用内快速跳转（可选） ===== */}
+      {quickLinks && quickLinks.length > 0 && (
+        <div
+          className="studiobar-quicklinks"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            flexShrink: 0,
+          }}
+        >
+          {quickLinks.map((q) => (
+            <a
+              key={q.href}
+              href={q.href}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '6px 12px',
+                borderRadius: '100px',
+                fontSize: '12px',
+                fontWeight: 500,
+                letterSpacing: '0.01em',
+                textDecoration: 'none',
+                color: 'var(--text-muted, #8888a0)',
+                background: 'color-mix(in srgb, var(--text, #fff) 4%, transparent)',
+                border: '1px solid var(--border, rgba(128,128,128,0.15))',
+                transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = currentLink.color;
+                e.currentTarget.style.background = `rgba(${currentLink.colorRgb}, 0.1)`;
+                e.currentTarget.style.borderColor = `rgba(${currentLink.colorRgb}, 0.35)`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-muted, #8888a0)';
+                e.currentTarget.style.background = 'color-mix(in srgb, var(--text, #fff) 4%, transparent)';
+                e.currentTarget.style.borderColor = 'var(--border, rgba(128,128,128,0.15))';
+              }}
+            >
+              {q.label}
+            </a>
+          ))}
+        </div>
+      )}
 
       {/* ===== 右侧：主题切换 ===== */}
       <button
@@ -257,6 +322,9 @@ export function StudioBar({ current }: StudioBarProps) {
       </button>
 
       <style>{`
+        @media (max-width: 1024px) {
+          .studiobar-quicklinks { display: none !important; }
+        }
         @media (max-width: 768px) {
           .studiobar-brand { display: none !important; }
           .studiobar-links { gap: 4px !important; }

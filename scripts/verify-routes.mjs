@@ -66,13 +66,20 @@ for (const project of liveProjects) {
     ok(`jack-${project.id}: merge-dist.mjs 拷贝规则正确`);
   }
 
-  // 2. _redirects 必须包含 SPA 回退（目标用目录形式 `/`，避免 Cloudflare Pages
-  //    把 /index.html 规范化为 `/` 的 308 重定向破坏 200 重写）
-  const fallbackLine = `/${expectedDir}/* /${expectedDir}/ 200`;
-  if (!redirects.includes(fallbackLine)) {
-    fail(`jack-${project.id}: _redirects 缺少 SPA 回退\n   期望包含: ${fallbackLine}`);
+  // 2. SPA 回退必须由 Pages Function（[[path]].js）实现，且 _redirects 不得包含
+  //    `/projects/jack-x/* ... 200` 重写 —— Pages 的 _redirects 无条件优先于静态资源，
+  //    该写法会把子应用全部静态文件（头像/封面/JS bundle）吞成 HTML（2026-08-04 事故根因）。
+  const swallowRule = `/${expectedDir}/* /${expectedDir}/ 200`;
+  if (redirects.includes(swallowRule)) {
+    fail(`jack-${project.id}: _redirects 含有会吞掉静态资源的 200 重写\n   禁止出现: ${swallowRule}\n   SPA 回退请使用 deploy/functions/${expectedDir}/[[path]].js`);
   } else {
-    ok(`jack-${project.id}: _redirects SPA 回退正确`);
+    ok(`jack-${project.id}: _redirects 无吞静态资源的 200 重写`);
+  }
+  const fallbackFn = resolve(root, `deploy/functions/${expectedDir}/[[path]].js`);
+  if (!existsSync(fallbackFn)) {
+    fail(`jack-${project.id}: SPA 回退 Function 不存在\n   期望: deploy/functions/${expectedDir}/[[path]].js`);
+  } else {
+    ok(`jack-${project.id}: SPA 回退 Function 存在`);
   }
 
   // 3. vite.config.ts 的 base 必须匹配
