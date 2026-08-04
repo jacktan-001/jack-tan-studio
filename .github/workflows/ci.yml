@@ -100,8 +100,8 @@ jobs:
           # jack-pose 的 CSP 必须与全局对齐（含 unsafe-inline），否则 importmap 被拦截白屏
           grep -qE "script-src 'self' 'unsafe-inline'" deploy/dist/_headers
           # 断言 jack-pose 专属块自身的 script-src 也含 unsafe-inline
-          test "$(awk '/^\/projects\/jack-pose\//{p=1} p&&/script-src/{print;exit}' deploy/dist/_headers)" != ""
-          awk '/^\/projects\/jack-pose\//{p=1} p&&/script-src/{print;exit}' deploy/dist/_headers | grep -qE "script-src 'self' 'unsafe-inline'"
+          test "$(awk '/^\/projects\/jack-pose\//{p=1} p&&/Content-Security-Policy/{print;exit}' deploy/dist/_headers)" != ""
+          awk '/^\/projects\/jack-pose\//{p=1} p&&/Content-Security-Policy/{print;exit}' deploy/dist/_headers | grep -qE "script-src 'self' 'unsafe-inline'"
           ! grep -qE '^/projects/jack-[a-z]+/\* /projects/jack-[a-z]+/ 200' deploy/dist/_redirects
           # SEO 产物内容校验：robots 必须声明 sitemap，且不得残留已失效的旧域名
           grep -q "Sitemap: https://jacktan-studio.pages.dev/sitemap.xml" deploy/dist/robots.txt
