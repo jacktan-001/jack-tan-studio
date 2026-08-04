@@ -73,6 +73,35 @@ jobs:
           test -f 'deploy/functions/projects/jack-wave/[[path]].js'
           test -f 'deploy/functions/projects/jack-pose/[[path]].js'
           test -f 'deploy/functions/projects/jack-tan/[[path]].js'
+          # ── P0 回归防护：共享 vendor 必须含具名导出，否则线上 React 白屏 ──
+          # esbuild 对 CJS 的 `export *` 不会提升具名导出，历史上因此全站白屏。
+          test -f deploy/dist/vendor/react.js
+          test -f deploy/dist/vendor/react-dom.js
+          test -f deploy/dist/vendor/react-router.js
+          # react.js：含 useMemo / jsxs（应用 chunk 以具名方式 import）
+          grep -qE '(export\s+(const\s+)?useMemo\b|export\{[^}]*\buseMemo\b)' deploy/dist/vendor/react.js
+          grep -qE '(export\s+(const\s+)?jsxs\b|export\{[^}]*\bjsxs\b)' deploy/dist/vendor/react.js
+          # react-dom.js：含 createRoot（react-dom/client 的入口）
+          grep -qE '(export\s+(const\s+)?createRoot\b|export\{[^}]*\bcreateRoot\b)' deploy/dist/vendor/react-dom.js
+          # react-dom.js：必须含 require 垫片 banner（`__vendor_react_ns`），
+          # 否则 esbuild 的 `Dynamic require of "react" is not supported` 会致 React 挂载失败白屏。
+          grep -q "__vendor_react_ns" deploy/dist/vendor/react-dom.js
+          # react-dom.js：必须提供 default 导出（来自 react-dom/client）。
+          # jack-pose / jack-tan 用 `import ReactDOM from 'react-dom/client'` 默认导入后调用
+          # ReactDOM.createRoot；若 default 缺失，则默认导入为 undefined → "createRoot is not a function"。
+          grep -qE "export\{[^}]*\b(as )?default\b" deploy/dist/vendor/react-dom.js
+          # react-router.js：含 Link / useNavigate
+          grep -qE '(export\s+(const\s+)?Link\b|export\{[^}]*\bLink\b)' deploy/dist/vendor/react-router.js
+          # 每个入口 index.html 必须含 importmap（否则裸模块名无法解析）
+          grep -q 'importmap' deploy/dist/index.html
+          grep -q 'importmap' deploy/dist/projects/jack-pose/index.html
+          grep -q 'importmap' deploy/dist/projects/jack-wave/index.html
+          grep -q 'importmap' deploy/dist/projects/jack-tan/index.html
+          # jack-pose 的 CSP 必须与全局对齐（含 unsafe-inline），否则 importmap 被拦截白屏
+          grep -qE "script-src 'self' 'unsafe-inline'" deploy/dist/_headers
+          # 断言 jack-pose 专属块自身的 script-src 也含 unsafe-inline
+          test "$(awk '/^\/projects\/jack-pose\//{p=1} p&&/script-src/{print;exit}' deploy/dist/_headers)" != ""
+          awk '/^\/projects\/jack-pose\//{p=1} p&&/script-src/{print;exit}' deploy/dist/_headers | grep -qE "script-src 'self' 'unsafe-inline'"
           ! grep -qE '^/projects/jack-[a-z]+/\* /projects/jack-[a-z]+/ 200' deploy/dist/_redirects
           # SEO 产物内容校验：robots 必须声明 sitemap，且不得残留已失效的旧域名
           grep -q "Sitemap: https://jacktan-studio.pages.dev/sitemap.xml" deploy/dist/robots.txt
