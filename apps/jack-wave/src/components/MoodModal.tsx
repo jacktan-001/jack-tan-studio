@@ -71,8 +71,8 @@ export function MoodModal({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        // 计入 PWA 安全区，确保顶部内容不被系统状态栏 / 导航栏遮挡
-        padding: 'max(24px, env(safe-area-inset-top, 0px)) 24px max(24px, env(safe-area-inset-bottom, 0px))',
+        // 顶部额外预留共享导航栏高度 64px + PWA 安全区，确保弹窗顶部不被系统状态栏 / 导航栏遮挡
+        padding: 'calc(64px + env(safe-area-inset-top, 0px)) 24px max(24px, env(safe-area-inset-bottom, 0px))',
         opacity: show ? 1 : 0,
         pointerEvents: show ? 'auto' : 'none',
         transition: 'opacity .25s',

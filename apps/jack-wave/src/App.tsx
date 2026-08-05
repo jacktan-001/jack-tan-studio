@@ -228,6 +228,10 @@ export default function App() {
   const [selectedMoodId, setSelectedMoodId] = useState<number | null>(null);
   const [isMoodModalOpen, setIsMoodModalOpen] = useState(false);
 
+  // === 本月推荐弹窗 ===
+  const [selectedMonthlyId, setSelectedMonthlyId] = useState<number | null>(null);
+  const [isMonthlyModalOpen, setIsMonthlyModalOpen] = useState(false);
+
   // === MonthlySection ref（用于"播放本月歌单"） ===
   const monthlyRef = useRef<MonthlySectionRef>(null);
 
@@ -247,6 +251,7 @@ export default function App() {
         player.playPrev();
       } else if (e.code === 'Escape') {
         setIsMoodModalOpen(false);
+        setIsMonthlyModalOpen(false);
       }
     };
 
@@ -303,6 +308,17 @@ export default function App() {
     setIsMoodModalOpen(false);
   }, []);
 
+  /** 打开本月推荐弹窗 */
+  const handleOpenMonthly = useCallback((id: number) => {
+    setSelectedMonthlyId(id);
+    setIsMonthlyModalOpen(true);
+  }, []);
+
+  /** 关闭本月推荐弹窗 */
+  const handleCloseMonthly = useCallback(() => {
+    setIsMonthlyModalOpen(false);
+  }, []);
+
   /**
    * 渲染依赖 KV 数据的子树（月度歌单 / 心情歌单 / 推荐表单 / 心情弹窗）。
    * 抽成函数便于复用：成功时用 KV 合并数据渲染、错误边界兜底时用静态数据渲染同一份结构。
@@ -310,6 +326,9 @@ export default function App() {
   const renderDataSections = (data: ResolvedData) => {
     const selectedMood = selectedMoodId
       ? data.moodPlaylists.find((p) => p.id === selectedMoodId) ?? null
+      : null;
+    const selectedMonthly = selectedMonthlyId
+      ? data.monthlyShares.find((p) => p.id === selectedMonthlyId) ?? null
       : null;
 
     return (
@@ -320,6 +339,7 @@ export default function App() {
           monthlyShares={data.monthlyShares}
           currentSong={player.currentSong}
           onPlay={handlePlay}
+          onOpenMonthly={handleOpenMonthly}
         />
 
         {/* 心情歌单 */}
@@ -333,6 +353,15 @@ export default function App() {
           playlist={selectedMood}
           show={isMoodModalOpen}
           onClose={handleCloseMood}
+          currentSong={player.currentSong}
+          onPlay={handlePlay}
+        />
+
+        {/* 本月推荐弹窗（复用 MoodModal，数据结构一致） */}
+        <MoodModal
+          playlist={selectedMonthly}
+          show={isMonthlyModalOpen}
+          onClose={handleCloseMonthly}
           currentSong={player.currentSong}
           onPlay={handlePlay}
         />

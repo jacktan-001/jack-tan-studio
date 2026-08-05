@@ -201,7 +201,7 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
           WebkitUserSelect: 'none',
         }}
       >
-        {/* 中心发光球体（当前播放指示器） */}
+        {/* 中心光球：视觉上隐藏，但保留当前选中的指示文案 */}
         <div
           aria-hidden="true"
           style={{
@@ -213,10 +213,6 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
             marginLeft: -75,
             marginTop: -75,
             borderRadius: '50%',
-            background:
-              'radial-gradient(circle at 35% 30%, #e9fbff 0%, #5eead4 32%, #14b8a6 62%, #0f766e 100%)',
-            boxShadow:
-              '0 0 70px 12px rgba(45,212,191,0.55), inset 0 0 34px rgba(255,255,255,0.55)',
             zIndex: 5,
             pointerEvents: 'none',
             display: 'flex',
@@ -224,7 +220,17 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
             justifyContent: 'center',
           }}
         >
-          <div className="mood-orb-pulse" />
+          {/* 光球视觉元素：完全透明，仅保留布局占位 */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '50%',
+              background: 'transparent',
+              boxShadow: 'none',
+              opacity: 0,
+            }}
+          />
           <span
             style={{
               position: 'absolute',
@@ -356,25 +362,9 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
       </div>
 
       <style>{`
-        .mood-orb-pulse {
-          position: absolute;
-          width: 150px;
-          height: 150px;
-          border-radius: 50%;
-          box-shadow: 0 0 0 0 rgba(45,212,191,0.5);
-          animation: mood-orb-pulse 2.6s ease-out infinite;
-        }
-        @keyframes mood-orb-pulse {
-          0% { box-shadow: 0 0 0 0 rgba(45,212,191,0.45); }
-          70% { box-shadow: 0 0 0 26px rgba(45,212,191,0); }
-          100% { box-shadow: 0 0 0 0 rgba(45,212,191,0); }
-        }
         .mood-3d-card:focus-visible {
           outline: 2px solid var(--teal);
           outline-offset: 3px;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .mood-orb-pulse { animation: none; }
         }
       `}</style>
     </section>
