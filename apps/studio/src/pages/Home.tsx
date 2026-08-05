@@ -30,12 +30,12 @@ export default function Home() {
 
 function Footer() {
   return (
-    <footer className="studio-footer border-t border-border px-6 pt-14 pb-12 mt-12">
-      <div className="max-w-[1000px] mx-auto flex flex-col items-center gap-3 text-center">
+    <footer className="studio-footer border-t border-border px-6 pt-14 pb-12 mt-12 text-center">
+      <div className="mx-auto max-w-[1000px]">
         <div className="font-display text-sm font-medium text-text-muted">
           Jack Tan Studio
         </div>
-        <div className="text-xs text-text-dim font-mono">
+        <div className="mt-3 text-xs text-text-dim font-mono">
           © 2026 · Built with React + Vite · Deployed on Cloudflare Pages
         </div>
       </div>

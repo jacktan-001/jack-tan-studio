@@ -362,14 +362,7 @@ export default function App() {
       </a>
 
       {/* StudioBar 跨项目共享导航栏（fixed 定位，下方内容由 index.css 预留 64px 顶部间距） */}
-      <StudioBar
-        current="wave"
-        quickLinks={[
-          { label: '本月推荐', href: '#monthly' },
-          { label: '心情歌单', href: '#mood' },
-          { label: '推荐歌单', href: '#recommend' },
-        ]}
-      />
+      <StudioBar current="wave" />
 
       {/* 光晕呼吸 — 角落 radial-gradient 脉冲 */}
       <div className="wave-halo-pulse" aria-hidden="true">

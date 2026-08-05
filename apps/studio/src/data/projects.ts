@@ -98,5 +98,6 @@ export const socialLinks = [
   { label: 'GitHub', href: 'https://github.com/jacktan-001', icon: 'github' },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/jacktan2011', icon: 'linkedin' },
   { label: 'Instagram', href: 'https://instagram.com/jacktan2011', icon: 'instagram' },
-  { label: '小红书', href: 'https://www.xiaohongshu.com/user/profile/JackTan', icon: 'xiaohongshu' },
+  { label: '小红书', href: 'https://www.xiaohongshu.com/user/profile/5d004945000000001002a18e', icon: 'xiaohongshu' },
+  { label: 'Bilibili', href: 'https://space.bilibili.com/97733003', icon: 'bilibili' },
 ];
