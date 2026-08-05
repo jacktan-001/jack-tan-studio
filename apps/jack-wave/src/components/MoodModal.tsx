@@ -63,14 +63,16 @@ export function MoodModal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 200,
+        // 提到共享导航栏（StudioBar z-index:999）与底部播放器之上，避免 PWA 下被遮挡
+        zIndex: 1200,
         background: 'rgba(0, 0, 0, 0.5)',
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '24px',
+        // 计入 PWA 安全区，确保顶部内容不被系统状态栏 / 导航栏遮挡
+        padding: 'max(24px, env(safe-area-inset-top, 0px)) 24px max(24px, env(safe-area-inset-bottom, 0px))',
         opacity: show ? 1 : 0,
         pointerEvents: show ? 'auto' : 'none',
         transition: 'opacity .25s',

@@ -1,11 +1,23 @@
 /**
- * MoodGrid — 心情歌单横向滚动卡片
- * 展示所有心情歌单卡片，点击打开弹窗；桌面端支持鼠标滚轮左右滚动
+ * MoodGrid — 心情歌单一 3D 螺旋轮播
+ *
+ * 屏幕正中央一个固定的发光球体（当前播放指示器），12/6/N 张专辑封面
+ * 以 rotateY + translateZ 分布在半径为 R 的 3D 螺旋轨道上，围绕中心球体旋转。
+ *
+ * 交互：
+ * - 拖拽旋转：鼠标 / 触控水平拖拽控制整个螺旋容器的 rotateY。
+ * - 惯性效果：松手后速度按 速度 *= 0.95（阻尼系数）逐帧衰减，直到静止；
+ *   速度越快滑行越远。公式：下一帧角度 = 当前角度 + 速度；速度 = 速度 * 0.95。
+ * - 悬停：单张卡片单独向屏幕前方移动（z +60）并增加高光边框。
+ * - 点击 / 回车：打开对应心情歌单（onOpenMood）。
+ *
+ * 封面数量基于数据动态渲染（moodPlaylists.length），新增专辑时自动增加，
+ * 效果连续循环（环形轨道 + 闲置微旋）。
  */
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import type { MoodPlaylist } from '../types';
-import { safeUrl, artworkSrc } from '../utils';
+import { artworkSrc } from '../utils';
 import { playlistCover } from '../data/musicData';
 
 export interface MoodGridProps {
@@ -13,228 +25,356 @@ export interface MoodGridProps {
   onOpenMood: (id: number) => void;
 }
 
+const DAMPING = 0.95; // 惯性阻尼系数：速度 *= 0.95
+const DRAG_SENSITIVITY = 0.32; // 拖拽灵敏度（px → deg）
+const AUTO_SPIN = 0.03; // 闲置自动微旋，保持“连续循环”观感
+const HOVER_PUSH = 60; // 悬停时向前的位移（z）
+const MIN_DRAG_PX = 6; // 位移小于此值视为点击
+
 export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const N = Math.max(moodPlaylists.length, 1);
+  const ringRef = useRef<HTMLDivElement>(null);
+  const rotation = useRef(0); // 当前角度
+  const velocity = useRef(0); // 角速度（deg/帧）
+  const rafRef = useRef<number | null>(null);
+  const drag = useRef({
+    active: false,
+    startX: 0,
+    startRot: 0,
+    lastX: 0,
+    moved: 0,
+  });
+  const downIndex = useRef<number | null>(null);
+  const suppressClick = useRef(false);
+  const curRef = useRef(-1);
 
-  // 鼠标滚轮映射为横向滚动
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [cur, setCur] = useState(0);
+  const [radius, setRadius] = useState(400);
+  const [cardSize, setCardSize] = useState(200);
+
+  // 响应式：轨道半径与卡片尺寸随视口缩放
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const onWheel = (e: WheelEvent) => {
-      // 只有容器存在横向滚动空间时才拦截纵向滚轮
-      if (el.scrollWidth <= el.clientWidth) return;
-      // 避免与横向滚轮冲突（如触控板横向滑动）
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-      e.preventDefault();
-      el.scrollBy({ left: e.deltaY, behavior: 'smooth' });
+    const apply = () => {
+      const w = window.innerWidth;
+      if (w < 560) {
+        setRadius(230);
+        setCardSize(150);
+      } else if (w < 900) {
+        setRadius(320);
+        setCardSize(180);
+      } else {
+        setRadius(400);
+        setCardSize(200);
+      }
     };
-
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
+    apply();
+    window.addEventListener('resize', apply);
+    return () => window.removeEventListener('resize', apply);
   }, []);
+
+  // 惯性 + 自动旋转循环
+  useEffect(() => {
+    const tick = () => {
+      if (!drag.current.active) {
+        if (Math.abs(velocity.current) > 0.02) {
+          // 核心惯性公式：下一帧角度 = 当前角度 + 速度；速度 = 速度 * 0.95
+          rotation.current += velocity.current;
+          velocity.current *= DAMPING;
+        } else {
+          // 速度衰减殆尽后保持极慢连续旋转
+          rotation.current += AUTO_SPIN;
+        }
+      }
+      if (ringRef.current) {
+        ringRef.current.style.transform = `translateZ(${-radius}px) rotateY(${rotation.current}deg)`;
+      }
+      // 计算当前正对前方的卡片索引（用于中心球体指示）
+      const step = 360 / N;
+      const idx = (((Math.round(-rotation.current / step) % N) + N) % N);
+      if (idx !== curRef.current) {
+        curRef.current = idx;
+        setCur(idx);
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [N, radius]);
+
+  // 拖拽开始
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    drag.current.active = true;
+    drag.current.startX = e.clientX;
+    drag.current.lastX = e.clientX;
+    drag.current.startRot = rotation.current;
+    drag.current.moved = 0;
+    velocity.current = 0;
+    const el = (e.target as HTMLElement).closest('[data-index]');
+    downIndex.current = el ? Number(el.getAttribute('data-index')) : null;
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+  }, []);
+
+  // 拖拽中：实时更新角度 + 估算角速度
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!drag.current.active) return;
+    const dx = e.clientX - drag.current.startX;
+    drag.current.moved = Math.max(drag.current.moved, Math.abs(dx));
+    rotation.current = drag.current.startRot + dx * DRAG_SENSITIVITY;
+    // 角速度 ≈ 本帧位移（deg）
+    velocity.current = (e.clientX - drag.current.lastX) * DRAG_SENSITIVITY;
+    drag.current.lastX = e.clientX;
+  }, []);
+
+  // 拖拽结束：位移很小 → 视为点击打开；否则保留速度进入惯性滑行
+  const endDrag = useCallback(
+    (e: React.PointerEvent) => {
+      if (!drag.current.active) return;
+      drag.current.active = false;
+      (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+      if (drag.current.moved < MIN_DRAG_PX) {
+        velocity.current = 0;
+        if (downIndex.current != null) {
+          suppressClick.current = true;
+          onOpenMood(moodPlaylists[downIndex.current]!.id);
+        }
+      }
+      downIndex.current = null;
+    },
+    [moodPlaylists, onOpenMood],
+  );
+
+  // 卡片点击（键盘可达性：Enter / 空格触发，pointer 点击由 endDrag 处理避免重复）
+  const cardClick = useCallback(
+    (i: number) => {
+      if (suppressClick.current) {
+        suppressClick.current = false;
+        return;
+      }
+      onOpenMood(moodPlaylists[i]!.id);
+    },
+    [moodPlaylists, onOpenMood],
+  );
+
+  const activeTitle = moodPlaylists[cur]?.title ?? '';
 
   return (
     <section
       className="section"
       id="mood"
-      style={{
-        padding: '80px 24px',
-        maxWidth: '1100px',
-        margin: '0 auto',
-      }}
+      style={{ padding: '80px 0', overflow: 'hidden' }}
     >
-      <h2
-        className="section-title"
-        style={{
-          fontSize: '32px',
-          fontWeight: 700,
-          letterSpacing: '-1px',
-          marginBottom: '8px',
-        }}
-      >
-        心情歌单
-      </h2>
-      <p
-        className="section-desc"
-        style={{ color: 'var(--gray-500)', fontSize: '15px', marginBottom: '28px' }}
-      >
-        不同的心情，不同的歌单
-      </p>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px' }}>
+        <h2
+          className="section-title"
+          style={{
+            fontSize: '32px',
+            fontWeight: 700,
+            letterSpacing: '-1px',
+            marginBottom: '8px',
+          }}
+        >
+          心情歌单
+        </h2>
+        <p
+          className="section-desc"
+          style={{ color: 'var(--gray-500)', fontSize: '15px', marginBottom: '8px' }}
+        >
+          拖拽旋转 · 点击封面播放对应心情
+        </p>
+      </div>
 
       <div
-        ref={scrollRef}
-        className="mood-scroll-container"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
         style={{
-          display: 'flex',
-          gap: '20px',
-          overflowX: 'auto',
-          scrollSnapType: 'x mandatory',
-          WebkitOverflowScrolling: 'touch',
-          padding: '8px 4px 24px',
-          margin: '0 -4px',
+          position: 'relative',
+          height: `${cardSize * 2 + 200}px`,
+          perspective: '1500px',
+          touchAction: 'none',
+          cursor: 'grab',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
         }}
       >
-        {moodPlaylists.map((p) => (
-          <div
-            key={p.id}
-            className="mood-card"
-            onClick={() => onOpenMood(p.id)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onOpenMood(p.id);
-              }
-            }}
+        {/* 中心发光球体（当前播放指示器） */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            width: 150,
+            height: 150,
+            marginLeft: -75,
+            marginTop: -75,
+            borderRadius: '50%',
+            background:
+              'radial-gradient(circle at 35% 30%, #e9fbff 0%, #5eead4 32%, #14b8a6 62%, #0f766e 100%)',
+            boxShadow:
+              '0 0 70px 12px rgba(45,212,191,0.55), inset 0 0 34px rgba(255,255,255,0.55)',
+            zIndex: 5,
+            pointerEvents: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div className="mood-orb-pulse" />
+          <span
             style={{
-              flex: '0 0 auto',
-              width: 'clamp(240px, 32vw, 280px)',
-              scrollSnapAlign: 'start',
-              background: 'var(--card)',
-              backdropFilter: 'blur(12px)',
-              borderRadius: 'var(--radius)',
-              border: '1px solid var(--border)',
-              boxShadow: 'var(--shadow)',
-              overflow: 'hidden',
-              transition: 'all .3s',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'var(--shadow)';
+              position: 'absolute',
+              bottom: -28,
+              fontSize: 12,
+              fontWeight: 600,
+              color: 'var(--gray-500)',
+              whiteSpace: 'nowrap',
             }}
           >
-            <div
-              className="mood-cover-wrap"
-              style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden' }}
-            >
-              <img
-                className="mood-cover"
-                src={artworkSrc(playlistCover(p)) || ''}
-                alt={`${p.title}封面`}
-                loading="lazy"
-                onError={(e) => {
-                  const img = e.currentTarget;
-                  if (!img.dataset.fallback) {
-                    img.dataset.fallback = '1';
-                    img.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%230d9488"/><circle cx="100" cy="80" r="30" fill="%2314b8a6" opacity="0.4"/><path d="M50 120 Q100 90 150 120" stroke="%232dd4bf" stroke-width="2" fill="none" opacity="0.5"/></svg>');
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  transition: 'transform .4s',
-                }}
-              />
-              <div
-                className="mood-cover-overlay"
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background:
-                    'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)',
-                }}
-              />
-              <span
-                className="mood-tag"
+            {activeTitle}
+          </span>
+        </div>
+
+        {/* 3D 螺旋旋转环 */}
+        <div
+          ref={ringRef}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            transformStyle: 'preserve-3d',
+          }}
+        >
+          {moodPlaylists.map((p, i) => {
+            const angle = (i / N) * 360;
+            // 螺旋竖向起伏，营造 3D 螺旋轨道观感（连续循环仍为环形）
+            const helix = Math.sin((i / N) * Math.PI * 2) * 26;
+            const isHover = hovered === i;
+            return (
+              <button
+                key={p.id}
+                data-index={i}
+                className="mood-3d-card"
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered((h) => (h === i ? null : h))}
+                onFocus={() => setHovered(i)}
+                onBlur={() => setHovered((h) => (h === i ? null : h))}
+                onClick={() => cardClick(i)}
+                aria-label={`${p.title} — ${p.tag}`}
                 style={{
                   position: 'absolute',
-                  top: '12px',
-                  right: '12px',
-                  padding: '4px 10px',
-                  background: 'rgba(255,255,255,0.2)',
-                  backdropFilter: 'blur(8px)',
-                  borderRadius: '999px',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  color: '#fff',
-                }}
-              >
-                {p.tag}
-              </span>
-            </div>
-            <div className="mood-body" style={{ padding: '16px 18px 20px' }}>
-              <div
-                className="mood-title"
-                style={{ fontSize: '17px', fontWeight: 600, marginBottom: '2px' }}
-              >
-                {p.title}
-              </div>
-              <div
-                className="mood-author"
-                style={{
-                  fontSize: '13px',
-                  color: 'var(--gray-500)',
-                  marginBottom: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                {p.avatarImage && (
-                  <img
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      verticalAlign: 'middle',
-                      marginRight: '4px',
-                    }}
-                    src={safeUrl(p.avatarImage) || ''}
-                    alt=""
-                    loading="lazy"
-                  />
-                )}
-                {p.author}
-              </div>
-              <div
-                className="mood-desc"
-                style={{
-                  fontSize: '13px',
-                  color: 'var(--gray-400)',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
+                  left: '50%',
+                  top: '50%',
+                  width: cardSize,
+                  height: cardSize,
+                  marginLeft: -cardSize / 2,
+                  marginTop: -cardSize / 2,
+                  borderRadius: 20,
+                  border: isHover
+                    ? '1.5px solid rgba(255,255,255,0.92)'
+                    : '1px solid rgba(255,255,255,0.18)',
+                  boxShadow: isHover
+                    ? '0 0 44px rgba(45,212,191,0.6)'
+                    : '0 12px 32px rgba(0,0,0,0.38)',
+                  transformStyle: 'preserve-3d',
+                  transform: `rotateY(${angle}deg) translateZ(${radius + (isHover ? HOVER_PUSH : 0)}px) translateY(${helix}px)`,
+                  transition:
+                    'transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .3s, border-color .3s',
+                  background: p.cover,
+                  cursor: 'pointer',
+                  padding: 0,
                   overflow: 'hidden',
+                  backdropFilter: 'blur(2px)',
+                  WebkitBackdropFilter: 'blur(2px)',
                 }}
               >
-                {p.desc}
-              </div>
-            </div>
-          </div>
-        ))}
+                <img
+                  src={artworkSrc(playlistCover(p)) || ''}
+                  alt=""
+                  loading="lazy"
+                  draggable={false}
+                  onError={(ev) => {
+                    (ev.currentTarget as HTMLImageElement).style.opacity = '0';
+                  }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    pointerEvents: 'none',
+                  }}
+                />
+                {/* 底部信息条：标题 + 心情标签 */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    padding: '10px 12px',
+                    background:
+                      'linear-gradient(to top, rgba(0,0,0,0.72), transparent)',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: '#fff',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.6)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {p.title}
+                  </div>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      marginTop: 4,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: '#fff',
+                      background: 'rgba(255,255,255,0.22)',
+                      borderRadius: 999,
+                      padding: '2px 8px',
+                    }}
+                  >
+                    {p.tag}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <style>{`
-        .mood-scroll-container {
-          scrollbar-width: thin;
-          scrollbar-color: var(--gray-300) transparent;
+        .mood-orb-pulse {
+          position: absolute;
+          width: 150px;
+          height: 150px;
+          border-radius: 50%;
+          box-shadow: 0 0 0 0 rgba(45,212,191,0.5);
+          animation: mood-orb-pulse 2.6s ease-out infinite;
         }
-        .mood-scroll-container::-webkit-scrollbar {
-          height: 6px;
+        @keyframes mood-orb-pulse {
+          0% { box-shadow: 0 0 0 0 rgba(45,212,191,0.45); }
+          70% { box-shadow: 0 0 0 26px rgba(45,212,191,0); }
+          100% { box-shadow: 0 0 0 0 rgba(45,212,191,0); }
         }
-        .mood-scroll-container::-webkit-scrollbar-track {
-          background: transparent;
+        .mood-3d-card:focus-visible {
+          outline: 2px solid var(--teal);
+          outline-offset: 3px;
         }
-        .mood-scroll-container::-webkit-scrollbar-thumb {
-          background: var(--gray-300);
-          border-radius: 3px;
-        }
-        :root[data-theme="dark"] .mood-scroll-container::-webkit-scrollbar-thumb {
-          background: var(--gray-600);
-        }
-
-        @media (max-width: 560px) {
-          .mood-card {
-            width: clamp(200px, 72vw, 260px) !important;
-          }
+        @media (prefers-reduced-motion: reduce) {
+          .mood-orb-pulse { animation: none; }
         }
       `}</style>
     </section>
