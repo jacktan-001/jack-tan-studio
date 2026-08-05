@@ -43,23 +43,26 @@ function App() {
       <BackgroundEffects />
       {/* StudioBar 跨项目共享导航栏（fixed 定位，下方内容由 index.css 预留 64px 顶部间距） */}
       <StudioBar current="pose" />
-      <HashRouter>
-        <Suspense
-          fallback={
-            <div className="min-h-screen bg-bg flex items-center justify-center text-secondary text-sm">
-              加载中…
-            </div>
-          }
-        >
-          <Routes>
-            <Route path="/" element={<ProjectListPage />} />
-            <Route path="/p/:id" element={<EditorPage />} />
-            <Route path="/puzzle" element={<PuzzlePage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-        <Toaster position="top-center" toastOptions={{ className: 'rounded-xl' }} />
-      </HashRouter>
+      {/* 内容层（relative z-1，抬升至背景光斑之上，避免暖色气泡遮挡正文） */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <HashRouter>
+          <Suspense
+            fallback={
+              <div className="min-h-screen bg-bg flex items-center justify-center text-secondary text-sm">
+                加载中…
+              </div>
+            }
+          >
+            <Routes>
+              <Route path="/" element={<ProjectListPage />} />
+              <Route path="/p/:id" element={<EditorPage />} />
+              <Route path="/puzzle" element={<PuzzlePage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+          <Toaster position="top-center" toastOptions={{ className: 'rounded-xl' }} />
+        </HashRouter>
+      </div>
     </ErrorBoundary>
   )
 }
