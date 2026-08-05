@@ -28,7 +28,7 @@ interface StudioBarLink {
 }
 
 const LINKS: StudioBarLink[] = [
-  { id: 'studio', label: 'Jack Studio', href: '/', color: '#7c3aed', colorRgb: '124, 58, 237' },
+  { id: 'studio', label: 'Jack Tan Studio', href: '/', color: '#7c3aed', colorRgb: '124, 58, 237' },
   { id: 'wave', label: 'Jack Wave', href: '/projects/jack-wave/', color: '#06b6d4', colorRgb: '6, 182, 212' },
   { id: 'pose', label: 'Jack Pose', href: '/projects/jack-pose/', color: '#ec4899', colorRgb: '236, 72, 153' },
   { id: 'tan', label: 'Jack Tan', href: '/projects/jack-tan/', color: '#3b82f6', colorRgb: '59, 130, 246' },
