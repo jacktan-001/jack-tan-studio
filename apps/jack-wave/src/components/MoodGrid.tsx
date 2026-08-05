@@ -1,8 +1,9 @@
 /**
- * MoodGrid — 心情歌单网格
- * 展示所有心情歌单卡片，点击打开弹窗
+ * MoodGrid — 心情歌单横向滚动卡片
+ * 展示所有心情歌单卡片，点击打开弹窗；桌面端支持鼠标滚轮左右滚动
  */
 
+import { useRef, useEffect } from 'react';
 import type { MoodPlaylist } from '../types';
 import { safeUrl, artworkSrc } from '../utils';
 import { playlistCover } from '../data/musicData';
@@ -13,6 +14,26 @@ export interface MoodGridProps {
 }
 
 export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 鼠标滚轮映射为横向滚动
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      // 只有容器存在横向滚动空间时才拦截纵向滚轮
+      if (el.scrollWidth <= el.clientWidth) return;
+      // 避免与横向滚轮冲突（如触控板横向滑动）
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      el.scrollBy({ left: e.deltaY, behavior: 'smooth' });
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
   return (
     <section
       className="section"
@@ -36,16 +57,22 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
       </h2>
       <p
         className="section-desc"
-        style={{ color: 'var(--gray-500)', fontSize: '15px', marginBottom: '40px' }}
+        style={{ color: 'var(--gray-500)', fontSize: '15px', marginBottom: '28px' }}
       >
         不同的心情，不同的歌单
       </p>
+
       <div
-        className="mood-grid"
+        ref={scrollRef}
+        className="mood-scroll-container"
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '24px',
+          display: 'flex',
+          gap: '20px',
+          overflowX: 'auto',
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+          padding: '8px 4px 24px',
+          margin: '0 -4px',
         }}
       >
         {moodPlaylists.map((p) => (
@@ -62,6 +89,9 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
               }
             }}
             style={{
+              flex: '0 0 auto',
+              width: 'clamp(240px, 32vw, 280px)',
+              scrollSnapAlign: 'start',
               background: 'var(--card)',
               backdropFilter: 'blur(12px)',
               borderRadius: 'var(--radius)',
@@ -181,13 +211,30 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
           </div>
         ))}
       </div>
-      {/* 响应式网格 */}
+
       <style>{`
-        @media (max-width: 900px) {
-          .mood-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        .mood-scroll-container {
+          scrollbar-width: thin;
+          scrollbar-color: var(--gray-300) transparent;
         }
+        .mood-scroll-container::-webkit-scrollbar {
+          height: 6px;
+        }
+        .mood-scroll-container::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .mood-scroll-container::-webkit-scrollbar-thumb {
+          background: var(--gray-300);
+          border-radius: 3px;
+        }
+        :root[data-theme="dark"] .mood-scroll-container::-webkit-scrollbar-thumb {
+          background: var(--gray-600);
+        }
+
         @media (max-width: 560px) {
-          .mood-grid { grid-template-columns: 1fr !important; }
+          .mood-card {
+            width: clamp(200px, 72vw, 260px) !important;
+          }
         }
       `}</style>
     </section>

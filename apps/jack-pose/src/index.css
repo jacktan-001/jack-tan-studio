@@ -135,8 +135,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg);
   color: var(--color-text);
-  /* StudioBar 为 fixed 定位（约 64px），为下方内容预留顶部空间 */
-  padding-top: 64px;
+  /* StudioBar 为 fixed 定位（约 64px + 系统状态栏安全区），为下方内容预留顶部空间 */
+  padding-top: calc(64px + env(safe-area-inset-top, 0px));
   transition: background-color 0.2s, color 0.2s;
 }
 
