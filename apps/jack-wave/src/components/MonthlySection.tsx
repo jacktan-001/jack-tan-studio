@@ -23,6 +23,8 @@ export interface MonthlySectionRef {
 export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>(
   function MonthlySection({ monthlyShares, currentSong, onPlay }, ref) {
     const [monthIndex, setMonthIndex] = useState(0);
+  // 默认折叠，点击标题 / 展开按钮后才展示完整内容，再次点击可收起
+  const [expanded, setExpanded] = useState(false);
 
     // 暴露 playCurrentMonth 方法给父组件
     useImperativeHandle(ref, () => ({
@@ -61,35 +63,93 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
         margin: '0 auto',
       }}
     >
-      <h2
-        className="section-title"
+      {/* 可点击标题栏：默认折叠，点击展开 / 收起 */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="monthly-toggle"
         style={{
-          fontSize: '32px',
-          fontWeight: 700,
-          letterSpacing: '-1px',
-          marginBottom: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          width: '100%',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          padding: 0,
+          color: 'inherit',
         }}
       >
-        本月推荐
-      </h2>
+        <h2
+          className="section-title"
+          style={{
+            fontSize: '32px',
+            fontWeight: 700,
+            letterSpacing: '-1px',
+            marginBottom: 0,
+          }}
+        >
+          本月推荐
+        </h2>
+        <span
+          aria-hidden="true"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 26,
+            height: 26,
+            borderRadius: '50%',
+            border: '1.5px solid var(--gray-200)',
+            color: 'var(--gray-500)',
+            transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform .3s ease',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </span>
+        <span
+          style={{
+            fontSize: '13px',
+            fontWeight: 600,
+            color: 'var(--teal)',
+            marginLeft: 'auto',
+          }}
+        >
+          {expanded ? '收起' : '展开'}
+        </span>
+      </button>
       <p
         className="section-desc"
-        style={{ color: 'var(--gray-500)', fontSize: '15px', marginBottom: '40px' }}
+        style={{ color: 'var(--gray-500)', fontSize: '15px', marginTop: '8px', marginBottom: expanded ? '28px' : '0' }}
       >
         每月精选歌单，记录这个月的声音记忆
       </p>
 
-      {/* 月份导航 */}
+      {/* 折叠容器：grid-template-rows 0fr→1fr 平滑展开 */}
       <div
-        className="month-nav"
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          marginBottom: '24px',
-          padding: '0 32px',
+          display: 'grid',
+          gridTemplateRows: expanded ? '1fr' : '0fr',
+          transition: 'grid-template-rows .35s ease',
         }}
       >
+        <div style={{ overflow: 'hidden', minHeight: 0 }}>
+          <div style={{ paddingBottom: 4 }}>
+            {/* 月份导航 */}
+            <div
+              className="month-nav"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                marginBottom: '24px',
+                padding: '0 32px',
+              }}
+            >
         <button
           className="month-nav-btn"
           onClick={() => handleMonthChange(-1)}
@@ -310,7 +370,10 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
           currentSong={currentSong}
           onPlay={handlePlayByIndex}
         />
-      </div>
+          </div>
+        </div>
+          </div>
+        </div>
 
       {/* 移动端：本月推荐改为上下结构（封面在上、信息在下） */}
       <style>{`
