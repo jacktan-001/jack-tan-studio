@@ -145,6 +145,7 @@ export function StudioBar({ current, quickLinks }: StudioBarProps) {
         }}
       >
         <div
+          className="studiobar-logo"
           style={{
             width: '32px',
             height: '32px',
@@ -195,6 +196,7 @@ export function StudioBar({ current, quickLinks }: StudioBarProps) {
               key={l.id}
               href={l.href}
               aria-current={active ? 'page' : undefined}
+              className="studiobar-link"
               onMouseEnter={() => setHoveredProject(l)}
               onMouseLeave={() => setHoveredProject(null)}
               style={{
@@ -327,9 +329,26 @@ export function StudioBar({ current, quickLinks }: StudioBarProps) {
         }
         @media (max-width: 768px) {
           .studiobar-brand { display: none !important; }
-          .studiobar-links { gap: 4px !important; }
-          .studiobar-links a { padding: 6px 8px !important; font-size: 11px !important; }
-          .studiobar-links a span { display: none !important; }
+          .studiobar-nav { padding-left: 12px !important; padding-right: 12px !important; }
+          .studiobar-logo {
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 10px !important;
+          }
+          .studiobar-logo svg { width: 22px !important; height: 22px !important; }
+          .studiobar-links { gap: 8px !important; }
+          .studiobar-link {
+            padding: 12px 14px !important;
+            border-radius: 12px !important;
+          }
+          .studiobar-link svg { width: 22px !important; height: 22px !important; }
+          .studiobar-link span { display: none !important; }
+          .studiobar-theme {
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 10px !important;
+          }
+          .studiobar-theme svg { width: 22px !important; height: 22px !important; }
         }
       `}</style>
     </nav>
