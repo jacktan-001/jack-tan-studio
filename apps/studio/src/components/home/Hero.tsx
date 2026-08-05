@@ -122,14 +122,14 @@ export default function Hero() {
           style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(42px, 9vw, 108px)',
-            fontWeight: 100,
+            fontWeight: 700,
             lineHeight: 1.05,
             letterSpacing: '-0.04em',
             marginBottom: '28px',
           }}
         >
-          <span style={{ color: 'var(--text)', fontWeight: 100 }}>Jack Tan </span>
-          <span className="gradient-text studio-neon-text hero-studio-accent" style={{ fontWeight: 100 }}>
+          <span style={{ color: 'var(--text)', fontWeight: 700 }}>Jack Tan </span>
+          <span className="gradient-text studio-neon-text hero-studio-accent" style={{ fontWeight: 700 }}>
             Studio
           </span>
         </motion.h1>

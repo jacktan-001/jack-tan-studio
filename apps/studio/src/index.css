@@ -603,7 +603,7 @@ button {
 .hero-studio-accent {
   display: inline-block;
   position: relative;
-  font-weight: 100 !important;
+  font-weight: 700 !important;
   letter-spacing: -0.03em;
   animation: hero-accent-breathe 4s ease-in-out infinite;
 }
