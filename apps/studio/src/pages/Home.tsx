@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react'
 import { socialLinks } from '../data/projects'
 import { socialIcons } from '../components/icons/SocialIcons'
 import ProjectShowcase from '../components/home/ProjectShowcase'
-import { Rise } from '../components/Rise'
 
 // N-2：Hero 是站内唯一仍需 Framer Motion（滚动视差 + 弹簧光球）的组件，
 // 懒加载后 motion-vendor chunk 不再进入首屏关键路径，首屏 JS 体积显著下降。
@@ -25,64 +24,9 @@ export default function Home() {
       >
         <Hero />
       </Suspense>
-      <StatsSection />
       <ProjectShowcase />
-      <AboutSection />
       <Footer />
     </div>
-  )
-}
-
-function StatsSection() {
-  const stats = [
-    { value: '03', label: '上线项目', sub: 'All Live' },
-    { value: '09+', label: '行业经验', sub: 'Years' },
-    { value: '08', label: '上线系统', sub: 'Systems' },
-    { value: '02', label: '国家专利', sub: 'Patents' },
-  ]
-
-  return (
-    <section className="max-w-[1000px] mx-auto px-6 py-10">
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
-        {stats.map((s, i) => (
-          <Rise key={s.label} delay={i * 0.08} className="glass p-7 text-center">
-            <div className="font-display text-5xl font-bold tracking-tight leading-none bg-clip-text text-transparent bg-[linear-gradient(135deg,var(--text),var(--text-muted))]">
-              {s.value}
-            </div>
-            <div className="text-sm text-text-muted mt-2">{s.label}</div>
-            <div className="text-[11px] font-mono text-text-dim mt-1">{s.sub}</div>
-          </Rise>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function AboutSection() {
-  return (
-    <section className="max-w-[900px] mx-auto px-6 py-24 text-center">
-      <Rise>
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-border mb-5 text-xs font-mono text-text-muted">
-          ABOUT
-        </div>
-        <h2 className="font-display text-[clamp(28px,4vw,44px)] font-semibold tracking-tight mb-6 leading-tight">
-          以技术为基，以<span className="gradient-text">创意</span>为翼
-        </h2>
-        <p className="text-base text-text-muted leading-relaxed max-w-[640px] mx-auto">
-          Jack Tan Studio 是一个个人创意集合平台，整合了音乐随记、社媒排版工具和个人职业展示。
-          底层采用 React + TypeScript + Vite + Framer Motion + Three.js 技术栈，
-          部署于 Cloudflare Pages 全球边缘网络。未来将持续集成更多创意工具和实验性项目。
-        </p>
-
-        <div className="flex flex-wrap gap-2.5 justify-center mt-10">
-          {['React 19', 'TypeScript', 'Vite', 'Framer Motion', 'Three.js', 'GSAP', 'Cloudflare Pages', 'PWA'].map((tech) => (
-            <span key={tech} className="px-4 py-2 rounded-lg bg-white/[0.04] border border-border text-[13px] font-mono text-text-muted">
-              {tech}
-            </span>
-          ))}
-        </div>
-      </Rise>
-    </section>
   )
 }
 
