@@ -1,0 +1,49 @@
+{
+  "id": "/",
+  "name": "Jack Tan Studio",
+  "short_name": "Jack Tan",
+  "description": "创意工作室 · 音乐 · 排版 · 个人作品集",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#06060a",
+  "theme_color": "#0f172a",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "categories": ["portfolio", "music", "design", "lifestyle"],
+  "icons": [
+    {
+      "src": "/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "在路上",
+      "short_name": "项目",
+      "description": "查看项目展示",
+      "url": "/#showcase"
+    }
+  ]
+}
