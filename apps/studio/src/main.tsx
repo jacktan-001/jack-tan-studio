@@ -14,3 +14,12 @@ createRoot(document.getElementById('root')!).render(
     </ThemeProvider>
   </StrictMode>,
 )
+
+// 注册 PWA Service Worker（仅在生产构建）
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .register('/sw.js')
+    .catch(() => {
+      // SW 注册失败静默处理
+    })
+}

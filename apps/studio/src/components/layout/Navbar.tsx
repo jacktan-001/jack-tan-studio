@@ -135,7 +135,6 @@ export default function Navbar() {
 
   const activeProject = hoveredProject
   const previewRgb = activeProject ? activeProject.colorRgb : '124, 58, 237'
-  const previewColor = activeProject ? activeProject.color : 'var(--accent)'
 
   return (
     <nav
@@ -162,30 +161,23 @@ export default function Navbar() {
     >
       {/* ===== 左侧：Logo ===== */}
       <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-        <div
+        <img
+          src="/logo-192.png"
+          alt=""
+          width={36}
+          height={36}
           className="nav-brand-mark"
           style={{
             width: '36px',
             height: '36px',
             borderRadius: '10px',
-            background: activeProject
-              ? `linear-gradient(135deg, ${previewColor}, var(--accent-2))`
-              : 'linear-gradient(135deg, var(--accent), var(--accent-2))',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'var(--font-display)',
-            fontWeight: 700,
-            fontSize: '18px',
-            color: 'white',
+            objectFit: 'cover',
             boxShadow: activeProject
               ? `0 4px 20px rgba(${previewRgb}, 0.4)`
               : '0 4px 20px rgba(124, 58, 237, 0.4)',
             transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
           }}
-        >
-          JT
-        </div>
+        />
         <span
           style={{
             fontFamily: 'var(--font-display)',
