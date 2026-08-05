@@ -148,7 +148,9 @@ export default function Navbar() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: scrolled ? '10px 32px' : '14px 32px',
+        padding: scrolled
+          ? 'calc(env(safe-area-inset-top, 0px) + 10px) calc(env(safe-area-inset-right, 0px) + 32px) calc(env(safe-area-inset-bottom, 0px) + 10px) calc(env(safe-area-inset-left, 0px) + 32px)'
+          : 'calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-right, 0px) + 32px) calc(env(safe-area-inset-bottom, 0px) + 14px) calc(env(safe-area-inset-left, 0px) + 32px)',
         background: scrolled ? 'color-mix(in srgb, var(--bg) 88%, transparent)' : 'color-mix(in srgb, var(--bg) 40%, transparent)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',

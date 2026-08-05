@@ -118,7 +118,9 @@ export function StudioBar({ current, quickLinks }: StudioBarProps) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: scrolled ? '8px 24px' : '12px 24px',
+        padding: scrolled
+          ? 'calc(env(safe-area-inset-top, 0px) + 8px) calc(env(safe-area-inset-right, 0px) + 24px) calc(env(safe-area-inset-bottom, 0px) + 8px) calc(env(safe-area-inset-left, 0px) + 24px)'
+          : 'calc(env(safe-area-inset-top, 0px) + 12px) calc(env(safe-area-inset-right, 0px) + 24px) calc(env(safe-area-inset-bottom, 0px) + 12px) calc(env(safe-area-inset-left, 0px) + 24px)',
         background: scrolled
           ? 'color-mix(in srgb, var(--bg, #06060a) 88%, transparent)'
           : 'color-mix(in srgb, var(--bg, #06060a) 40%, transparent)',
@@ -329,7 +331,7 @@ export function StudioBar({ current, quickLinks }: StudioBarProps) {
         }
         @media (max-width: 768px) {
           .studiobar-brand { display: none !important; }
-          .studiobar-nav { padding-left: 12px !important; padding-right: 12px !important; }
+          .studiobar-nav { padding-left: calc(env(safe-area-inset-left, 0px) + 12px) !important; padding-right: calc(env(safe-area-inset-right, 0px) + 12px) !important; }
           .studiobar-logo {
             width: 40px !important;
             height: 40px !important;
