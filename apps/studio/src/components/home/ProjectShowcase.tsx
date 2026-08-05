@@ -307,10 +307,10 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           <VisualPreview project={project} />
         </div>
 
-        {/* 特色亮点 */}
+        {/* 特色亮点 — 双列布局，缩短卡片高度 */}
         <div style={{ marginBottom: '22px' }}>
           <FieldLabel>特色亮点</FieldLabel>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px 14px' }}>
+          <div className="showcase-features">
             {project.features.map((f) => (
               <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                 <span style={{
@@ -445,6 +445,16 @@ export default function ProjectShowcase() {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
           gap: 22px;
+        }
+
+        /* ===== 特色亮点：双列布局（窄屏回退单列），缩短卡片高度 ===== */
+        .showcase-features {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 8px 14px;
+        }
+        @media (min-width: 520px) {
+          .showcase-features { grid-template-columns: 1fr 1fr; }
         }
 
         /* ===== 预览容器通用 ===== */
