@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { StudioBar } from '@jack-tan/studio-core'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import CameraFlash from './components/CameraFlash'
 
 const ProjectListPage = lazy(() => import('./pages/ProjectListPage').then(m => ({ default: m.ProjectListPage })))
 const EditorPage = lazy(() => import('./pages/EditorPage').then(m => ({ default: m.EditorPage })))
@@ -63,6 +64,9 @@ function App() {
           <Toaster position="top-center" toastOptions={{ className: 'rounded-xl' }} />
         </HashRouter>
       </div>
+
+      {/* 全局相机闪光特效 — 随机位置闪光灯，模拟四处拍照（fixed 覆盖层，不拦截交互） */}
+      <CameraFlash />
     </ErrorBoundary>
   )
 }

@@ -315,6 +315,65 @@ body {
   }
 }
 
+/* ==================== 全局相机闪光特效 ====================
+   随机位置、随机时长的闪光灯，模拟「四处拍照」氛围；
+   与 Jack Pose「摆拍 / 摄影」主题契合。
+   - fixed 全屏覆盖，pointer-events:none，绝不拦截交互
+   - z-index 9990：内容层(1) / 导航栏(999) 之上，纸张纹理(9998) / Toast 之下
+   - 暖白光晕，暗色模式偏冷白，保持与页面暖色基调协调 */
+.pose-flash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.pose-flash {
+  position: absolute;
+  /* top/left 表示闪光中心点，用 translate 居中 */
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: opacity, transform;
+  mix-blend-mode: screen;
+  animation-name: pose-flash-burst;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: forwards;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 248, 230, 0.6) 18%,
+    rgba(255, 240, 210, 0.25) 38%,
+    transparent 70%
+  );
+}
+
+/* 暗色模式：闪光更亮、偏冷白，避免暖色过曝 */
+:root[data-theme="dark"] .pose-flash {
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(245, 248, 255, 0.7) 16%,
+    rgba(220, 230, 255, 0.3) 38%,
+    transparent 70%
+  );
+}
+
+@keyframes pose-flash-burst {
+  0%   { opacity: 0;    transform: translate(-50%, -50%) scale(0.4); }
+  8%   { opacity: 0.95; transform: translate(-50%, -50%) scale(1); }
+  35%  { opacity: 0.35; transform: translate(-50%, -50%) scale(1.12); }
+  100% { opacity: 0;    transform: translate(-50%, -50%) scale(1.45); }
+}
+
+/* 减少动效偏好下彻底关闭闪光层 */
+@media (prefers-reduced-motion: reduce) {
+  .pose-flash-overlay {
+    display: none;
+  }
+}
+
 /* 暖光发光 */
 .pose-warm-glow {
   box-shadow:
