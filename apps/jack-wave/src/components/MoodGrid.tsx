@@ -50,22 +50,25 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
 
   const [hovered, setHovered] = useState<number | null>(null);
   const [cur, setCur] = useState(0);
-  const [radius, setRadius] = useState(400);
-  const [cardSize, setCardSize] = useState(200);
+  const [radius, setRadius] = useState(440);
+  const [cardSize, setCardSize] = useState(240);
 
-  // 响应式：轨道半径与卡片尺寸随视口缩放
+  // 响应式：轨道半径与卡片尺寸随视口缩放。
+  // 说明：由于 ring 整体 translateZ(-radius) 与卡片 translateZ(+radius) 相互抵消，
+  // 正对前方的卡片在透视下按真实 cardSize 渲染，因此放大 cardSize 即可让封面与
+  // “本月推荐”200px 封面在视觉上保持一致（并整体放大）。
   useEffect(() => {
     const apply = () => {
       const w = window.innerWidth;
       if (w < 560) {
-        setRadius(230);
-        setCardSize(150);
+        setRadius(300);
+        setCardSize(195);
       } else if (w < 900) {
-        setRadius(320);
-        setCardSize(180);
+        setRadius(380);
+        setCardSize(215);
       } else {
-        setRadius(400);
-        setCardSize(200);
+        setRadius(440);
+        setCardSize(240);
       }
     };
     apply();
@@ -193,7 +196,7 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
         onPointerCancel={endDrag}
         style={{
           position: 'relative',
-          height: `${cardSize * 2 + 200}px`,
+          height: `${cardSize * 2 + 220}px`,
           perspective: '1500px',
           touchAction: 'none',
           cursor: 'grab',
@@ -256,8 +259,8 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
         >
           {moodPlaylists.map((p, i) => {
             const angle = (i / N) * 360;
-            // 螺旋竖向起伏，营造 3D 螺旋轨道观感（连续循环仍为环形）
-            const helix = Math.sin((i / N) * Math.PI * 2) * 26;
+            // 螺旋竖向起伏，营造 3D 螺旋轨道观感（连续循环仍为环形）；随卡片尺寸等比缩放保持协调
+            const helix = Math.sin((i / N) * Math.PI * 2) * (cardSize * 0.13);
             const isHover = hovered === i;
             return (
               <button

@@ -72,7 +72,7 @@ export function MoodModal({
         alignItems: 'center',
         justifyContent: 'center',
         // 顶部额外预留共享导航栏高度 64px + PWA 安全区，确保弹窗顶部不被系统状态栏 / 导航栏遮挡
-        padding: 'calc(64px + env(safe-area-inset-top, 0px)) 24px max(24px, env(safe-area-inset-bottom, 0px))',
+        padding: 'calc(64px + env(safe-area-inset-top, 0px)) 20px max(24px, env(safe-area-inset-bottom, 0px))',
         opacity: show ? 1 : 0,
         pointerEvents: show ? 'auto' : 'none',
         transition: 'opacity .25s',
@@ -90,9 +90,9 @@ export function MoodModal({
         style={{
           background: 'var(--card-solid)',
           borderRadius: '20px',
-          maxWidth: '640px',
+          maxWidth: '600px',
           width: '100%',
-          maxHeight: '85vh',
+          maxHeight: '78vh',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',

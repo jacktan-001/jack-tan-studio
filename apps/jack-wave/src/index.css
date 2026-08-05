@@ -248,9 +248,9 @@ textarea {
 .modal {
   background: var(--card-solid);
   border-radius: 20px;
-  max-width: 640px;
+  max-width: 600px;
   width: 100%;
-  max-height: 85vh;
+  max-height: 78vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
