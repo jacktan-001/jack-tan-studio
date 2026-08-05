@@ -118,9 +118,10 @@ export function StudioBar({ current, quickLinks }: StudioBarProps) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        // 顶部固定导航只需处理顶部/左右安全区；底部安全区属于底部栏，加在这里会异常增高并遮挡首屏内容
         padding: scrolled
-          ? 'calc(env(safe-area-inset-top, 0px) + 8px) calc(env(safe-area-inset-right, 0px) + 24px) calc(env(safe-area-inset-bottom, 0px) + 8px) calc(env(safe-area-inset-left, 0px) + 24px)'
-          : 'calc(env(safe-area-inset-top, 0px) + 12px) calc(env(safe-area-inset-right, 0px) + 24px) calc(env(safe-area-inset-bottom, 0px) + 12px) calc(env(safe-area-inset-left, 0px) + 24px)',
+          ? 'calc(env(safe-area-inset-top, 0px) + 8px) calc(env(safe-area-inset-right, 0px) + 24px) 8px calc(env(safe-area-inset-left, 0px) + 24px)'
+          : 'calc(env(safe-area-inset-top, 0px) + 12px) calc(env(safe-area-inset-right, 0px) + 24px) 12px calc(env(safe-area-inset-left, 0px) + 24px)',
         background: scrolled
           ? 'color-mix(in srgb, var(--bg, #06060a) 88%, transparent)'
           : 'color-mix(in srgb, var(--bg, #06060a) 40%, transparent)',

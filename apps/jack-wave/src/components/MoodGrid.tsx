@@ -50,25 +50,27 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
 
   const [hovered, setHovered] = useState<number | null>(null);
   const [cur, setCur] = useState(0);
-  const [radius, setRadius] = useState(440);
-  const [cardSize, setCardSize] = useState(240);
+  const [radius, setRadius] = useState(420);
+  const [cardSize, setCardSize] = useState(200);
 
   // 响应式：轨道半径与卡片尺寸随视口缩放。
   // 说明：由于 ring 整体 translateZ(-radius) 与卡片 translateZ(+radius) 相互抵消，
-  // 正对前方的卡片在透视下按真实 cardSize 渲染，因此放大 cardSize 即可让封面与
-  // “本月推荐”200px 封面在视觉上保持一致（并整体放大）。
+  // 正对前方的卡片在透视下按真实 cardSize 渲染。因此将 cardSize 设为与
+  // MonthlySection 封面一致（桌面/平板 200px，手机最大 260px），即可让心情歌单
+  // 旋转封面与本月推荐封面在视觉上完全等大。
   useEffect(() => {
     const apply = () => {
       const w = window.innerWidth;
       if (w < 560) {
+        // 手机端本月推荐封面 max-width: 260px，这里同步使用 260px 保持等大
         setRadius(300);
-        setCardSize(195);
+        setCardSize(260);
       } else if (w < 900) {
-        setRadius(380);
-        setCardSize(215);
+        setRadius(360);
+        setCardSize(200);
       } else {
-        setRadius(440);
-        setCardSize(240);
+        setRadius(420);
+        setCardSize(200);
       }
     };
     apply();
