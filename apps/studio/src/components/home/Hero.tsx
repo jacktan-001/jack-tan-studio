@@ -1,9 +1,8 @@
 import { useRef, useEffect, useState } from 'react'
 import { motion, useScroll, useTransform } from 'motion/react'
 import { ArrowDown, Sparkles } from 'lucide-react'
-import { setPendingProject, navigateWithTransition } from '@jack-tan/studio-core'
-import CharSplit from '../effects/CharSplit'
-import { useMagnetic } from '../../hooks/useMagnetic'
+import { socialLinks } from '../../data/projects'
+import { socialIcons } from '../icons/SocialIcons'
 
 export default function Hero() {
   const ref = useRef<HTMLDivElement>(null)
@@ -16,12 +15,6 @@ export default function Hero() {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9])
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-
-  // 磁吸按钮 refs — Studio 科幻展厅核心交互
-  const magneticExploreRef = useRef<HTMLAnchorElement>(null)
-  const magneticGithubRef = useRef<HTMLAnchorElement>(null)
-  useMagnetic(magneticExploreRef)
-  useMagnetic(magneticGithubRef)
 
   useEffect(() => {
     const handleMove = (e: MouseEvent) => {
@@ -42,10 +35,7 @@ export default function Hero() {
     >
       {/* Floating orbs */}
       <motion.div
-        animate={{
-          x: mousePos.x,
-          y: mousePos.y,
-        }}
+        animate={{ x: mousePos.x, y: mousePos.y }}
         transition={{ type: 'spring', stiffness: 50, damping: 20 }}
         style={{
           position: 'absolute',
@@ -60,10 +50,7 @@ export default function Hero() {
         }}
       />
       <motion.div
-        animate={{
-          x: -mousePos.x,
-          y: -mousePos.y,
-        }}
+        animate={{ x: -mousePos.x, y: -mousePos.y }}
         transition={{ type: 'spring', stiffness: 50, damping: 20 }}
         style={{
           position: 'absolute',
@@ -102,9 +89,9 @@ export default function Hero() {
         </motion.div>
 
         <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ delay: 0.3, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(48px, 10vw, 120px)',
@@ -114,9 +101,7 @@ export default function Hero() {
             marginBottom: '24px',
           }}
         >
-          <span className="gradient-text studio-neon-text">
-            <CharSplit text="Jack Tan" />
-          </span>
+          <span className="gradient-text studio-neon-text">Jack Tan</span>
           <br />
           <span style={{
             fontWeight: 200,
@@ -134,7 +119,7 @@ export default function Hero() {
             color: 'var(--text-muted)',
             lineHeight: 1.7,
             maxWidth: '560px',
-            margin: '0 auto 40px',
+            margin: '0 auto 44px',
           }}
         >
           创意工作室 · 汇集音乐随记、社媒排版、个人作品集于一体。
@@ -142,78 +127,65 @@ export default function Hero() {
           以技术驱动创意，以动效诠释体验。
         </motion.p>
 
+        {/* 社交媒体链接 — 移至首屏 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.6 }}
-          style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}
         >
-          <a
-            ref={magneticExploreRef}
-            href="/projects/wave/intro"
-            data-cursor-hover
-            className="studio-magnetic"
-            onClick={(e) => {
-              e.preventDefault()
-              setPendingProject('wave')
-              navigateWithTransition('/projects/wave/intro')
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '14px 32px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, var(--accent), var(--accent-2))',
-              color: 'white',
-              fontWeight: 600,
-              fontSize: '15px',
-              boxShadow: '0 8px 30px rgba(124, 58, 237, 0.4)',
-              transition: 'transform 0.3s, box-shadow 0.3s',
-              textDecoration: 'none',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(124, 58, 237, 0.6)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 8px 30px rgba(124, 58, 237, 0.4)'
-            }}
-          >
-            探索作品
-          </a>
-          <a
-            ref={magneticGithubRef}
-            href="https://github.com/jacktan-001"
-            target="_blank"
-            rel="noopener noreferrer"
-            data-cursor-hover
-            className="studio-magnetic"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '14px 32px',
-              borderRadius: '12px',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid var(--border)',
-              color: 'var(--text)',
-              fontWeight: 500,
-              fontSize: '15px',
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
-              e.currentTarget.style.borderColor = 'var(--border-hover)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
-              e.currentTarget.style.borderColor = 'var(--border)'
-            }}
-          >
-            GitHub
-          </a>
+          <div style={{
+            fontSize: '11px',
+            fontFamily: 'var(--font-mono)',
+            color: 'var(--text-dim)',
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            marginBottom: '18px',
+          }}>
+            Connect · 找到我
+          </div>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {socialLinks.map((link, i) => (
+              <motion.a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={link.label}
+                data-cursor-hover
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.78 + i * 0.07, duration: 0.5 }}
+                style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '14px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid var(--border)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-muted)',
+                  transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(124, 58, 237, 0.14)'
+                  e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.45)'
+                  e.currentTarget.style.color = 'var(--accent)'
+                  e.currentTarget.style.transform = 'translateY(-4px)'
+                  e.currentTarget.style.boxShadow = '0 10px 30px -8px rgba(124, 58, 237, 0.5)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+                  e.currentTarget.style.borderColor = 'var(--border)'
+                  e.currentTarget.style.color = 'var(--text-muted)'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
+              >
+                {socialIcons[link.icon]}
+              </motion.a>
+            ))}
+          </div>
         </motion.div>
       </div>
 
