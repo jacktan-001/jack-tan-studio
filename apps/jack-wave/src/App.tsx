@@ -364,26 +364,43 @@ export default function App() {
       {/* StudioBar 跨项目共享导航栏（fixed 定位，下方内容由 index.css 预留 64px 顶部间距） */}
       <StudioBar current="wave" />
 
+      {/* ============ 全局背景动效层（fixed, z-index:0，置于内容之下） ============ */}
+      {/* 波纹纹理 — SVG 水波 */}
+      <div className="wave-ripple-texture" aria-hidden="true" />
+      {/* 液态光斑 — 流动冷色光斑 */}
+      <div className="wave-liquid-blobs" aria-hidden="true">
+        <div className="wave-liquid-blob" />
+        <div className="wave-liquid-blob" />
+      </div>
       {/* 光晕呼吸 — 角落 radial-gradient 脉冲 */}
       <div className="wave-halo-pulse" aria-hidden="true">
         <div className="wave-halo-corner" />
         <div className="wave-halo-corner" />
       </div>
+      {/* 音频频条 — 音乐相关均衡器背景 */}
+      <div className="wave-eq-bars" aria-hidden="true">
+        {Array.from({ length: 48 }).map((_, i) => (
+          <div key={i} className="wave-eq-bar" />
+        ))}
+      </div>
       {/* 点击水波纹扩散 */}
       <RippleField />
 
-      {/* Hero 区域 */}
-      <Hero onPlayCurrentMonth={handlePlayCurrentMonth} />
+      {/* ============ 内容层（relative z-1，置于背景之上） ============ */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        {/* Hero 区域 */}
+        <Hero onPlayCurrentMonth={handlePlayCurrentMonth} />
 
-      {/* 依赖 KV 动态数据的区域：use() + Suspense，加载失败静默回退静态数据 */}
-      <Suspense fallback={<DataFallback />}>
-        <PublicDataErrorBoundary fallback={renderDataSections(staticResolvedData)}>
-          <PublicDataProvider>{renderDataSections}</PublicDataProvider>
-        </PublicDataErrorBoundary>
-      </Suspense>
+        {/* 依赖 KV 动态数据的区域：use() + Suspense，加载失败静默回退静态数据 */}
+        <Suspense fallback={<DataFallback />}>
+          <PublicDataErrorBoundary fallback={renderDataSections(staticResolvedData)}>
+            <PublicDataProvider>{renderDataSections}</PublicDataProvider>
+          </PublicDataErrorBoundary>
+        </Suspense>
 
-      {/* 页脚 */}
-      <Footer />
+        {/* 页脚 */}
+        <Footer />
+      </div>
 
       {/* 底部播放器 */}
       <AudioPlayer player={player} />

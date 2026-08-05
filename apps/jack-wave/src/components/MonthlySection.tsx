@@ -311,6 +311,29 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
           onPlay={handlePlayByIndex}
         />
       </div>
+
+      {/* 移动端：本月推荐改为上下结构（封面在上、信息在下） */}
+      <style>{`
+        @media (max-width: 640px) {
+          .monthly-card { border-radius: 16px !important; }
+          .monthly-header {
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 20px !important;
+            padding: 20px !important;
+            text-align: center;
+          }
+          .monthly-cover {
+            width: 100% !important;
+            max-width: 260px !important;
+            height: auto !important;
+            aspect-ratio: 1 / 1 !important;
+          }
+          .monthly-info { width: 100% !important; }
+          .monthly-author,
+          .monthly-meta { justify-content: center !important; }
+        }
+      `}</style>
     </section>
   );
   },
