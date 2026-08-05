@@ -28,7 +28,7 @@ export const projects: Project[] = [
     url: '/projects/jack-wave/',
     repo: 'jacktan-001/jack-wave',
     tech: ['PWA', 'Cloudflare KV', 'Pages Functions', 'Service Worker'],
-    features: ['月度歌单', '心情歌单', '音乐播放器', '管理后台', '离线支持'],
+    features: ['月度 / 心情歌单', '音乐播放器', '管理后台', '离线支持'],
     status: 'live',
   },
   {
@@ -43,7 +43,7 @@ export const projects: Project[] = [
     url: '/projects/jack-pose/',
     repo: 'jacktan-001/jack-pose',
     tech: ['React Router', 'TypeScript', 'Tailwind CSS', 'Vite'],
-    features: ['排版编辑器', '双平台预览', '拼长图', '工程文件导入导出', '实时渲染'],
+    features: ['排版编辑器', '实时预览（双平台）', '拼长图', '工程文件导入导出'],
     status: 'live',
   },
   {
@@ -58,7 +58,7 @@ export const projects: Project[] = [
     url: '/projects/jack-tan/',
     repo: 'jacktan-001/jack-tan',
     tech: ['HTML5', 'CSS3', 'IntersectionObserver', 'PWA'],
-    features: ['工作经历', '核心项目', '上线作品', '专利成果', '荣誉资质'],
+    features: ['工作经历', '核心项目', '上线作品', '专利与荣誉'],
     status: 'live',
   },
   {
