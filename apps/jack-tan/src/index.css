@@ -163,6 +163,50 @@ section[id] {
   clip-path: inset(0 0 0 0 round 0);
 }
 
+/* 工作经历模块在页面加载时直接显示，无需手动滚动触发 */
+.experience-mount-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  clip-path: inset(10% 0 10% 0 round 12px);
+  animation: experience-mount-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+}
+
+@keyframes experience-mount-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(28px);
+    clip-path: inset(10% 0 10% 0 round 12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    clip-path: inset(0 0 0 0 round 0);
+  }
+}
+
+/* 工作经历卡片错落入场 */
+.experience-mount-reveal .card-hover {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: experience-card-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.experience-mount-reveal .card-hover:nth-child(1) { animation-delay: 0.25s; }
+.experience-mount-reveal .card-hover:nth-child(2) { animation-delay: 0.35s; }
+.experience-mount-reveal .card-hover:nth-child(3) { animation-delay: 0.45s; }
+.experience-mount-reveal .card-hover:nth-child(4) { animation-delay: 0.55s; }
+
+@keyframes experience-card-in {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ==================== Utilities ==================== */
 
 .card-hover {
@@ -592,12 +636,13 @@ section[id] {
 
 /* ==================== 布局辅助 ====================
    侧边栏在固定导航栏下方对齐（仅桌面端），
-   确保 sticky 定位不会被 StudioBar 遮挡。 */
+   确保 sticky 定位不会被 StudioBar 遮挡。
+   StudioBar 高度 = 64px + 系统状态栏安全区，因此这里同步加上 safe-area。 */
 
 @media (min-width: 1024px) {
   aside.sticky {
-    top: 64px;
-    height: calc(100vh - 64px);
+    top: calc(64px + env(safe-area-inset-top, 0px));
+    height: calc(100vh - 64px - env(safe-area-inset-top, 0px));
   }
 }
 

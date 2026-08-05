@@ -6,7 +6,6 @@
  * - 进度条（点击跳转）
  * - 当前歌曲封面/标题/歌手
  * - Apple Music 平台链接（修复地区代码）
- * - 关闭播放器按钮
  *
  * 播放逻辑由 useAudioPlayer hook 管理，本组件仅负责 UI 展示。
  */
@@ -32,7 +31,6 @@ export function AudioPlayer({ player }: AudioPlayerProps) {
     playNext,
     playPrev,
     seek,
-    closePlayer,
   } = player;
 
   if (!isVisible || !currentSong) return null;
@@ -348,49 +346,6 @@ export function AudioPlayer({ player }: AudioPlayerProps) {
           <span>Apple Music</span>
         </a>
       </div>
-
-      {/* 关闭按钮 */}
-      <button
-        className="player-close"
-        onClick={closePlayer}
-        aria-label="关闭播放器"
-        title="关闭"
-        style={{
-          width: '36px',
-          height: '36px',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--gray-500)',
-          transition: 'all .15s',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          flexShrink: 0,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.color = 'var(--gray-700)';
-          e.currentTarget.style.background = 'var(--gray-100)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.color = 'var(--gray-500)';
-          e.currentTarget.style.background = 'none';
-        }}
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-        >
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-      </button>
 
       {/* 响应式：移动端隐藏进度条和平台链接文字 */}
       <style>{`

@@ -32,7 +32,7 @@ export default function App() {
 
       <div
         className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 lg:grid-cols-[380px_1fr]"
-        style={{ paddingTop: '64px' }}
+        style={{ paddingTop: 'calc(64px + env(safe-area-inset-top, 0px))' }}
       >
         <Sidebar />
         <RevealObserver>

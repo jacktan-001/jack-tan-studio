@@ -51,7 +51,7 @@ const EXPERIENCES = [
 
 export default function Experience() {
   return (
-    <section id="experience" className="section-reveal mb-16">
+    <section id="experience" className="experience-mount-reveal mb-16">
       <SectionHeader title="工作经历" />
       <div className="space-y-3.5">
         {EXPERIENCES.map((exp) => (
