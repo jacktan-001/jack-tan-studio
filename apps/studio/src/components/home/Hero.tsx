@@ -127,65 +127,48 @@ export default function Hero() {
           以技术驱动创意，以动效诠释体验。
         </motion.p>
 
-        {/* 社交媒体链接 — 移至首屏 */}
+        {/* 社交媒体链接 — 首屏（简洁版：去标签、幽灵图标，减少视觉噪音） */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.6 }}
+          style={{ display: 'flex', gap: '4px', justifyContent: 'center', flexWrap: 'wrap' }}
         >
-          <div style={{
-            fontSize: '11px',
-            fontFamily: 'var(--font-mono)',
-            color: 'var(--text-dim)',
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            marginBottom: '18px',
-          }}>
-            Connect · 找到我
-          </div>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {socialLinks.map((link, i) => (
-              <motion.a
-                key={link.label}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={link.label}
-                data-cursor-hover
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.78 + i * 0.07, duration: 0.5 }}
-                style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '14px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid var(--border)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--text-muted)',
-                  transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(124, 58, 237, 0.14)'
-                  e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.45)'
-                  e.currentTarget.style.color = 'var(--accent)'
-                  e.currentTarget.style.transform = 'translateY(-4px)'
-                  e.currentTarget.style.boxShadow = '0 10px 30px -8px rgba(124, 58, 237, 0.5)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
-                  e.currentTarget.style.borderColor = 'var(--border)'
-                  e.currentTarget.style.color = 'var(--text-muted)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = 'none'
-                }}
-              >
-                {socialIcons[link.icon]}
-              </motion.a>
-            ))}
-          </div>
+          {socialLinks.map((link, i) => (
+            <motion.a
+              key={link.label}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={link.label}
+              data-cursor-hover
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.78 + i * 0.07, duration: 0.5 }}
+              style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--text-dim)',
+                transition: 'color 0.3s, transform 0.3s, background 0.3s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--accent)'
+                e.currentTarget.style.transform = 'translateY(-3px)'
+                e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-dim)'
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.background = 'transparent'
+              }}
+            >
+              {socialIcons[link.icon]}
+            </motion.a>
+          ))}
         </motion.div>
       </div>
 
