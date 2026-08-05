@@ -178,22 +178,20 @@ export default function Hero() {
         transition={{ delay: 1.5, duration: 1 }}
         style={{
           position: 'absolute',
-          bottom: '40px',
+          bottom: '36px',
           left: '50%',
           transform: 'translateX(-50%)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '8px',
           color: 'var(--text-dim)',
+          display: 'flex',
+          justifyContent: 'center',
         }}
+        aria-hidden
       >
-        <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em' }}>SCROLL</span>
         <motion.div
           animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <ArrowDown size={16} />
+          <ArrowDown size={18} />
         </motion.div>
       </motion.div>
 

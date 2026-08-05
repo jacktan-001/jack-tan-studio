@@ -30,12 +30,34 @@ export default function Home() {
 
 function Footer() {
   return (
-    <footer className="studio-footer border-t border-border px-6 pt-14 pb-12 mt-12 text-center">
-      <div className="mx-auto max-w-[1000px]">
-        <div className="font-display text-sm font-medium text-text-muted">
+    <footer
+      className="studio-footer"
+      style={{
+        borderTop: '1px solid var(--border)',
+        padding: '56px 24px calc(48px + env(safe-area-inset-bottom, 0px))',
+        marginTop: '48px',
+        textAlign: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '14px',
+            fontWeight: 500,
+            color: 'var(--text-muted)',
+          }}
+        >
           Jack Tan Studio
         </div>
-        <div className="mt-3 text-xs text-text-dim font-mono">
+        <div
+          style={{
+            marginTop: '12px',
+            fontSize: '12px',
+            fontFamily: 'var(--font-mono)',
+            color: 'var(--text-dim)',
+          }}
+        >
           © 2026 · Built with React + Vite · Deployed on Cloudflare Pages
         </div>
       </div>
