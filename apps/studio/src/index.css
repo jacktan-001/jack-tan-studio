@@ -533,6 +533,200 @@ button {
   }
 }
 
+/* ==================== Hero 诗意首屏视觉与微交互 ====================
+   设计理念：把「代码、音符与像素编织的花园」转译为可感知的视觉：
+   - 极淡网格随鼠标呼吸
+   - 标题超细字重 + 霓虹渐变扫描
+   - 关键词「律 / 序」悬停浮现音乐 / 调色盘图标
+   - 「慢慢逛」细斜体收尾
+   ================================================== */
+
+/* 呼吸网格：极淡，随鼠标径向Mask微变 */
+.hero-breath-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(var(--accent-rgb), 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--accent-rgb), 0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(
+    circle 420px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(0, 0, 0, 0.55),
+    transparent 70%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 420px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(0, 0, 0, 0.55),
+    transparent 70%
+  );
+  opacity: 0.55;
+  transition: opacity 0.6s ease, mask-position 0.4s ease, -webkit-mask-position 0.4s ease;
+  animation: hero-grid-breathe 8s ease-in-out infinite;
+}
+
+@keyframes hero-grid-breathe {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.75; }
+}
+
+/* 标题霓虹扫描光带 */
+.hero-scan-beam {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--accent-rgb), 0.04),
+    rgba(var(--accent-2-rgb), 0.07),
+    rgba(var(--accent-3-rgb), 0.04),
+    transparent
+  );
+  transform: skewX(-20deg);
+  animation: hero-scan-sweep 7s ease-in-out infinite;
+}
+
+@keyframes hero-scan-sweep {
+  0%, 85%, 100% { left: -100%; opacity: 0; }
+  10% { opacity: 1; }
+  45% { left: 140%; opacity: 1; }
+  55% { opacity: 0; }
+}
+
+/* 标题强调字：保持超细字重，叠加渐变与扫描 */
+.hero-studio-accent {
+  display: inline-block;
+  position: relative;
+  font-weight: 100 !important;
+  letter-spacing: -0.03em;
+  animation: hero-accent-breathe 4s ease-in-out infinite;
+}
+
+.hero-studio-accent::after {
+  content: '';
+  position: absolute;
+  inset: -8% -4%;
+  z-index: -1;
+  background: radial-gradient(ellipse at center, rgba(var(--accent-rgb), 0.18), transparent 70%);
+  filter: blur(20px);
+  opacity: 0.6;
+  animation: hero-glow-pulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes hero-accent-breathe {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.12); }
+}
+
+@keyframes hero-glow-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.95); }
+  50% { opacity: 0.75; transform: scale(1.05); }
+}
+
+/* 诗意关键词悬停高亮 + 图标 */
+.poetic-keyword {
+  position: relative;
+  display: inline-block;
+  cursor: default;
+  color: var(--text);
+  font-weight: 500;
+  transition: color 0.35s ease, text-shadow 0.35s ease;
+}
+
+.poetic-keyword:hover {
+  color: var(--accent);
+  text-shadow:
+    0 0 8px rgba(var(--accent-rgb), 0.4),
+    0 0 18px rgba(var(--accent-rgb), 0.2);
+}
+
+.poetic-keyword .poetic-icon {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(6px) scale(0.85);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  color: var(--accent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.poetic-keyword:hover .poetic-icon {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* 慢慢逛：细斜体收尾 */
+.hero-farewell {
+  font-weight: 100;
+  font-style: italic;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  transition: color 0.4s ease, text-shadow 0.4s ease;
+}
+
+.hero-farewell:hover {
+  color: var(--accent);
+  text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.35);
+}
+
+/* 响应式：移动端降低特效强度 */
+@media (max-width: 768px) {
+  .hero-breath-grid {
+    background-size: 60px 60px;
+    opacity: 0.35;
+    animation: none;
+  }
+
+  .hero-scan-beam {
+    display: none;
+  }
+
+  .hero-title {
+    font-size: clamp(36px, 12vw, 72px) !important;
+  }
+
+  .hero-poetic-text {
+    font-size: clamp(15px, 4.2vw, 18px) !important;
+    line-height: 1.8 !important;
+  }
+
+  .poetic-keyword .poetic-icon {
+    display: none;
+  }
+}
+
+/* 尊重「减少动态效果」偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .hero-breath-grid,
+  .hero-scan-beam,
+  .hero-studio-accent,
+  .hero-studio-accent::after {
+    animation: none !important;
+  }
+
+  .poetic-keyword .poetic-icon {
+    transition: none !important;
+  }
+}
+
 /* ==================== 安全区适配（刘海屏/_home 指示条） ==================== */
 .studio-navbar {
   padding-top: env(safe-area-inset-top, 0px);

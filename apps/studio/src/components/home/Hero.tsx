@@ -6,6 +6,7 @@ import { socialIcons } from '../icons/SocialIcons'
 
 export default function Hero() {
   const ref = useRef<HTMLDivElement>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start start', 'end start'],
@@ -15,17 +16,28 @@ export default function Hero() {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9])
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [gridOrigin, setGridOrigin] = useState({ x: 50, y: 50 })
 
   useEffect(() => {
     const handleMove = (e: MouseEvent) => {
-      setMousePos({
-        x: (e.clientX / window.innerWidth - 0.5) * 30,
-        y: (e.clientY / window.innerHeight - 0.5) * 30,
+      const x = e.clientX / window.innerWidth - 0.5
+      const y = e.clientY / window.innerHeight - 0.5
+      setMousePos({ x: x * 30, y: y * 30 })
+      setGridOrigin({
+        x: 50 + x * 35,
+        y: 50 + y * 35,
       })
     }
     window.addEventListener('mousemove', handleMove)
     return () => window.removeEventListener('mousemove', handleMove)
   }, [])
+
+  useEffect(() => {
+    if (gridRef.current) {
+      gridRef.current.style.setProperty('--mouse-x', `${gridOrigin.x}%`)
+      gridRef.current.style.setProperty('--mouse-y', `${gridOrigin.y}%`)
+    }
+  }, [gridOrigin])
 
   return (
     <motion.section
@@ -33,6 +45,20 @@ export default function Hero() {
       style={{ y, opacity, scale }}
       className="hero-section"
     >
+      {/* 呼吸网格背景：随鼠标位置微变透明度与径向中心 */}
+      <div
+        ref={gridRef}
+        className="hero-breath-grid"
+        aria-hidden="true"
+        style={{
+          '--mouse-x': '50%',
+          '--mouse-y': '50%',
+        } as React.CSSProperties}
+      />
+
+      {/* 标题后方科技扫描光带 */}
+      <div className="hero-scan-beam" aria-hidden="true" />
+
       {/* Floating orbs */}
       <motion.div
         animate={{ x: mousePos.x, y: mousePos.y }}
@@ -65,7 +91,7 @@ export default function Hero() {
         }}
       />
 
-      <div style={{ textAlign: 'center', maxWidth: '900px', padding: '0 24px' }}>
+      <div style={{ textAlign: 'center', maxWidth: '900px', padding: '0 24px', position: 'relative', zIndex: 1 }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -92,39 +118,61 @@ export default function Hero() {
           initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ delay: 0.3, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          className="hero-title"
           style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(48px, 10vw, 120px)',
-            fontWeight: 700,
-            lineHeight: 0.95,
+            fontSize: 'clamp(42px, 9vw, 108px)',
+            fontWeight: 100,
+            lineHeight: 1.05,
             letterSpacing: '-0.04em',
-            marginBottom: '24px',
+            marginBottom: '28px',
           }}
         >
-          <span className="gradient-text studio-neon-text">Jack Tan</span>
-          <br />
-          <span style={{
-            fontWeight: 200,
-            color: 'var(--text-muted)',
-            fontSize: 'clamp(32px, 6vw, 72px)',
-          }}>Studio</span>
+          <span style={{ color: 'var(--text)', fontWeight: 100 }}>Jack Tan </span>
+          <span className="gradient-text studio-neon-text hero-studio-accent" style={{ fontWeight: 100 }}>
+            Studio
+          </span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.6 }}
+          className="hero-poetic-text"
           style={{
             fontSize: 'clamp(16px, 2vw, 20px)',
             color: 'var(--text-muted)',
-            lineHeight: 1.7,
-            maxWidth: '560px',
+            lineHeight: 1.85,
+            maxWidth: '620px',
             margin: '0 auto 44px',
+            fontWeight: 400,
           }}
         >
-          创意工作室 · 汇集音乐随记、社媒排版、个人作品集于一体。
-          <br />
-          以技术驱动创意，以动效诠释体验。
+          耳听为
+          <span className="poetic-keyword" data-keyword="律">
+            律
+            <span className="poetic-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+              </svg>
+            </span>
+          </span>
+          ，眼见为
+          <span className="poetic-keyword" data-keyword="序">
+            序
+            <span className="poetic-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="13.5" cy="6.5" r="2.5" />
+                <path d="M13.5 13.5c-2.5 0-4.5 2-4.5 4.5s2 4.5 4.5 4.5 4.5-2 4.5-4.5-2-4.5-4.5-4.5z" />
+                <path d="M4.5 4.5h4v4h-4z" />
+                <path d="M4.5 15.5h4v4h-4z" />
+              </svg>
+            </span>
+          </span>
+          。在这座由代码、音符与像素编织的花园里，种着音乐的碎片，养着设计的灵光。欢迎你，
+          <span className="hero-farewell">慢慢逛</span>。
         </motion.p>
 
         {/* 社交媒体链接 — 首屏（简洁版：去标签、幽灵图标，减少视觉噪音） */}

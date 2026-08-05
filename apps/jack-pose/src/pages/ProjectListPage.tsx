@@ -78,7 +78,7 @@ export function ProjectListPage() {
             className="w-44 h-44 sm:w-52 sm:h-52 mx-auto mb-6 rounded-3xl shadow-lg shadow-black/10"
           />
           <h1 className="text-5xl sm:text-6xl font-bold tracking-tighter mb-3 text-primary">
-            JACK-POSE
+            Jack-<span style={{ color: 'var(--color-accent, #ec4899)' }}>Pose</span>
           </h1>
           <p className="text-lg text-tertiary font-medium">
             Photo Layout Tool · 社媒排版・长图导出
