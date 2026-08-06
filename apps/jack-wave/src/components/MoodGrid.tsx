@@ -27,6 +27,7 @@ export interface MoodGridProps {
 
 const DAMPING = 0.95; // 惯性阻尼系数：速度 *= 0.95
 const DRAG_SENSITIVITY = 0.32; // 拖拽灵敏度（px → deg）
+const WHEEL_SENSITIVITY = 0.08; // 滚轮灵敏度（px → deg）
 const AUTO_SPIN = 0.03; // 闲置自动微旋，保持“连续循环”观感
 const HOVER_PUSH = 60; // 悬停时向前的位移（z）
 const MIN_DRAG_PX = 6; // 位移小于此值视为点击
@@ -142,6 +143,13 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
     [moodPlaylists, onOpenMood],
   );
 
+  // 滚轮旋转：桌面端将纵向/横向滚动转换为轮播角速度
+  const onWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    velocity.current += delta * WHEEL_SENSITIVITY;
+  }, []);
+
   // 卡片点击（键盘可达性：Enter / 空格触发，pointer 点击由 endDrag 处理避免重复）
   const cardClick = useCallback(
     (i: number) => {
@@ -160,8 +168,30 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
       id="mood"
       style={{ padding: '24px 0', overflow: 'hidden' }}
     >
+      {/* 板块大标题：保留，仅移除封面外部独立标题 */}
+      <div style={{ textAlign: 'center', marginBottom: '24px', padding: '0 24px' }}>
+        <h2
+          className="section-title"
+          style={{
+            fontSize: 'clamp(26px, 5vw, 32px)',
+            fontWeight: 700,
+            letterSpacing: '-1px',
+            marginBottom: '8px',
+          }}
+        >
+          心情歌单
+        </h2>
+        <p
+          className="section-desc"
+          style={{ color: 'var(--gray-500)', fontSize: '15px' }}
+        >
+          拖拽或滚动浏览不同心情
+        </p>
+      </div>
+
       <div
         onPointerDown={onPointerDown}
+        onWheel={onWheel}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
@@ -245,7 +275,7 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
                     pointerEvents: 'none',
                   }}
                 />
-                {/* 底部信息条：标题 + 心情标签 */}
+                {/* 底部信息条：封面内部标题 + 圆角心情标签 + 歌单作者 */}
                 <div
                   style={{
                     position: 'absolute',
@@ -271,20 +301,40 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
                   >
                     {p.title}
                   </div>
-                  <span
+                  <div
                     style={{
-                      display: 'inline-block',
-                      marginTop: 4,
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: '#fff',
-                      background: 'rgba(255,255,255,0.22)',
-                      borderRadius: 999,
-                      padding: '2px 8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      marginTop: '4px',
                     }}
                   >
-                    {p.tag}
-                  </span>
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: '#fff',
+                        background: 'rgba(255,255,255,0.22)',
+                        borderRadius: 999,
+                        padding: '2px 8px',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {p.tag}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: 'rgba(255,255,255,0.78)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {p.author}
+                    </span>
+                  </div>
                 </div>
               </button>
             );

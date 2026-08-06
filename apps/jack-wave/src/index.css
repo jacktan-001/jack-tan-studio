@@ -332,6 +332,25 @@ textarea {
 }
 .skip-link:focus { top: 0; }
 
+/* Player control buttons (prev / next) */
+.player-ctrl-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-600);
+  transition: all .15s;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.player-ctrl-btn:hover { color: var(--teal); background: var(--tag-bg); }
+.player-ctrl-btn:active { transform: scale(0.95); }
+.player-ctrl-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
 /* Animations */
 @keyframes eq {
   0%, 100% { transform: scaleY(.4); }

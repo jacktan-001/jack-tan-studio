@@ -31,7 +31,9 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
   const [authorName, setAuthorName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [customTag, setCustomTag] = useState('');
   const [screenshotData, setScreenshotData] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 提交状态：真实状态由 useState 持有，useOptimistic 在 transition 中立即乐观显示 "submitting"。
@@ -44,9 +46,30 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
   const [, startTransition] = useTransition();
 
   const toggleTag = (tag: string) => {
+    if (tag === '其他') {
+      setSelectedTags((prev) => {
+        if (prev.includes('其他')) {
+          // 取消「其他」：同时移除已输入的自定义标签
+          setCustomTag('');
+          return prev.filter((t) => t !== '其他' && t !== customTag);
+        }
+        return [...prev, '其他'];
+      });
+      return;
+    }
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
+  };
+
+  // 将自定义标签写入选中列表（替换占位符「其他」）
+  const applyCustomTag = () => {
+    const value = customTag.trim();
+    if (!value) return;
+    setSelectedTags((prev) => {
+      const withoutOther = prev.filter((t) => t !== '其他');
+      return [...new Set([...withoutOther, value])];
+    });
   };
 
   // 截图上传：压缩图片并存储为 DataURL
@@ -93,6 +116,11 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
       return;
     }
 
+    // 标签：过滤占位符「其他」，若用户填写了自定义内容则替换加入
+    const finalTags = selectedTags
+      .filter((t) => t !== '其他')
+      .concat(customTag.trim() ? [customTag.trim()] : []);
+
     const payload: SubmitPayload = {
       type: activeTab,
       linkUrl: linkUrl.trim(),
@@ -100,7 +128,7 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
       playlistName: playlistName.trim(),
       authorName: authorName.trim(),
       description: description.trim(),
-      tags: selectedTags,
+      tags: Array.from(new Set(finalTags)),
     };
     if (activeTab === 'screenshot' && screenshotData) {
       payload.screenshotData = screenshotData;
@@ -130,7 +158,9 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
             setAuthorName('');
             setDescription('');
             setSelectedTags([]);
+            setCustomTag('');
             setScreenshotData(null);
+            setIsExpanded(false);
           }, 5000);
         } else {
           // 失败：回退到 idle 并提示错误
@@ -192,7 +222,70 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
           margin: '0 auto',
         }}
       >
-        {optimisticStatus !== 'success' ? (
+        {optimisticStatus === 'success' ? (
+          /* Success state */
+          <div className="form-success" style={{ textAlign: 'center', padding: '40px 0' }}>
+            <div
+              className="form-success-icon"
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'var(--tag-bg)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px',
+                color: 'var(--teal)',
+              }}
+            >
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h3 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '8px' }}>
+              感谢你的推荐！
+            </h3>
+            <p style={{ color: 'var(--gray-500)', fontSize: '14px' }}>
+              我们会尽快审核并展示在页面上
+            </p>
+          </div>
+        ) : !isExpanded ? (
+          /* 默认折叠收起 */
+          <div
+            onClick={() => setIsExpanded(true)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setIsExpanded(true);
+              }
+            }}
+            style={{
+              padding: '28px',
+              textAlign: 'center',
+              cursor: 'pointer',
+              borderRadius: '20px',
+            }}
+          >
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
+              推荐你的歌单
+            </h3>
+            <p style={{ color: 'var(--gray-500)', fontSize: '14px' }}>
+              点击展开推荐表单
+            </p>
+          </div>
+        ) : (
           <>
             {/* Tabs */}
             <div
@@ -442,28 +535,84 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
                 标签<span className="opt">选填</span>
               </label>
               <div className="tag-pills" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {allTags.map((tag) => (
-                  <button
-                    key={tag}
-                    className={`tag-pill${selectedTags.includes(tag) ? ' active' : ''}`}
-                    onClick={() => toggleTag(tag)}
-                    type="button"
-                    style={{
-                      padding: '6px 14px',
-                      borderRadius: '999px',
-                      fontSize: '13px',
-                      fontWeight: 500,
-                      border: '1.5px solid var(--gray-200)',
-                      transition: 'all .2s',
-                      color: selectedTags.includes(tag) ? 'var(--teal)' : 'var(--gray-600)',
-                      borderColor: selectedTags.includes(tag) ? 'var(--teal)' : 'var(--gray-200)',
-                      background: selectedTags.includes(tag) ? 'var(--tag-bg)' : 'transparent',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {tag}
-                  </button>
-                ))}
+                {[...allTags, '其他'].map((tag) => {
+                  const isOther = tag === '其他';
+                  const isSelected = isOther
+                    ? selectedTags.includes('其他') || (customTag.trim() && selectedTags.includes(customTag.trim()))
+                    : selectedTags.includes(tag);
+
+                  if (isOther) {
+                    return (
+                      <div key="other" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', width: '100%' }}>
+                        <button
+                          className={`tag-pill${isSelected ? ' active' : ''}`}
+                          onClick={() => toggleTag('其他')}
+                          type="button"
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '999px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            border: '1.5px solid var(--gray-200)',
+                            transition: 'all .2s',
+                            color: isSelected ? 'var(--teal)' : 'var(--gray-600)',
+                            borderColor: isSelected ? 'var(--teal)' : 'var(--gray-200)',
+                            background: isSelected ? 'var(--tag-bg)' : 'transparent',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          其他
+                        </button>
+                        {isSelected && (
+                          <input
+                            type="text"
+                            value={customTag}
+                            onChange={(e) => setCustomTag(e.target.value)}
+                            onBlur={applyCustomTag}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                applyCustomTag();
+                              }
+                            }}
+                            placeholder="输入自定义标签"
+                            maxLength={20}
+                            style={{
+                              flex: 1,
+                              minWidth: '120px',
+                              maxWidth: '200px',
+                              padding: '6px 12px',
+                              fontSize: '13px',
+                            }}
+                          />
+                        )}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={tag}
+                      className={`tag-pill${isSelected ? ' active' : ''}`}
+                      onClick={() => toggleTag(tag)}
+                      type="button"
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '999px',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        border: '1.5px solid var(--gray-200)',
+                        transition: 'all .2s',
+                        color: isSelected ? 'var(--teal)' : 'var(--gray-600)',
+                        borderColor: isSelected ? 'var(--teal)' : 'var(--gray-200)',
+                        background: isSelected ? 'var(--tag-bg)' : 'transparent',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -489,44 +638,25 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
             >
               {optimisticStatus === 'submitting' ? '提交中...' : '提交推荐'}
             </button>
-          </>
-        ) : (
-          /* Success state */
-          <div className="form-success" style={{ textAlign: 'center', padding: '40px 0' }}>
-            <div
-              className="form-success-icon"
+
+            {/* 收起表单 */}
+            <button
+              type="button"
+              onClick={() => setIsExpanded(false)}
               style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '50%',
-                background: 'var(--tag-bg)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px',
-                color: 'var(--teal)',
+                width: '100%',
+                marginTop: '12px',
+                padding: '10px',
+                fontSize: '14px',
+                color: 'var(--gray-500)',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
               }}
             >
-              <svg
-                width="28"
-                height="28"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            <h3 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '8px' }}>
-              感谢你的推荐！
-            </h3>
-            <p style={{ color: 'var(--gray-500)', fontSize: '14px' }}>
-              我们会尽快审核并展示在页面上
-            </p>
-          </div>
+              收起表单
+            </button>
+          </>
         )}
       </div>
     </section>
