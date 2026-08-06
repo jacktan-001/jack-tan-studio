@@ -129,31 +129,13 @@ export function AudioPlayer({ player }: AudioPlayerProps) {
         style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}
       >
         <button
-          className="player-prev"
-          onClick={playPrev}
+          className="player-ctrl-btn"
+          onClick={(e) => {
+            playPrev();
+            e.currentTarget.blur();
+          }}
           aria-label="上一首"
           title="上一首"
-          style={{
-            width: '46px',
-            height: '46px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--gray-600)',
-            transition: 'all .15s',
-            border: 'none',
-            background: 'none',
-            cursor: 'pointer',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = 'var(--teal)';
-            e.currentTarget.style.background = 'var(--tag-bg)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'var(--gray-600)';
-            e.currentTarget.style.background = 'none';
-          }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <polygon points="19 20 9 12 19 4 19 20" />
@@ -201,31 +183,13 @@ export function AudioPlayer({ player }: AudioPlayerProps) {
         </button>
 
         <button
-          className="player-next"
-          onClick={playNext}
+          className="player-ctrl-btn"
+          onClick={(e) => {
+            playNext();
+            e.currentTarget.blur();
+          }}
           aria-label="下一首"
           title="下一首"
-          style={{
-            width: '46px',
-            height: '46px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--gray-600)',
-            transition: 'all .15s',
-            border: 'none',
-            background: 'none',
-            cursor: 'pointer',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = 'var(--teal)';
-            e.currentTarget.style.background = 'var(--tag-bg)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'var(--gray-600)';
-            e.currentTarget.style.background = 'none';
-          }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <polygon points="5 4 15 12 5 20 5 4" />
