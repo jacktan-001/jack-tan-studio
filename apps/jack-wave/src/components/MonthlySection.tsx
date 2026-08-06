@@ -314,32 +314,6 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
               >
                 {m.desc}
               </div>
-              <div
-                className="monthly-hint"
-                style={{
-                  marginTop: '16px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: 'var(--teal)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                }}
-              >
-                查看歌曲列表
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </div>
             </div>
           </div>
         </div>
@@ -370,8 +344,7 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
             }
             .monthly-info { width: 100% !important; }
             .monthly-author,
-            .monthly-meta,
-            .monthly-hint { justify-content: center !important; }
+            .monthly-meta { justify-content: center !important; }
           }
         `}</style>
       </section>

@@ -168,12 +168,12 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
       id="mood"
       style={{ padding: '24px 0', overflow: 'hidden' }}
     >
-      {/* 板块大标题：保留，仅移除封面外部独立标题 */}
-      <div style={{ textAlign: 'center', marginBottom: '24px', padding: '0 24px' }}>
+      {/* 板块大标题：与本月推荐统一为左对齐、固定 32px 字号、28px 副标题间距 */}
+      <div style={{ marginBottom: '24px', padding: '0 24px' }}>
         <h2
           className="section-title"
           style={{
-            fontSize: 'clamp(26px, 5vw, 32px)',
+            fontSize: '32px',
             fontWeight: 700,
             letterSpacing: '-1px',
             marginBottom: '8px',
@@ -183,7 +183,7 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
         </h2>
         <p
           className="section-desc"
-          style={{ color: 'var(--gray-500)', fontSize: '15px' }}
+          style={{ color: 'var(--gray-500)', fontSize: '15px', marginBottom: '28px' }}
         >
           拖拽或滚动浏览不同心情
         </p>
