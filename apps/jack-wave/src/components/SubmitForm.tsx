@@ -1,6 +1,6 @@
 /**
  * SubmitForm — 推荐歌单表单
- * 3 个 Tab（链接/手动/截图），歌单名称、作者、推荐语、标签
+ * 3 个 Tab（链接/手动/截图），歌单标题、作者、描述、标签
  * 截图上传含图片压缩
  */
 
@@ -112,7 +112,7 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
       return;
     }
     if (!playlistName || !authorName) {
-      onToast('请填写歌单名称和您的名字');
+      onToast('请填写歌单标题和作者');
       return;
     }
 
@@ -453,12 +453,12 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
             {/* Common fields */}
             <div className="form-group">
               <label className="form-label">
-                歌单名称<span className="req">*</span>
+                歌单标题<span className="req">*</span>
               </label>
               <input
                 type="text"
                 className="form-input"
-                placeholder="给你的歌单起个名字"
+                placeholder="给歌单起个标题"
                 maxLength={100}
                 value={playlistName}
                 onChange={(e) => setPlaylistName(e.target.value)}
@@ -479,12 +479,12 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
 
             <div className="form-group">
               <label className="form-label">
-                你的名字<span className="req">*</span>
+                作者<span className="req">*</span>
               </label>
               <input
                 type="text"
                 className="form-input"
-                placeholder="你的名字或昵称"
+                placeholder="作者名或昵称"
                 maxLength={50}
                 value={authorName}
                 onChange={(e) => setAuthorName(e.target.value)}
@@ -505,7 +505,7 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
 
             <div className="form-group">
               <label className="form-label">
-                推荐语<span className="opt">选填</span>
+                描述<span className="opt">选填</span>
               </label>
               <textarea
                 className="form-input"
