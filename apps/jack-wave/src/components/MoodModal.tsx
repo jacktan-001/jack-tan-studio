@@ -6,6 +6,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { MoodPlaylist, Song } from '../types';
+import type { PlayerTrack } from '@jack-tan/studio-core';
 import { SongList } from './SongList';
 import { artworkSrc } from '../utils';
 import { playlistCover } from '../data/musicData';
@@ -15,7 +16,7 @@ export interface MoodModalProps {
   playlist: MoodPlaylist | null;
   show: boolean;
   onClose: () => void;
-  currentSong: Song | null;
+  currentSong: Song | PlayerTrack | null;
   onPlay: (song: Song, songList: Song[], index: number) => void;
 }
 

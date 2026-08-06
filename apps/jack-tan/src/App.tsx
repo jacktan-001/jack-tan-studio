@@ -1,4 +1,4 @@
-import { StudioBar } from '@jack-tan/studio-core'
+import { StudioBar, GlobalAudioPlayer, useGlobalAudioPlayer } from '@jack-tan/studio-core'
 import Sidebar from './components/Sidebar'
 import RevealObserver from './components/RevealObserver'
 import Spotlight from './components/Spotlight'
@@ -11,6 +11,8 @@ import Skills from './components/Skills'
 import Footer from './components/Footer'
 
 export default function App() {
+  const player = useGlobalAudioPlayer()
+
   return (
     <>
       <StudioBar current="tan" />
@@ -47,6 +49,9 @@ export default function App() {
           </main>
         </RevealObserver>
       </div>
+
+      {/* 跨应用全局底部播放器 */}
+      <GlobalAudioPlayer player={player} />
     </>
   )
 }

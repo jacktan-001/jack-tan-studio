@@ -121,3 +121,33 @@
   --glow: 0 0 40px rgba(124, 58, 237, 0.4);
   --gradient: linear-gradient(135deg, #7c3aed, #3b82f6, #6366f1);
 }
+
+/* ---------- 跨应用全局播放器栏：控制按钮样式 ---------- */
+.jack-global-player-ctrl-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-600, #4b5563);
+  transition: all .15s;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.jack-global-player-ctrl-btn:hover {
+  color: var(--teal, var(--accent, #14b8a6));
+  background: var(--tag-bg, rgba(20, 184, 166, 0.1));
+}
+
+.jack-global-player-ctrl-btn:active {
+  transform: scale(0.95);
+}
+
+.jack-global-player-ctrl-btn:focus-visible {
+  outline: 2px solid var(--teal, var(--accent, #14b8a6));
+  outline-offset: 2px;
+}

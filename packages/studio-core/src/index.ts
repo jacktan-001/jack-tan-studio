@@ -36,3 +36,6 @@ export * from './deploy';
 
 // Layer 7: Effects
 export * from './effects';
+
+// Layer 8: Player (cross-project global audio player)
+export * from './player';

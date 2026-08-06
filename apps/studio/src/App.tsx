@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
+import { GlobalAudioPlayer, useGlobalAudioPlayer } from '@jack-tan/studio-core'
 import Navbar from './components/layout/Navbar'
 import CustomCursor from './components/ui/CustomCursor'
 import StarField from './components/effects/StarField'
@@ -26,6 +27,7 @@ function BackgroundEffects() {
 
 export default function App() {
   const location = useLocation()
+  const player = useGlobalAudioPlayer()
 
   return (
     <>
@@ -67,6 +69,9 @@ export default function App() {
           </Routes>
         </div>
       </div>
+
+      {/* 跨应用全局底部播放器 */}
+      <GlobalAudioPlayer player={player} />
     </>
   )
 }

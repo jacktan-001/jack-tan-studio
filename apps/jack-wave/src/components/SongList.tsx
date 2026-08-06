@@ -9,13 +9,14 @@
 
 import { useRef } from 'react';
 import type { Song } from '../types';
+import type { PlayerTrack } from '@jack-tan/studio-core';
 import { artworkSrc } from '../utils';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 export interface SongListProps {
   songs: Song[];
   /** 当前正在播放的歌曲（用于高亮） */
-  currentSong: Song | null;
+  currentSong: Song | PlayerTrack | null;
   /** 点击歌曲时的回调 */
   onPlay: (index: number) => void;
 }
