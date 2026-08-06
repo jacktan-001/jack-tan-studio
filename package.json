@@ -50,5 +50,10 @@
   "packageManager": "pnpm@10.0.0",
   "engines": {
     "node": ">=22.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "undici": "7.29.0"
+    }
   }
 }

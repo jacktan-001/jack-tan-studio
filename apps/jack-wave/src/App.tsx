@@ -236,6 +236,11 @@ export default function App() {
     resolveArtwork: artworkSrc,
   });
 
+  // 用 ref 持有最新 player：避免把整个 player 对象放进 useEffect/useCallback 依赖，
+  // 否则键盘监听会随 player 身份变化（播放中每秒重渲染）反复解绑重绑（P1-2）。
+  const playerRef = useRef(player);
+  playerRef.current = player;
+
   // === 心情歌单弹窗 ===
   const [selectedMoodId, setSelectedMoodId] = useState<number | null>(null);
   const [isMoodModalOpen, setIsMoodModalOpen] = useState(false);
@@ -250,17 +255,18 @@ export default function App() {
   // === 键盘快捷键 ===
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const p = playerRef.current;
       // 输入框中不触发快捷键
       const tag = (e.target as HTMLElement).tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
-      if (e.code === 'Space' && player.currentTrack) {
+      if (e.code === 'Space' && p.currentTrack) {
         e.preventDefault();
-        player.togglePlay();
-      } else if (e.code === 'ArrowRight' && player.currentTrack) {
-        player.playNext();
-      } else if (e.code === 'ArrowLeft' && player.currentTrack) {
-        player.playPrev();
+        p.togglePlay();
+      } else if (e.code === 'ArrowRight' && p.currentTrack) {
+        p.playNext();
+      } else if (e.code === 'ArrowLeft' && p.currentTrack) {
+        p.playPrev();
       } else if (e.code === 'Escape') {
         setIsMoodModalOpen(false);
         setIsMonthlyModalOpen(false);
@@ -269,7 +275,7 @@ export default function App() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [player]);
+  }, []);
 
   // === PWA Service Worker 注册 ===
   useEffect(() => {
@@ -305,9 +311,9 @@ export default function App() {
   const handlePlay = useCallback(
     (song: Song, songList: Song[], index: number) => {
       const queue: PlayerTrack[] = songList.map((s) => toPlayerTrack(s, artworkSrc));
-      player.playTrack(toPlayerTrack(song, artworkSrc), queue, index);
+      playerRef.current.playTrack(toPlayerTrack(song, artworkSrc), queue, index);
     },
-    [player],
+    [],
   );
 
   /** 打开心情歌单弹窗 */

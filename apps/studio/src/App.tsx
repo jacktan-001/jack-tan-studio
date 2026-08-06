@@ -1,12 +1,16 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { GlobalAudioPlayer, useGlobalAudioPlayer } from '@jack-tan/studio-core'
 import Navbar from './components/layout/Navbar'
 import CustomCursor from './components/ui/CustomCursor'
 import StarField from './components/effects/StarField'
-import Home from './pages/Home'
-import ComingSoon from './pages/ComingSoon'
-import ProjectIntro from './pages/ProjectIntro'
 import { projects } from './data/projects'
+
+// 路由级懒加载：首屏只加载外壳，页面组件（及其携带的 gsap / motion 等依赖）
+// 按需切分为独立 chunk，缩短首屏 JS 体积（P2-3）
+const Home = lazy(() => import('./pages/Home'))
+const ComingSoon = lazy(() => import('./pages/ComingSoon'))
+const ProjectIntro = lazy(() => import('./pages/ProjectIntro'))
 
 function BackgroundEffects() {
   return (
@@ -37,6 +41,7 @@ export default function App() {
       <div className="page-wrap">
         {/* N-2：用 key + CSS .studio-page-fade 实现路由切换淡入，替代 AnimatePresence（去除首屏 Motion 依赖） */}
         <div key={location.pathname} className="studio-page-fade">
+          <Suspense fallback={<div className="studio-page-fade" />}>
           <Routes location={location}>
             <Route path="/" element={<Home />} />
 
@@ -67,6 +72,7 @@ export default function App() {
             {/* 兜底 404 回首页 */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
         </div>
       </div>
 

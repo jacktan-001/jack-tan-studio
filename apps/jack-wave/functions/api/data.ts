@@ -2,6 +2,7 @@
 // 数据管理接口 - 带结构校验和时序安全密码比较
 // ============================================================
 
+import { authenticateAdmin } from '../_lib/adminAuth';
 import { handlePreflight, withCors } from '../_lib/cors';
 
 // OPTIONS 预检处理
@@ -11,46 +12,6 @@ export const onRequestOptions: PagesFunction<Env> = (context) => {
 
 // 最大数据大小限制：5MB
 const MAX_DATA_SIZE = 5 * 1024 * 1024;
-
-/**
- * 使用恒定时间比较来验证密码，防止时序攻击
- * 先对两个密码分别进行 SHA-256 哈希（使长度一致，避免长度泄露），
- * 再逐字节异或比较，确保比较耗时与内容无关
- */
-async function timingSafeEqual(a: string, b: string): Promise<boolean> {
-  const encoder = new TextEncoder();
-  // 并行计算两个哈希
-  const [hashA, hashB] = await Promise.all([
-    crypto.subtle.digest('SHA-256', encoder.encode(a)),
-    crypto.subtle.digest('SHA-256', encoder.encode(b)),
-  ]);
-  const arrA = new Uint8Array(hashA);
-  const arrB = new Uint8Array(hashB);
-
-  // 哈希长度理论上总是相同（32 字节），但安全起见仍做检查
-  if (arrA.length !== arrB.length) return false;
-
-  // 逐字节异或，累积差异（恒定时间比较）
-  let result = 0;
-  for (let i = 0; i < arrA.length; i++) {
-    result |= arrA[i] ^ arrB[i];
-  }
-  return result === 0;
-}
-
-/**
- * 从请求中提取密码并进行时序安全验证
- */
-async function verifyPassword(
-  context: { request: Request; url: URL },
-  env: Env,
-): Promise<boolean> {
-  const password =
-    context.url.searchParams.get('password') ||
-    context.request.headers.get('x-admin-password');
-  if (!password) return false;
-  return timingSafeEqual(password, env.ADMIN_PASSWORD);
-}
 
 /**
  * 校验数据结构合法性
@@ -98,13 +59,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 };
 
 async function handleGet(context: PagesFunctionContext<Env>): Promise<Response> {
-  const url = new URL(context.request.url);
-
-  // 时序安全密码验证
-  const authorized = await verifyPassword({ request: context.request, url }, context.env);
-  if (!authorized) {
-    return Response.json({ error: '未授权' }, { status: 401 });
-  }
+  // 统一鉴权：时序安全比较 + IP 限流（仅接受 x-admin-password 请求头）
+  const auth = await authenticateAdmin(context.request, context.env);
+  if (!auth.authorized) return auth.response;
 
   try {
     const kv = context.env.JACK_WAVE_KV;
@@ -125,15 +82,9 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 };
 
 async function handlePut(context: PagesFunctionContext<Env>): Promise<Response> {
-  // 时序安全密码验证
-  const password = context.request.headers.get('x-admin-password');
-  if (!password) {
-    return Response.json({ error: '未授权' }, { status: 401 });
-  }
-  const authorized = await timingSafeEqual(password, context.env.ADMIN_PASSWORD);
-  if (!authorized) {
-    return Response.json({ error: '未授权' }, { status: 401 });
-  }
+  // 统一鉴权：时序安全比较 + IP 限流（仅接受 x-admin-password 请求头）
+  const auth = await authenticateAdmin(context.request, context.env);
+  if (!auth.authorized) return auth.response;
 
   try {
     const kv = context.env.JACK_WAVE_KV;
@@ -168,13 +119,9 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
 };
 
 async function handleDelete(context: PagesFunctionContext<Env>): Promise<Response> {
-  const url = new URL(context.request.url);
-
-  // 时序安全密码验证
-  const authorized = await verifyPassword({ request: context.request, url }, context.env);
-  if (!authorized) {
-    return Response.json({ error: '未授权' }, { status: 401 });
-  }
+  // 统一鉴权：时序安全比较 + IP 限流（仅接受 x-admin-password 请求头）
+  const auth = await authenticateAdmin(context.request, context.env);
+  if (!auth.authorized) return auth.response;
 
   try {
     const kv = context.env.JACK_WAVE_KV;

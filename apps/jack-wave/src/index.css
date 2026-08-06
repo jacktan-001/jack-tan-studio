@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* 让 Tailwind 扫描 packages/studio-core 中的类名（其位于 src 之外，自动检测覆盖不到） */
+@source "../../../packages/studio-core/src";
 
 /* ==================== Tailwind v4 主题令牌 ====================
    将 studio-core 的 CSS 变量映射到 Tailwind 工具类。
@@ -294,6 +296,28 @@ textarea {
 }
 .form-label .req { color: var(--red); margin-left: 2px; }
 .form-label .opt { color: var(--text3); font-weight: 400; font-size: 12px; margin-left: 4px; }
+
+/* a11y：字段的内联 style 里有 outline:none，会完全抹掉键盘焦点指示，这里补回可见焦点环 */
+.form-input:focus-visible,
+.form-textarea:focus-visible {
+  border-color: var(--teal) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 28%, transparent);
+}
+
+/* 即时校验：错误态描边 + 错误提示（与 aria-invalid / aria-describedby 配套） */
+.form-input[aria-invalid='true'],
+.form-textarea[aria-invalid='true'] {
+  border-color: var(--red) !important;
+}
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--red);
+}
 
 /* Toast */
 .toast {

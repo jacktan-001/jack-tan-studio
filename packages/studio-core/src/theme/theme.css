@@ -16,6 +16,15 @@
  *  - 各应用在此基础上通过纹理、动画、交互、发光等维度建立独特个性
  * ================================================================== */
 
+/* ---------- 全局焦点可见样式（键盘可达性基线） ----------
+   使用 :where() 保持 0 特异性，便于各应用/组件用更高特异性覆盖。
+   仅键盘聚焦（:focus-visible）时显示，鼠标点击不触发。 */
+:where(a, button, input, select, textarea, [tabindex]):not([tabindex="-1"]):focus-visible {
+  outline: 2px solid var(--accent, #14b8a6);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
 /* ---------- 统一底层令牌：字体 + 圆角（所有应用共享） ---------- */
 :root {
   /* 字体栈 — Inter Variable（拉丁）+ Noto Sans SC（中文），全局统一字重 400/500/600/700 */

@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* 让 Tailwind 扫描 packages/studio-core 中的类名（其位于 src 之外，自动检测覆盖不到） */
+@source "../../../packages/studio-core/src";
 
 /* ==================== Tailwind v4 主题映射 ====================
    将 studio-core 的 CSS 变量映射到 Tailwind 工具类。

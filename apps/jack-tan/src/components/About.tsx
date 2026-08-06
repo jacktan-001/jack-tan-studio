@@ -29,7 +29,7 @@ export default function About() {
             className="card-hover rounded-xl border border-neutral-200 bg-white p-4 text-center"
           >
             <div className="text-2xl font-extrabold text-neutral-900">{s.num}</div>
-            <div className="mt-0.5 text-[11px] font-medium text-neutral-400">{s.label}</div>
+            <div className="mt-0.5 text-[11px] font-medium text-neutral-500">{s.label}</div>
           </div>
         ))}
       </div>

@@ -410,7 +410,7 @@ function doLogin() {
   PW = document.getElementById('passwordInput').value;
   if (!PW) return;
   api('/projects/jack-wave/api/data').then(res => {
-    if (res.error) { toast('密码错误'); return; }
+    if (res.error) { toast(res.rateLimited ? res.error : '密码错误'); return; }
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminApp').classList.add('active');
     loadData();
@@ -426,7 +426,12 @@ function doLogout() {
 // --- API ---
 function api(path, opts = {}) {
   const headers = { 'Content-Type': 'application/json', 'x-admin-password': PW };
-  return fetch(path, { ...opts, headers }).then(r => r.json());
+  return fetch(path, { ...opts, headers }).then(async (r) => {
+    const body = await r.json().catch(() => ({ error: '响应解析失败' }));
+    // 429 = 认证失败次数过多（服务端 IP 限流），需与"密码错误"区分开
+    if (r.status === 429) body.rateLimited = true;
+    return body;
+  });
 }
 
 // --- DATA ---

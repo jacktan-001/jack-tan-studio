@@ -11,6 +11,20 @@ deploy
 # env files
 .env
 .env.*local
+.env.production
+
+# Wrangler 本地密钥文件（含 ADMIN_PASSWORD 等）
+.dev.vars
+.dev.vars.*
+
+# 证书与私钥
+*.pem
+*.key
+*.p12
+*.pfx
+
+# 测试覆盖率产物
+coverage
 
 # editor
 .vscode

@@ -102,7 +102,7 @@ function WorkCard({ work }: { work: (typeof WORKS)[0] }) {
       </div>
       <h4 className="text-sm font-bold leading-snug text-neutral-900">{work.title}</h4>
       <p className="mt-1.5 flex-1 text-xs leading-relaxed text-neutral-500">{work.desc}</p>
-      <div className="mt-3 flex items-center gap-1 border-t border-neutral-100 pt-2.5 text-[11px] font-medium text-neutral-400">
+      <div className="mt-3 flex items-center gap-1 border-t border-neutral-100 pt-2.5 text-[11px] font-medium text-neutral-500">
         {work.internal ? (
           <span>{work.note}</span>
         ) : (

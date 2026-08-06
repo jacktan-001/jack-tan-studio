@@ -89,6 +89,8 @@ export function useAudioPlayer(
   const currentSongRef = useRef<Song | null>(null);
   const currentSongListRef = useRef<Song[]>([]);
   const currentIndexRef = useRef<number>(-1);
+  // 解绑当前 <audio> 上注册的监听器（切歌 / URL 刷新 / 卸载时调用，避免旧 audio 实例泄漏）
+  const audioListenersCleanupRef = useRef<(() => void) | null>(null);
 
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -235,6 +237,11 @@ export function useAudioPlayer(
     const audio = audioRef.current;
     if (!audio) return;
 
+    // 先解绑上一次注册的监听器：切歌 / URL 刷新会创建新的 <audio>，
+    // 若不清理，旧 audio 实例被监听器闭包引用而无法回收（P1-3 内存泄漏）。
+    audioListenersCleanupRef.current?.();
+    audioListenersCleanupRef.current = null;
+
     const handleTimeUpdate = () => {
       if (audio.duration) {
         setProgress((audio.currentTime / audio.duration) * 100);
@@ -257,7 +264,7 @@ export function useAudioPlayer(
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError);
 
-    return () => {
+    audioListenersCleanupRef.current = () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
@@ -426,6 +433,8 @@ export function useAudioPlayer(
 
   useEffect(() => {
     return () => {
+      audioListenersCleanupRef.current?.();
+      audioListenersCleanupRef.current = null;
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;

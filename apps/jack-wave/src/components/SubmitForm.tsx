@@ -36,6 +36,47 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 即时校验：字段级错误信息。仅在 onBlur / 提交时写入，避免用户边打字边报错。
+  type FieldName = 'linkUrl' | 'playlistName' | 'authorName';
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldName, string>>>({});
+
+  /** 返回错误文案；无错误返回空串 */
+  const getFieldError = (name: FieldName, value: string): string => {
+    const v = value.trim();
+    switch (name) {
+      case 'linkUrl':
+        // 链接为选填，但一旦填了就必须是合法的 http(s) 链接
+        if (v && !safeUrl(v)) return '请输入有效的链接（以 http:// 或 https:// 开头）';
+        return '';
+      case 'playlistName':
+        return v ? '' : '请填写歌单标题';
+      case 'authorName':
+        return v ? '' : '请填写作者';
+    }
+  };
+
+  /** onBlur 时校验单个字段 */
+  const validateOnBlur = (name: FieldName, value: string) => {
+    const msg = getFieldError(name, value);
+    setFieldErrors((prev) => {
+      if (msg) return { ...prev, [name]: msg };
+      if (!prev[name]) return prev;
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+  };
+
+  /** 用户重新输入时立刻清掉该字段的错误，避免"已修好但红字还在" */
+  const clearFieldError = (name: FieldName) => {
+    setFieldErrors((prev) => {
+      if (!prev[name]) return prev;
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+  };
+
   // 提交状态：真实状态由 useState 持有，useOptimistic 在 transition 中立即乐观显示 "submitting"。
   // 后台异步执行真实 API 调用；transition 结束后乐观值自动回退到真实状态。
   const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('idle');
@@ -106,15 +147,29 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
   };
 
   const handleSubmit = () => {
-    // 验证
-    if (activeTab === 'link' && linkUrl && !safeUrl(linkUrl)) {
-      onToast('请输入有效的链接（以 http:// 或 https:// 开头）');
+    // 验证：与 onBlur 复用同一套规则，结果同时写进 fieldErrors，
+    // 这样错误既有 toast 也有字段级红字 + aria-invalid，屏幕阅读器可感知。
+    const errors: Partial<Record<FieldName, string>> = {};
+    if (activeTab === 'link') {
+      const e = getFieldError('linkUrl', linkUrl);
+      if (e) errors.linkUrl = e;
+    }
+    const nameErr = getFieldError('playlistName', playlistName);
+    if (nameErr) errors.playlistName = nameErr;
+    const authorErr = getFieldError('authorName', authorName);
+    if (authorErr) errors.authorName = authorErr;
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      const first = (['linkUrl', 'playlistName', 'authorName'] as FieldName[]).find((k) => errors[k]);
+      if (first) {
+        onToast(errors[first]!);
+        // 把焦点移到第一个出错的字段，键盘/读屏用户不用自己找
+        document.getElementById(`submit-${first}`)?.focus();
+      }
       return;
     }
-    if (!playlistName || !authorName) {
-      onToast('请填写歌单标题和作者');
-      return;
-    }
+    setFieldErrors({});
 
     // 标签：过滤占位符「其他」，若用户填写了自定义内容则替换加入
     const finalTags = selectedTags
@@ -332,15 +387,22 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
             {/* Tab content */}
             {activeTab === 'link' && (
               <div className="form-group">
-                <label className="form-label">
+                <label className="form-label" htmlFor="submit-linkUrl">
                   平台链接<span className="req">*</span>
                 </label>
                 <input
+                  id="submit-linkUrl"
                   type="url"
                   className="form-input"
                   placeholder="粘贴 Apple Music / Spotify / 网易云 歌单链接"
                   value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
+                  onChange={(e) => {
+                    setLinkUrl(e.target.value);
+                    clearFieldError('linkUrl');
+                  }}
+                  onBlur={(e) => validateOnBlur('linkUrl', e.target.value)}
+                  aria-invalid={fieldErrors.linkUrl ? true : undefined}
+                  aria-describedby={fieldErrors.linkUrl ? 'submit-linkUrl-error' : undefined}
                   style={{
                     width: '100%',
                     padding: '12px 16px',
@@ -354,6 +416,11 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
                     color: 'var(--gray-800)',
                   }}
                 />
+                {fieldErrors.linkUrl && (
+                  <p className="form-error" id="submit-linkUrl-error" role="alert">
+                    {fieldErrors.linkUrl}
+                  </p>
+                )}
               </div>
             )}
 
@@ -452,16 +519,23 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
 
             {/* Common fields */}
             <div className="form-group">
-              <label className="form-label">
+              <label className="form-label" htmlFor="submit-playlistName">
                 歌单标题<span className="req">*</span>
               </label>
               <input
+                id="submit-playlistName"
                 type="text"
                 className="form-input"
                 placeholder="给歌单起个标题"
                 maxLength={100}
                 value={playlistName}
-                onChange={(e) => setPlaylistName(e.target.value)}
+                onChange={(e) => {
+                  setPlaylistName(e.target.value);
+                  clearFieldError('playlistName');
+                }}
+                onBlur={(e) => validateOnBlur('playlistName', e.target.value)}
+                aria-invalid={fieldErrors.playlistName ? true : undefined}
+                aria-describedby={fieldErrors.playlistName ? 'submit-playlistName-error' : undefined}
                 style={{
                   width: '100%',
                   padding: '12px 16px',
@@ -475,19 +549,31 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
                   color: 'var(--gray-800)',
                 }}
               />
+              {fieldErrors.playlistName && (
+                <p className="form-error" id="submit-playlistName-error" role="alert">
+                  {fieldErrors.playlistName}
+                </p>
+              )}
             </div>
 
             <div className="form-group">
-              <label className="form-label">
+              <label className="form-label" htmlFor="submit-authorName">
                 作者<span className="req">*</span>
               </label>
               <input
+                id="submit-authorName"
                 type="text"
                 className="form-input"
                 placeholder="作者名或昵称"
                 maxLength={50}
                 value={authorName}
-                onChange={(e) => setAuthorName(e.target.value)}
+                onChange={(e) => {
+                  setAuthorName(e.target.value);
+                  clearFieldError('authorName');
+                }}
+                onBlur={(e) => validateOnBlur('authorName', e.target.value)}
+                aria-invalid={fieldErrors.authorName ? true : undefined}
+                aria-describedby={fieldErrors.authorName ? 'submit-authorName-error' : undefined}
                 style={{
                   width: '100%',
                   padding: '12px 16px',
@@ -501,6 +587,11 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
                   color: 'var(--gray-800)',
                 }}
               />
+              {fieldErrors.authorName && (
+                <p className="form-error" id="submit-authorName-error" role="alert">
+                  {fieldErrors.authorName}
+                </p>
+              )}
             </div>
 
             <div className="form-group">

@@ -43,7 +43,7 @@ export function WechatView({ caption, imageIds, urls, onCaption, onReorder, onRe
         onChange={(e) => onCaption(e.target.value)}
         placeholder="这一刻的想法…"
         rows={2}
-        className="w-full text-[15px] leading-relaxed text-primary bg-transparent resize-none outline-none placeholder:text-placeholder"
+        className="w-full text-[15px] leading-relaxed text-primary bg-transparent resize-none outline-none rounded focus-visible:ring-2 focus-visible:ring-[#576b95] placeholder:text-placeholder"
       />
 
       {/* 九宫格 + 拖拽排序 */}
@@ -57,12 +57,16 @@ export function WechatView({ caption, imageIds, urls, onCaption, onReorder, onRe
               {urls[id] && (
                 <img src={urls[id]} alt="" width={400} height={400} loading="lazy" className="w-full h-full object-cover" draggable={false} />
               )}
+              {/* 命中区扩到 44px（WCAG 2.5.5），视觉圆点仍为 20px 且位置不变 */}
               <button
                 onClick={() => onRemove(id)}
                 onPointerDown={(e) => e.stopPropagation()}
-                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/40 text-white text-xs flex items-center justify-center"
+                aria-label="移除这张照片"
+                className="absolute top-0 right-0 w-11 h-11 p-1 flex items-start justify-end focus-visible:outline-none group/del"
               >
-                ×
+                <span className="w-5 h-5 rounded-full bg-black/40 text-white text-xs flex items-center justify-center group-focus-visible/del:ring-2 group-focus-visible/del:ring-white">
+                  ×
+                </span>
               </button>
             </div>
           )}

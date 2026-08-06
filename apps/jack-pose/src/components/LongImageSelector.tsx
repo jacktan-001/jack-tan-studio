@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import type { PhotoMeta } from '../types'
 import type { CropSettings } from '../lib/importExport'
 
@@ -34,6 +34,44 @@ export function CropModal({
   const lastPos = useRef({ x: 0, y: 0 })
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+
+  // 无障碍：打开时聚焦弹窗、Esc 关闭、Tab 键在弹窗内循环（焦点陷阱）（P3）
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+    const getFocusable = () =>
+      Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      )
+    // 初始焦点：优先第一个可聚焦元素，否则聚焦弹窗本身
+    ;(getFocusable()[0] ?? dialog).focus()
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const items = getFocusable()
+      if (items.length === 0) return
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (!first || !last) return
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    dialog.addEventListener('keydown', onKeyDown)
+    return () => dialog.removeEventListener('keydown', onKeyDown)
+  }, [onClose])
 
   const imgR = photo.width / photo.height
   const boxSize = 280
@@ -78,7 +116,14 @@ export function CropModal({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-surface-2 rounded-3xl w-full max-w-sm p-5 shadow-2xl mx-4">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="裁剪图片"
+        tabIndex={-1}
+        className="relative bg-surface-2 rounded-3xl w-full max-w-sm p-5 shadow-2xl mx-4"
+      >
         <h4 className="font-semibold text-primary mb-4">裁剪图片</h4>
 
         <div className="flex justify-center mb-4">

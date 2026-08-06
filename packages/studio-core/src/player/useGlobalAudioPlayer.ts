@@ -17,6 +17,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -77,6 +78,18 @@ export function useGlobalAudioPlayer(
   const isPlayingRef = useRef<boolean>(false);
   const durationRef = useRef<number>(0);
   const channelRef = useRef<BroadcastChannel | null>(null);
+  // 解绑当前 audio 元素上的监听器（切歌/卸载时调用，避免 Audio 实例与监听器一起泄漏）
+  const detachRef = useRef<(() => void) | null>(null);
+
+  // options 由调用方以对象字面量传入（如 jack-wave 的 { onError, resolveArtwork }），
+  // 每次渲染都是新引用。存入 ref 后下方 useCallback 才能保持稳定身份，
+  // 否则 loadTrack 身份每渲染变化 → 初始化 effect 反复重建 BroadcastChannel 并重新 loadTrack。
+  const onErrorRef = useRef(onError);
+  const resolveArtworkRef = useRef(resolveArtwork);
+  useEffect(() => {
+    onErrorRef.current = onError;
+    resolveArtworkRef.current = resolveArtwork;
+  });
 
   const [currentTrack, setCurrentTrack] = useState<PlayerTrack | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -110,11 +123,14 @@ export function useGlobalAudioPlayer(
         queue: overrides?.queue ?? queueRef.current,
         currentIndex: overrides?.currentIndex ?? indexRef.current,
         isPlaying: overrides?.isPlaying ?? isPlayingRef.current,
-        currentTime: overrides?.currentTime ?? currentTime,
+        // 直接读音频元素的实时进度，而不是 currentTime state。
+        // 依赖 state 会让本回调每 ~250ms（timeupdate 频率）换一次身份，
+        // 进而使所有依赖它的 effect 反复销毁重建。
+        currentTime: overrides?.currentTime ?? audioRef.current?.currentTime ?? 0,
         source: typeof window !== 'undefined' ? window.location.pathname : '',
       });
     },
-    [currentTime],
+    [],
   );
 
   // 广播当前播放事件
@@ -123,21 +139,29 @@ export function useGlobalAudioPlayer(
       postPlayerMessage(channelRef.current, {
         type,
         trackId: trackRef.current?.trackId,
-        currentTime: currentTime,
+        // 同 persistState：读实时进度而非 state，保持回调身份稳定
+        currentTime: audioRef.current?.currentTime ?? 0,
         isPlaying: isPlayingRef.current,
         ...extra,
       });
     },
-    [currentTime],
+    [],
   );
 
-  /** 解析封面 URL */
+  /** 解析封面 URL（幂等） */
   const resolveTrackArtwork = useCallback(
     (track: PlayerTrack): PlayerTrack => {
-      if (!resolveArtwork || !track.artworkUrl100) return track;
-      return { ...track, artworkUrl100: resolveArtwork(track.artworkUrl100) };
+      const resolve = resolveArtworkRef.current;
+      const src = track.artworkUrl100;
+      if (!resolve || !src) return track;
+      // 幂等保护：已解析过的地址（同源代理相对路径）不再二次解析。
+      // 调用方的 resolveArtwork 内部用 safeUrl 校验，而 safeUrl 以 new URL() 解析、
+      // 不接受相对路径，重复调用会把已代理的封面判为非法并清空成空串——
+      // 表现为从 localStorage 恢复播放状态后封面变空白。
+      if (!/^https?:\/\//i.test(src)) return track;
+      return { ...track, artworkUrl100: resolve(src) };
     },
-    [resolveArtwork],
+    [],
   );
 
   // 内部：加载并播放指定曲目
@@ -145,11 +169,13 @@ export function useGlobalAudioPlayer(
     async (track: PlayerTrack, autoPlay: boolean) => {
       track = resolveTrackArtwork(track);
       if (!track.previewUrl) {
-        onError?.('歌曲预览链接缺失');
+        onErrorRef.current?.('歌曲预览链接缺失');
         return;
       }
 
-      // 清理旧音频
+      // 清理旧音频：必须先解绑监听器，否则旧 Audio 实例会被监听器闭包持有而无法回收
+      detachRef.current?.();
+      detachRef.current = null;
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = '';
@@ -173,11 +199,29 @@ export function useGlobalAudioPlayer(
         audio.currentTime = saved.currentTime;
       }
 
+      // timeupdate 约每 250ms 触发一次。原实现每次无条件 setState 三份，
+      // 而本 hook 在四个 app 的根组件调用 → 整棵组件树每 250ms 重新协调。
+      // 这里按"整数百分比 / 整秒 / 时长变化"去重，UI 精度不变（进度条 1% 步进、时间显示到秒），
+      // 实际 setState 次数下降约 90%。
+      let lastPct = -1;
+      let lastSec = -1;
+      let lastDur = -1;
       const updateProgress = () => {
-        if (audio.duration) {
-          setProgress((audio.currentTime / audio.duration) * 100);
-          setCurrentTime(audio.currentTime);
-          setDuration(audio.duration);
+        const dur = audio.duration;
+        if (!dur || !isFinite(dur)) return;
+        const pct = Math.floor((audio.currentTime / dur) * 100);
+        const sec = Math.floor(audio.currentTime);
+        if (pct !== lastPct) {
+          lastPct = pct;
+          setProgress(pct);
+        }
+        if (sec !== lastSec) {
+          lastSec = sec;
+          setCurrentTime(sec);
+        }
+        if (dur !== lastDur) {
+          lastDur = dur;
+          setDuration(dur);
         }
       };
 
@@ -202,7 +246,7 @@ export function useGlobalAudioPlayer(
 
       const handleError = () => {
         setIsPlaying(false);
-        onError?.('音频加载失败，链接可能已过期');
+        onErrorRef.current?.('音频加载失败，链接可能已过期');
         persistState({ isPlaying: false });
         broadcast('pause');
       };
@@ -210,6 +254,12 @@ export function useGlobalAudioPlayer(
       audio.addEventListener('timeupdate', updateProgress);
       audio.addEventListener('ended', handleEnded);
       audio.addEventListener('error', handleError);
+      // 记录解绑函数，供下次切歌与组件卸载时调用
+      detachRef.current = () => {
+        audio.removeEventListener('timeupdate', updateProgress);
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handleError);
+      };
 
       if (autoPlay) {
         try {
@@ -227,7 +277,9 @@ export function useGlobalAudioPlayer(
         setIsPlaying(false);
       }
     },
-    [onError, persistState, broadcast],
+    // 依赖项全部为稳定引用（persistState / broadcast / resolveTrackArtwork 均为空依赖，
+    // onError 已改走 onErrorRef），因此 loadTrack 身份恒定，下游 effect 不会反复重建。
+    [persistState, broadcast, resolveTrackArtwork],
   );
 
   // 公开 API：播放指定曲目
@@ -320,6 +372,8 @@ export function useGlobalAudioPlayer(
 
   // 公开 API：关闭播放器
   const closePlayer = useCallback(() => {
+    detachRef.current?.();
+    detachRef.current = null;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = '';
@@ -347,7 +401,8 @@ export function useGlobalAudioPlayer(
       queueRef.current = saved.queue;
       indexRef.current = saved.currentIndex;
       // 如果之前是播放状态，尝试自动继续；否则仅加载
-      loadTrack(resolveTrackArtwork(saved.currentTrack), saved.isPlaying);
+      // 注意：loadTrack 内部已调用 resolveTrackArtwork，此处不要重复解析
+      loadTrack(saved.currentTrack, saved.isPlaying);
     }
 
     const unsubscribe = subscribePlayerMessages(channelRef.current, (msg) => {
@@ -401,31 +456,53 @@ export function useGlobalAudioPlayer(
     return () => clearInterval(timer);
   }, [persistState]);
 
-  // 清理：组件卸载时暂停（不销毁持久化状态）
+  // 清理：组件卸载时解绑监听并暂停（不销毁持久化状态）
   useEffect(() => {
     return () => {
+      detachRef.current?.();
+      detachRef.current = null;
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.src = '';
         audioRef.current = null;
       }
     };
   }, []);
 
-  return {
-    currentTrack,
-    isPlaying,
-    progress,
-    currentTime,
-    duration,
-    currentTimeStr: fmtTime(currentTime),
-    totalTimeStr: fmtTime(duration || currentTrack?.duration || 0),
-    isVisible,
-    playTrack,
-    playByIndex,
-    togglePlay,
-    playNext,
-    playPrev,
-    seek,
-    closePlayer,
-  };
+  // 返回值必须 memo 化：调用方（如 jack-wave/App.tsx）会把整个 player 对象放进
+  // useEffect 依赖数组，返回裸对象字面量会导致其监听器每次渲染解绑重绑。
+  return useMemo(
+    () => ({
+      currentTrack,
+      isPlaying,
+      progress,
+      currentTime,
+      duration,
+      currentTimeStr: fmtTime(currentTime),
+      totalTimeStr: fmtTime(duration || currentTrack?.duration || 0),
+      isVisible,
+      playTrack,
+      playByIndex,
+      togglePlay,
+      playNext,
+      playPrev,
+      seek,
+      closePlayer,
+    }),
+    [
+      currentTrack,
+      isPlaying,
+      progress,
+      currentTime,
+      duration,
+      isVisible,
+      playTrack,
+      playByIndex,
+      togglePlay,
+      playNext,
+      playPrev,
+      seek,
+      closePlayer,
+    ],
+  );
 }

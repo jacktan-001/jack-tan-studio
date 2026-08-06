@@ -126,7 +126,7 @@ export function XiaohongshuView({
         onChange={(e) => onTitle(e.target.value)}
         maxLength={20}
         placeholder="标题（≤20字）"
-        className="w-full font-bold text-lg text-primary bg-transparent outline-none placeholder:text-placeholder placeholder:font-normal"
+        className="w-full font-bold text-lg text-primary bg-transparent outline-none rounded focus-visible:ring-2 focus-visible:ring-xhs placeholder:text-placeholder placeholder:font-normal"
       />
 
       {/* 正文 */}
@@ -135,7 +135,7 @@ export function XiaohongshuView({
         onChange={(e) => onCaption(e.target.value)}
         placeholder="正文内容…"
         rows={4}
-        className="w-full text-sm leading-relaxed text-primary bg-transparent resize-none outline-none placeholder:text-placeholder"
+        className="w-full text-sm leading-relaxed text-primary bg-transparent resize-none outline-none rounded focus-visible:ring-2 focus-visible:ring-xhs placeholder:text-placeholder"
       />
 
       {/* 缩略图条 + 拖拽排序 */}
@@ -155,20 +155,27 @@ export function XiaohongshuView({
                 }`}
               >
                 {urls[id] && (
-                  <img
-                    src={urls[id]}
-                    alt=""
-                    width={64}
-                    height={64}
-                    loading="lazy"
-                    className="w-full h-full object-cover"
+                  <button
+                    type="button"
                     onClick={() => scrollTo(idx)}
-                  />
+                    aria-label={`查看第 ${idx + 1} 张图片`}
+                    className="block w-full h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xhs"
+                  >
+                    <img
+                      src={urls[id]}
+                      alt=""
+                      width={64}
+                      height={64}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
                 )}
                 <button
                   onClick={() => onRemove(id)}
                   onPointerDown={(e) => e.stopPropagation()}
-                  className="absolute top-0 right-0 w-4 h-4 bg-black/50 text-white text-[10px] flex items-center justify-center"
+                  aria-label={`移除第 ${idx + 1} 张图片`}
+                  className="absolute top-0 right-0 w-6 h-6 bg-black/50 text-white text-[10px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
                 >
                   ×
                 </button>

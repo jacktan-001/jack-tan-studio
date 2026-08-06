@@ -47,6 +47,24 @@ export function AudioPlayer({ player }: AudioPlayerProps) {
     seek(ratio);
   };
 
+  // 键盘跳转（slider 语义需要可键盘操作）（P3）
+  const handleSeekKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    let next: number | null = null;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+      next = Math.min(1, (progress + 5) / 100);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+      next = Math.max(0, (progress - 5) / 100);
+    } else if (e.key === 'Home') {
+      next = 0;
+    } else if (e.key === 'End') {
+      next = 1;
+    }
+    if (next !== null) {
+      e.preventDefault();
+      seek(next);
+    }
+  };
+
   return (
     <div
       className="player-bar active"
@@ -226,6 +244,8 @@ export function AudioPlayer({ player }: AudioPlayerProps) {
         <div
           className="progress-bar"
           onClick={handleSeek}
+          onKeyDown={handleSeekKey}
+          tabIndex={0}
           role="slider"
           aria-label="播放进度"
           aria-valuenow={Math.round(progress)}
@@ -313,6 +333,10 @@ export function AudioPlayer({ player }: AudioPlayerProps) {
 
       {/* 响应式：移动端隐藏进度条和平台链接文字 */}
       <style>{`
+        .progress-bar:focus-visible {
+          outline: 2px solid var(--teal);
+          outline-offset: 4px;
+        }
         @media (max-width: 768px) {
           .player-bar {
             height: calc(84px + env(safe-area-inset-bottom, 0px)) !important;

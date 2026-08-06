@@ -31,6 +31,10 @@ export function PhotoUploader({ projectId, platform }: Props) {
   const [urls, setUrls] = useState<Record<string, string>>({})
 
   // 加载图片 objectURL
+  // 始终持有最新的 urls 快照，供卸载/移除时的回收逻辑读取（P1-4）
+  const urlsRef = useRef<Record<string, string>>(urls)
+  urlsRef.current = urls
+
   useEffect(() => {
     let cancelled = false
     photos.forEach(async (ph) => {
@@ -46,6 +50,27 @@ export function PhotoUploader({ projectId, platform }: Props) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [photos])
+
+  // 回收被移除照片对应的 objectURL，避免 Blob URL 泄漏（P1-4）
+  useEffect(() => {
+    const ids = new Set(photos.map((p) => p.id))
+    const stale = Object.keys(urlsRef.current).filter((id) => !ids.has(id))
+    if (stale.length === 0) return
+    stale.forEach((id) => revokePhotoUrl(id))
+    setUrls((u) => {
+      const next = { ...u }
+      stale.forEach((id) => delete next[id])
+      return next
+    })
+  }, [photos])
+
+  // 卸载时释放当前已加载的全部 objectURL
+  useEffect(() => {
+    return () => {
+      Object.keys(urlsRef.current).forEach((id) => revokePhotoUrl(id))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return
@@ -143,15 +168,22 @@ export function PhotoUploader({ projectId, platform }: Props) {
                 }`}
               >
                 {urls[ph.id] ? (
-                  <img
-                    src={urls[ph.id]}
-                    alt={ph.name}
-                    width={400}
-                    height={400}
-                    loading="lazy"
-                    className="w-full h-full object-cover cursor-pointer"
+                  <button
+                    type="button"
                     onClick={() => togglePlatformImage(projectId, platform, ph.id)}
-                  />
+                    aria-pressed={selected}
+                    aria-label={`${selected ? '取消选择' : '选择'}图片 ${ph.name}`}
+                    className="block w-full h-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+                  >
+                    <img
+                      src={urls[ph.id]}
+                      alt={ph.name}
+                      width={400}
+                      height={400}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-xs text-secondary">
                     加载中
@@ -174,9 +206,12 @@ export function PhotoUploader({ projectId, platform }: Props) {
 
                 <button
                   onClick={() => handleDelete(ph.id)}
-                  className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-black/50 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                  aria-label="删除图片"
+                  className="absolute top-1.5 right-1.5 grid place-items-center w-5 h-5 rounded-full bg-black/50 text-white text-xs transition opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
                 >
-                  ×
+                  {/* 扩大可点击热区到 ≥44px（视觉仍保持小圆点），满足触摸目标尺寸（P3） */}
+                  <span className="absolute inset-0 -m-3" aria-hidden="true" />
+                  <span className="relative leading-none">×</span>
                 </button>
               </div>
             )

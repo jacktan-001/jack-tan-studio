@@ -240,12 +240,16 @@ export function PuzzlePage() {
                         ✂
                       </span>
                     )}
+                    {/* 命中区扩到 44px（WCAG 2.5.5），视觉圆点仍为 20px 且位置不变 */}
                     <button
                       onClick={(e) => { e.stopPropagation(); remove(id) }}
                       onPointerDown={(e) => e.stopPropagation()}
-                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/40 text-white text-xs flex items-center justify-center z-10"
+                      aria-label={`移除第 ${idx + 1} 张照片`}
+                      className="absolute top-0 right-0 w-11 h-11 p-1 flex items-start justify-end z-20 focus-visible:outline-none group/del"
                     >
-                      ×
+                      <span className="w-5 h-5 rounded-full bg-black/40 text-white text-xs flex items-center justify-center group-focus-visible/del:ring-2 group-focus-visible/del:ring-white">
+                        ×
+                      </span>
                     </button>
                   </div>
                 )}

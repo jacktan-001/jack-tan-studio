@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* 让 Tailwind 扫描 packages/studio-core 中的类名（其位于 src 之外，自动检测覆盖不到） */
+@source "../../../packages/studio-core/src";
 
 /* ==================== Tailwind v4 主题令牌 ====================
    将原 tailwind.config.js 的颜色/字体令牌映射到现有 CSS 变量系统。
@@ -43,8 +45,10 @@
   --color-surface-2: #ffffff;
   --color-hover: #f5f5f7;
   --color-text: #1d1d1f;
-  --color-text-2: #86868b;
-  --color-text-3: #9B8E7E;
+  /* a11y：原 #86868b 在 #FBF7F0 上仅 3.39:1，未达 WCAG AA 4.5:1 → #6e6e73 = 4.75:1 */
+  --color-text-2: #6e6e73;
+  /* a11y：原 #9B8E7E 仅 2.99:1 → #7A6E60 = 4.65:1（保留暖色调） */
+  --color-text-3: #7A6E60;
   --color-border: #EDE8E0;
   --color-border-light: #e8e8ed;
   --color-border-strong: #d2d2d7;
@@ -61,7 +65,8 @@
   --bg-elevated: #F5EFE6;
   --bg-glass: rgba(255, 251, 245, 0.6);
   --text: #1d1d1f;
-  --text-muted: #86868b;
+  /* a11y：StudioBar 导航文字消费此变量，3.39:1 → 4.75:1 */
+  --text-muted: #6e6e73;
   --text-dim: #9B8E7E;
   --border: rgba(193, 149, 106, 0.15);
   --border-hover: rgba(193, 149, 106, 0.28);
@@ -88,8 +93,10 @@
   --color-surface-2: #2c251e;
   --color-hover: #332b22;
   --color-text: #f5f0e8;
+  /* #a89888 在 #1c1612 上为 6.40:1，已达标，保持不变 */
   --color-text-2: #a89888;
-  --color-text-3: #7a6e60;
+  /* a11y：原 #7a6e60 仅 3.60:1 → #9A8D7C = 5.52:1（保留暖色调） */
+  --color-text-3: #9A8D7C;
   --color-border: #3a3028;
   --color-border-light: #342a22;
   --color-border-strong: #4a3e34;

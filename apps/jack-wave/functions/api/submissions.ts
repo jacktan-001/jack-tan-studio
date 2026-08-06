@@ -2,6 +2,7 @@
 // 提交列表管理接口 - 并行查询 + 分页 + 状态过滤
 // ============================================================
 
+import { authenticateAdmin } from '../_lib/adminAuth';
 import { handlePreflight, withCors } from '../_lib/cors';
 
 // OPTIONS 预检处理
@@ -14,25 +15,6 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
 // 单页最大条数限制
 const MAX_LIMIT = 100;
-
-/**
- * 使用恒定时间比较来验证密码，防止时序攻击
- */
-async function timingSafeEqual(a: string, b: string): Promise<boolean> {
-  const encoder = new TextEncoder();
-  const [hashA, hashB] = await Promise.all([
-    crypto.subtle.digest('SHA-256', encoder.encode(a)),
-    crypto.subtle.digest('SHA-256', encoder.encode(b)),
-  ]);
-  const arrA = new Uint8Array(hashA);
-  const arrB = new Uint8Array(hashB);
-  if (arrA.length !== arrB.length) return false;
-  let result = 0;
-  for (let i = 0; i < arrA.length; i++) {
-    result |= arrA[i] ^ arrB[i];
-  }
-  return result === 0;
-}
 
 /**
  * 安全解析整数参数，失败时返回默认值
@@ -50,13 +32,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 };
 
 async function handleGet(context: PagesFunctionContext<Env>): Promise<Response> {
-  const url = new URL(context.request.url);
-  const password =
-    url.searchParams.get('password') || context.request.headers.get('x-admin-password');
+  // 统一鉴权：时序安全比较 + IP 限流（仅接受 x-admin-password 请求头）
+  const auth = await authenticateAdmin(context.request, context.env);
+  if (!auth.authorized) return auth.response;
 
-  if (!password || !(await timingSafeEqual(password, context.env.ADMIN_PASSWORD))) {
-    return Response.json({ error: '未授权' }, { status: 401 });
-  }
+  const url = new URL(context.request.url);
 
   try {
     const kv = context.env.JACK_WAVE_KV;
@@ -138,14 +118,13 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
 };
 
 async function handleDelete(context: PagesFunctionContext<Env>): Promise<Response> {
+  // 统一鉴权：时序安全比较 + IP 限流（仅接受 x-admin-password 请求头）
+  const auth = await authenticateAdmin(context.request, context.env);
+  if (!auth.authorized) return auth.response;
+
   const url = new URL(context.request.url);
-  const password =
-    url.searchParams.get('password') || context.request.headers.get('x-admin-password');
   const id = url.searchParams.get('id');
 
-  if (!password || !(await timingSafeEqual(password, context.env.ADMIN_PASSWORD))) {
-    return Response.json({ error: '未授权' }, { status: 401 });
-  }
   if (!id) return Response.json({ error: '缺少 id 参数' }, { status: 400 });
 
   try {
