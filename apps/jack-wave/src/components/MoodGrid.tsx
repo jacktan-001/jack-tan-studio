@@ -1,8 +1,8 @@
 /**
  * MoodGrid — 心情歌单一 3D 螺旋轮播
  *
- * 屏幕正中央一个固定的发光球体（当前播放指示器），12/6/N 张专辑封面
- * 以 rotateY + translateZ 分布在半径为 R 的 3D 螺旋轨道上，围绕中心球体旋转。
+ * N 张专辑封面以 rotateY + translateZ 分布在半径为 R 的 3D 螺旋轨道上，
+ * 形成连续循环的旋转封面墙。
  *
  * 交互：
  * - 拖拽旋转：鼠标 / 触控水平拖拽控制整个螺旋容器的 rotateY。
@@ -46,10 +46,8 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
   });
   const downIndex = useRef<number | null>(null);
   const suppressClick = useRef(false);
-  const curRef = useRef(-1);
 
   const [hovered, setHovered] = useState<number | null>(null);
-  const [cur, setCur] = useState(0);
   const [radius, setRadius] = useState(420);
   const [cardSize, setCardSize] = useState(200);
 
@@ -94,20 +92,13 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
       if (ringRef.current) {
         ringRef.current.style.transform = `translateZ(${-radius}px) rotateY(${rotation.current}deg)`;
       }
-      // 计算当前正对前方的卡片索引（用于中心球体指示）
-      const step = 360 / N;
-      const idx = (((Math.round(-rotation.current / step) % N) + N) % N);
-      if (idx !== curRef.current) {
-        curRef.current = idx;
-        setCur(idx);
-      }
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [N, radius]);
+  }, [radius]);
 
   // 拖拽开始
   const onPointerDown = useCallback((e: React.PointerEvent) => {
@@ -163,34 +154,12 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
     [moodPlaylists, onOpenMood],
   );
 
-  const activeTitle = moodPlaylists[cur]?.title ?? '';
-
   return (
     <section
       className="section"
       id="mood"
-      style={{ padding: '80px 0', overflow: 'hidden' }}
+      style={{ padding: '24px 0', overflow: 'hidden' }}
     >
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px' }}>
-        <h2
-          className="section-title"
-          style={{
-            fontSize: '32px',
-            fontWeight: 700,
-            letterSpacing: '-1px',
-            marginBottom: '8px',
-          }}
-        >
-          心情歌单
-        </h2>
-        <p
-          className="section-desc"
-          style={{ color: 'var(--gray-500)', fontSize: '15px', marginBottom: '8px' }}
-        >
-          拖拽旋转 · 点击封面播放对应心情
-        </p>
-      </div>
-
       <div
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -198,7 +167,8 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
         onPointerCancel={endDrag}
         style={{
           position: 'relative',
-          height: `${cardSize * 2 + 220}px`,
+          // 交互区域大幅缩小，仅保留封面与 3D 透视所需空间，避免占用过多空白
+          height: `${cardSize + 180}px`,
           perspective: '1500px',
           touchAction: 'none',
           cursor: 'grab',
@@ -206,50 +176,6 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
           WebkitUserSelect: 'none',
         }}
       >
-        {/* 中心光球：视觉上隐藏，但保留当前选中的指示文案 */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            width: 150,
-            height: 150,
-            marginLeft: -75,
-            marginTop: -75,
-            borderRadius: '50%',
-            zIndex: 5,
-            pointerEvents: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {/* 光球视觉元素：完全透明，仅保留布局占位 */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '50%',
-              background: 'transparent',
-              boxShadow: 'none',
-              opacity: 0,
-            }}
-          />
-          <span
-            style={{
-              position: 'absolute',
-              bottom: -28,
-              fontSize: 12,
-              fontWeight: 600,
-              color: 'var(--gray-500)',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {activeTitle}
-          </span>
-        </div>
-
         {/* 3D 螺旋旋转环 */}
         <div
           ref={ringRef}
