@@ -6,7 +6,7 @@
 import type { Song, MoodPlaylist, MonthlyShare } from '../types';
 
 /** 每个歌单最多歌曲数 */
-export const MAX_SONGS = 10;
+export const MAX_SONGS = 20;
 
 /** 歌曲库 — 以 trackId 为 key，去重存储 */
 export const songLibrary: Record<string, Song> = {

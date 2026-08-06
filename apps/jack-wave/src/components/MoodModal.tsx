@@ -146,7 +146,7 @@ export function MoodModal({
               className="modal-subtitle"
               style={{ fontSize: '13px', color: 'var(--gray-500)' }}
             >
-              {playlist.author} · {playlist.tag} · {playlist.songList.length}首
+              {playlist.author} · {playlist.tag} · {playlist.songList.length} 首
             </div>
           </div>
           <button
