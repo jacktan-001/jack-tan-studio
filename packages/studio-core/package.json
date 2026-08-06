@@ -15,7 +15,8 @@
     "./pwa": "./src/pwa/index.ts",
     "./deploy": "./src/deploy/index.ts",
     "./effects": "./src/effects/index.ts",
-    "./nav": "./src/nav/index.ts"
+    "./nav": "./src/nav/index.ts",
+    "./player": "./src/player/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

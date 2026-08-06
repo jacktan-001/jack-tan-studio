@@ -275,7 +275,7 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
                     pointerEvents: 'none',
                   }}
                 />
-                {/* 底部信息条：封面内部标题 + 圆角心情标签 + 歌单作者 */}
+                {/* 底部信息条：封面内部标题 + 歌单作者居中 + 圆角心情标签居右 */}
                 <div
                   style={{
                     position: 'absolute',
@@ -303,14 +303,33 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
                   </div>
                   <div
                     style={{
+                      position: 'relative',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      marginTop: '4px',
+                      justifyContent: 'center',
+                      marginTop: '6px',
+                      minHeight: '20px',
                     }}
                   >
                     <span
                       style={{
+                        fontSize: 11,
+                        color: 'rgba(255,255,255,0.82)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        textAlign: 'center',
+                        padding: '0 58px 0 0',
+                      }}
+                    >
+                      {p.author}
+                    </span>
+                    <span
+                      style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
                         display: 'inline-block',
                         fontSize: 11,
                         fontWeight: 600,
@@ -322,17 +341,6 @@ export function MoodGrid({ moodPlaylists, onOpenMood }: MoodGridProps) {
                       }}
                     >
                       {p.tag}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: 'rgba(255,255,255,0.78)',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {p.author}
                     </span>
                   </div>
                 </div>

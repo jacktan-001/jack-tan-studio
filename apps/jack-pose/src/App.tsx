@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
-import { StudioBar } from '@jack-tan/studio-core'
+import { StudioBar, GlobalAudioPlayer, useGlobalAudioPlayer } from '@jack-tan/studio-core'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import CameraFlash from './components/CameraFlash'
 
@@ -38,6 +38,8 @@ function App() {
     }
   }, [])
 
+  const player = useGlobalAudioPlayer()
+
   return (
     <ErrorBoundary>
       {/* 背景视觉层 — 暖色手工质感 */}
@@ -67,6 +69,9 @@ function App() {
 
       {/* 全局相机闪光特效 — 随机位置闪光灯，模拟四处拍照（fixed 覆盖层，不拦截交互） */}
       <CameraFlash />
+
+      {/* 跨应用全局底部播放器 */}
+      <GlobalAudioPlayer player={player} />
     </ErrorBoundary>
   )
 }

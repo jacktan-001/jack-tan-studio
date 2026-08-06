@@ -39,6 +39,12 @@ import {
   sortMonthly,
 } from './data/musicData';
 import { useAudioPlayer } from './hooks/useAudioPlayer';
+import {
+  GlobalAudioPlayer,
+  useGlobalAudioPlayer,
+  toPlayerTrack,
+  type PlayerTrack,
+} from '@jack-tan/studio-core';
 import { StudioBar } from '@jack-tan/studio-core';
 import { Hero } from './components/Hero';
 import RippleField from './components/RippleField';
@@ -46,9 +52,9 @@ import { MonthlySection, type MonthlySectionRef } from './components/MonthlySect
 import { MoodGrid } from './components/MoodGrid';
 import { MoodModal } from './components/MoodModal';
 import { SubmitForm } from './components/SubmitForm';
-import { AudioPlayer } from './components/AudioPlayer';
 import { Footer } from './components/Footer';
 import { Toast, useToast } from './components/Toast';
+import { artworkSrc } from './utils';
 
 /** /api/public-data 返回的 KV 公开数据结构 */
 interface PublicData {
@@ -221,8 +227,14 @@ export default function App() {
   // === 强制刷新（URL 刷新后需要重新渲染） ===
   const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
-  // === 音频播放器 ===
-  const player = useAudioPlayer(songLibrary, showToast, forceUpdate);
+  // === iTunes 预览 URL 后台刷新（jack-wave 专属） ===
+  useAudioPlayer(songLibrary, showToast, forceUpdate);
+
+  // === 跨应用全局音频播放器 ===
+  const player = useGlobalAudioPlayer({
+    onError: showToast,
+    resolveArtwork: artworkSrc,
+  });
 
   // === 心情歌单弹窗 ===
   const [selectedMoodId, setSelectedMoodId] = useState<number | null>(null);
@@ -242,12 +254,12 @@ export default function App() {
       const tag = (e.target as HTMLElement).tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
-      if (e.code === 'Space' && player.currentSong) {
+      if (e.code === 'Space' && player.currentTrack) {
         e.preventDefault();
         player.togglePlay();
-      } else if (e.code === 'ArrowRight' && player.currentSong) {
+      } else if (e.code === 'ArrowRight' && player.currentTrack) {
         player.playNext();
-      } else if (e.code === 'ArrowLeft' && player.currentSong) {
+      } else if (e.code === 'ArrowLeft' && player.currentTrack) {
         player.playPrev();
       } else if (e.code === 'Escape') {
         setIsMoodModalOpen(false);
@@ -289,10 +301,11 @@ export default function App() {
     monthlyRef.current?.playCurrentMonth();
   }, []);
 
-  /** 播放歌曲 */
+  /** 播放歌曲：转换为跨应用 PlayerTrack 后交给全局播放器 */
   const handlePlay = useCallback(
     (song: Song, songList: Song[], index: number) => {
-      player.playSong(song, songList, index);
+      const queue: PlayerTrack[] = songList.map((s) => toPlayerTrack(s, artworkSrc));
+      player.playTrack(toPlayerTrack(song, artworkSrc), queue, index);
     },
     [player],
   );
@@ -337,7 +350,7 @@ export default function App() {
         <MonthlySection
           ref={monthlyRef}
           monthlyShares={data.monthlyShares}
-          currentSong={player.currentSong}
+          currentSong={player.currentTrack}
           onPlay={handlePlay}
           onOpenMonthly={handleOpenMonthly}
         />
@@ -353,7 +366,7 @@ export default function App() {
           playlist={selectedMood}
           show={isMoodModalOpen}
           onClose={handleCloseMood}
-          currentSong={player.currentSong}
+          currentSong={player.currentTrack}
           onPlay={handlePlay}
         />
 
@@ -362,7 +375,7 @@ export default function App() {
           playlist={selectedMonthly}
           show={isMonthlyModalOpen}
           onClose={handleCloseMonthly}
-          currentSong={player.currentSong}
+          currentSong={player.currentTrack}
           onPlay={handlePlay}
         />
       </>
@@ -431,8 +444,8 @@ export default function App() {
         <Footer />
       </div>
 
-      {/* 底部播放器 */}
-      <AudioPlayer player={player} />
+      {/* 跨应用全局底部播放器 */}
+      <GlobalAudioPlayer player={player} resolveArtwork={artworkSrc} />
 
       {/* Toast 通知 */}
       <Toast message={message} show={show} onHide={hideToast} />

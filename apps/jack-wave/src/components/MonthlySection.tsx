@@ -7,12 +7,13 @@
 
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import type { MonthlyShare, Song } from '../types';
+import type { PlayerTrack } from '@jack-tan/studio-core';
 import { safeUrl, artworkSrc } from '../utils';
 import { playlistCover } from '../data/musicData';
 
 export interface MonthlySectionProps {
   monthlyShares: MonthlyShare[];
-  currentSong: Song | null;
+  currentSong: Song | PlayerTrack | null;
   onPlay: (song: Song, songList: Song[], index: number) => void;
   onOpenMonthly: (id: number) => void;
 }
