@@ -301,7 +301,7 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
                   className="monthly-count"
                   style={{ fontSize: '13px', color: 'var(--gray-400)' }}
                 >
-                  {m.songList.length} 首歌
+                  {m.songList.length} 首
                 </span>
               </div>
               <div

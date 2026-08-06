@@ -285,7 +285,7 @@ input[readonly]{opacity:.6;cursor:default;background:var(--hover-bg)}
       <h3 style="margin-bottom:16px">设置</h3>
       <div class="card">
         <div style="display:flex;flex-direction:column;gap:12px">
-          <button class="btn btn-outline" onclick="cleanupAllPlaylists()" style="width:100%">一键清理（10首限制+去重）</button>
+          <button class="btn btn-outline" onclick="cleanupAllPlaylists()" style="width:100%">一键清理（20首限制+去重）</button>
           <button class="btn btn-primary" onclick="syncToKV()" style="width:100%">同步静态数据到 KV</button>
           <button class="btn btn-danger" onclick="doLogout()" style="width:100%">退出登录</button>
         </div>
@@ -763,14 +763,14 @@ function manageSongs(type, idx) {
 function renderSongList() {
   const songs = editingSongs.parent.songList;
   const body = document.getElementById('songModalBody');
-  const atLimit = songs.length >= 10;
+  const atLimit = songs.length >= 20;
   body.innerHTML = `
     <div class="search-box" style="margin-bottom:12px;${atLimit ? 'opacity:0.4;pointer-events:none' : ''}">
-      <input id="songSearch" placeholder="${atLimit ? '已达上限 10 首，请先删除歌曲' : '搜索歌曲名/歌手...'}" onkeydown="if(event.key==='Enter')searchITunes()">
+      <input id="songSearch" placeholder="${atLimit ? '已达上限 20 首，请先删除歌曲' : '搜索歌曲名/歌手...'}" onkeydown="if(event.key==='Enter')searchITunes()">
       <button class="btn btn-primary btn-sm" onclick="searchITunes()">搜索</button>
     </div>
     <div id="searchResults"></div>
-    <div style="margin-bottom:8px;font-size:13px;color:var(--text2);font-weight:600">${songs.length} / 10 首歌${atLimit ? ' <span style="color:var(--red)">(已达上限)</span>' : ''}</div>
+    <div style="margin-bottom:8px;font-size:13px;color:var(--text2);font-weight:600">${songs.length} / 20 首歌${atLimit ? ' <span style="color:var(--red)">(已达上限)</span>' : ''}</div>
     <div id="songListContainer">${songs.map((s,i) => songRow(s,i)).join('')}</div>
     <div style="margin-top:16px;display:flex;gap:8px">
       <button class="btn btn-outline" style="flex:1" onclick="closeSongModal()">关闭</button>
@@ -845,8 +845,8 @@ async function searchITunes() {
 }
 
 function addSong(song) {
-  if (editingSongs.parent.songList.length >= 10) {
-    toast('每个歌单最多 10 首歌');
+  if (editingSongs.parent.songList.length >= 20) {
+    toast('每个歌单最多 20 首歌');
     return;
   }
   var key = getSongKey(song);
@@ -1084,14 +1084,14 @@ function dedupeSongs(songList) {
 }
 
 function cleanupAllPlaylists() {
-  if (!confirm('将自动对所有歌单执行：\n1. 去除重复歌曲\n2. 截断为最多10首\n\n确定继续？')) return;
+  if (!confirm('将自动对所有歌单执行：\n1. 去除重复歌曲\n2. 截断为最多20首\n\n确定继续？')) return;
   var cleaned = 0;
   var truncated = 0;
   DATA.monthlyShares.forEach(function(p) {
     if (!p.songList) p.songList = [];
     var before = p.songList.length;
     p.songList = dedupeSongs(p.songList);
-    if (p.songList.length > 10) p.songList = p.songList.slice(0, 10);
+    if (p.songList.length > 20) p.songList = p.songList.slice(0, 20);
     if (p.songList.length !== before) {
       cleaned += before - p.songList.length;
       truncated++;
@@ -1101,7 +1101,7 @@ function cleanupAllPlaylists() {
     if (!p.songList) p.songList = [];
     var before = p.songList.length;
     p.songList = dedupeSongs(p.songList);
-    if (p.songList.length > 10) p.songList = p.songList.slice(0, 10);
+    if (p.songList.length > 20) p.songList = p.songList.slice(0, 20);
     if (p.songList.length !== before) {
       cleaned += before - p.songList.length;
       truncated++;
