@@ -862,3 +862,38 @@
   display: none;
 }
 
+
+/* ==================== AudioPlayer 响应式适配 ====================
+   从 AudioPlayer.tsx 内联 <style> 块提取，统一作用域管理，
+   避免在 React 组件中注入 CSS 导致 SSR / CSP inline 问题。 */
+[data-project='wave'] .progress-bar:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 4px;
+}
+
+@media (max-width: 768px) {
+  [data-project='wave'] .player-bar {
+    height: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 0 14px !important;
+    gap: 10px !important;
+  }
+  [data-project='wave'] .player-cover {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  [data-project='wave'] .player-progress {
+    display: none !important;
+  }
+  [data-project='wave'] .player-time {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  [data-project='wave'] .platform-btn span {
+    display: none;
+  }
+  [data-project='wave'] .platform-btn {
+    padding: 14px 16px !important;
+  }
+}

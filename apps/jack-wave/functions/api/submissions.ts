@@ -106,8 +106,9 @@ async function handleGet(context: PagesFunctionContext<Env>): Promise<Response> 
         totalPages,
       },
     });
-  } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+  } catch (e) {
+    console.error('[submissions:GET] 查询失败:', e);
+    return Response.json({ error: '服务器内部错误' }, { status: 500 });
   }
 }
 
@@ -135,7 +136,8 @@ async function handleDelete(context: PagesFunctionContext<Env>): Promise<Respons
     // 列表读取通过 kv.list({ prefix: 'submission:' }) 枚举，避免竞态条件
 
     return Response.json({ success: true });
-  } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+  } catch (e) {
+    console.error('[submissions:DELETE] 删除失败:', e);
+    return Response.json({ error: '服务器内部错误' }, { status: 500 });
   }
 }

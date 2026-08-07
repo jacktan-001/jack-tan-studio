@@ -59,11 +59,12 @@ async function handleGet(context: PagesFunctionContext<Env>): Promise<Response> 
         headers: { 'Cache-Control': 'public, max-age=60' },
       },
     );
-  } catch (e: any) {
+  } catch (e) {
+    console.error('[public-data] KV 读取失败:', e);
     // KV 读取失败时返回 502（网关错误），而非 200
     // 让前端明确知道后端不可用，而非误以为数据为空
     return Response.json(
-      { error: '数据读取失败', message: e.message },
+      { error: '数据读取失败，请稍后重试' },
       {
         status: 502,
         headers: { 'Cache-Control': 'no-store' },

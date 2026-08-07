@@ -198,7 +198,7 @@ function staleWhileRevalidate(req, cacheName) {
 
 // === 消息通信：允许页面触发 SW 更新 ===
 self.addEventListener('message', function(e) {
-  if (e.data === 'SKIP_WAITING') {
+  if (e.source && e.source.type === 'client' && e.data === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
