@@ -51,7 +51,7 @@ function PoseContent() {
       {/* 背景视觉层 — 暖色手工质感 */}
       <BackgroundEffects />
       {/* 内容层（relative z-1，抬升至背景光斑之上，避免暖色气泡遮挡正文） */}
-      <div style={{ position: 'relative', zIndex: 1 }}>
+      <main style={{ position: 'relative', zIndex: 1 }}>
         <HashRouter>
           <Suspense
             fallback={
@@ -69,7 +69,7 @@ function PoseContent() {
           </Suspense>
           <Toaster position="top-center" toastOptions={{ className: 'rounded-xl' }} />
         </HashRouter>
-      </div>
+      </main>
 
       {/* 全局相机闪光特效 — 随机位置闪光灯，模拟四处拍照（fixed 覆盖层，不拦截交互） */}
       <CameraFlash />

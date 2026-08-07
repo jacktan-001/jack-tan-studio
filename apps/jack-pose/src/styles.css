@@ -192,6 +192,14 @@
 
 }
 
+/* P1：View Transitions reduced-motion 补丁 */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 
 /* ==================== Jack Pose 独有视觉语言 ====================
    设计理念：暖色手作质感

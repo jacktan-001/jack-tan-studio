@@ -10,6 +10,7 @@ interface ComingSoonProps {
 
 export default function ComingSoon({ project }: ComingSoonProps) {
   return (
+    <main>
     <Rise
       style={{
         minHeight: 'calc(100vh - 80px)',
@@ -146,5 +147,6 @@ export default function ComingSoon({ project }: ComingSoonProps) {
         </Rise>
       </div>
     </Rise>
+    </main>
   )
 }

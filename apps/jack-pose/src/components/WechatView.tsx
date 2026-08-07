@@ -55,7 +55,7 @@ export function WechatView({ caption, imageIds, urls, onCaption, onReorder, onRe
           renderItem={(id) => (
             <div className="relative aspect-square rounded overflow-hidden bg-hover group">
               {urls[id] && (
-                <img src={urls[id]} alt="" width={400} height={400} loading="lazy" className="w-full h-full object-cover" draggable={false} />
+                <img src={urls[id]} alt="照片" width={400} height={400} loading="lazy" className="w-full h-full object-cover" draggable={false} />
               )}
               {/* 命中区扩到 44px（WCAG 2.5.5），视觉圆点仍为 20px 且位置不变 */}
               <button

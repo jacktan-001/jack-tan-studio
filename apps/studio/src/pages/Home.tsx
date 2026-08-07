@@ -7,7 +7,7 @@ const Hero = lazy(() => import('../components/home/Hero'))
 
 export default function Home() {
   return (
-    <div>
+    <main>
       <Suspense
         fallback={
           <div
@@ -24,7 +24,7 @@ export default function Home() {
       </Suspense>
       <ProjectShowcase />
       <Footer />
-    </div>
+    </main>
   )
 }
 

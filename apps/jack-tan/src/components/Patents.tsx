@@ -45,7 +45,7 @@ export default function Patents() {
               <span className="mb-2.5 inline-block rounded-full bg-neutral-900 px-3 py-0.5 text-[10px] font-semibold text-white">
                 国家发明专利
               </span>
-              <h4 className="text-[15px] font-bold leading-snug text-neutral-900">{p.title}</h4>
+              <h3 className="text-[15px] font-bold leading-snug text-neutral-900">{p.title}</h3>
               <p className="mt-2 text-xs leading-relaxed text-neutral-500">{p.desc}</p>
               <div className="mt-3.5 flex items-center justify-between border-t border-neutral-100 pt-3 text-[11px] text-neutral-500">
                 <span>{p.number}</span>
@@ -68,7 +68,7 @@ export default function Patents() {
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-neutral-100 text-[22px]">
                 {h.icon}
               </div>
-              <h4 className="text-sm font-bold text-neutral-900">{h.title}</h4>
+              <h3 className="text-sm font-bold text-neutral-900">{h.title}</h3>
               <p className="mt-1.5 text-xs leading-relaxed text-neutral-500">{h.desc}</p>
               <div className="mt-2.5 text-[11px] font-semibold text-neutral-700">{h.source}</div>
             </div>
