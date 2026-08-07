@@ -100,10 +100,16 @@ jobs:
           test -f deploy/dist/projects/jack-wave/index.html
           test -f deploy/dist/projects/jack-pose/index.html
           test -f deploy/dist/projects/jack-tan/index.html
-          # SPA 回退必须走 Pages Function；_redirects 的 200 重写会吞掉子应用全部静态资源
-          test -f 'deploy/functions/projects/jack-wave/[[path]].js'
-          test -f 'deploy/functions/projects/jack-pose/[[path]].js'
-          test -f 'deploy/functions/projects/jack-tan/[[path]].js'
+          # SPA 回退必须走 Pages Function；_redirects 的 200 重写会吞掉子应用全部静态资源。
+          # 回退 Function 的位置随 SPA_MODE 变化：
+          #   studio（默认）     → deploy/functions/projects/{id}/[[path]].js       回退 studio 外壳
+          #   standalone（回退） → deploy/functions/projects/jack-{id}/[[path]].js  回退子应用自身
+          # 此处只断言「存在其一」，模式一致性由 scripts/verify-routes.mjs 精确校验。
+          for id in wave pose tan; do
+            test -f "deploy/functions/projects/$id/[[path]].js" \
+              || test -f "deploy/functions/projects/jack-$id/[[path]].js" \
+              || { echo "缺少 $id 的 SPA 回退 Function"; exit 1; }
+          done
           # ── P0 回归防护：共享 vendor 必须含具名导出，否则线上 React 白屏 ──
           # esbuild 对 CJS 的 `export *` 不会提升具名导出，历史上因此全站白屏。
           test -f deploy/dist/vendor/react.js

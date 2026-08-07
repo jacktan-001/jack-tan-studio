@@ -96,6 +96,41 @@ for (const project of liveProjects) {
     ok(`jack-${project.id}: _redirects 无吞静态资源的 200 重写`);
   }
 
+  // 2a. 单页模式专属：规范路由 /projects/{id}/ 不得被 301 劫持回独立产物。
+  //     `/projects/{id}/* /projects/jack-{id}/:splat 301` 是为独立模式写的旧规则，
+  //     在单页模式下会让硬刷新 /projects/pose/ 跳回独立版 —— 外壳卸载、音乐中断，
+  //     且同一项目出现「独立版 / 外壳嵌入版」两套界面（本地与线上表现不一致的根因）。
+  if (SPA_MODE === 'studio') {
+    const hijackRule = `/${clientDir}/* /${standaloneDir}/:splat 301`;
+    if (redirects.includes(hijackRule)) {
+      fail(
+        `jack-${project.id}: _redirects 含劫持单页规范路由的反向 301\n   禁止出现: ${hijackRule}\n   该规则仅适用于 SPA_MODE=standalone`,
+      );
+    } else {
+      ok(`jack-${project.id}: 单页规范路由未被反向 301 劫持`);
+    }
+
+    // 旧独立产物页面入口必须 301 到规范单页路由，避免同项目双 URL 渲染两套界面
+    const legacyEntryRule = `/${standaloneDir}/ /${clientDir}/ 301`;
+    if (!redirects.includes(legacyEntryRule)) {
+      fail(
+        `jack-${project.id}: 缺少旧独立路径到规范单页路由的 301\n   期望包含: ${legacyEntryRule}`,
+      );
+    } else {
+      ok(`jack-${project.id}: 旧独立路径已 301 到规范单页路由`);
+    }
+
+    // 但严禁用 /* 通配 —— 会连 assets/* 与 /projects/jack-wave/api/* 一起 301 掉
+    const wildcardLegacyRule = `/${standaloneDir}/* /${clientDir}/:splat 301`;
+    if (redirects.includes(wildcardLegacyRule)) {
+      fail(
+        `jack-${project.id}: 旧路径 301 使用了 /* 通配，会吞掉静态资源与 API\n   禁止出现: ${wildcardLegacyRule}\n   仅允许对页面入口做精确路径 301`,
+      );
+    } else {
+      ok(`jack-${project.id}: 旧路径 301 未使用 /* 通配（静态资源与 API 安全）`);
+    }
+  }
+
   // 2b. 回退 Function 必须存在于当前模式对应的路径，且 FALLBACK_PATH 与模式一致
   const fallbackFn = resolve(root, `deploy/functions/${funcDir}/[[path]].js`);
   if (!existsSync(fallbackFn)) {

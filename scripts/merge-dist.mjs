@@ -149,10 +149,26 @@ const redirects = [
   '/pose/* /projects/jack-pose/:splat 301',
   '/wave/* /projects/jack-wave/:splat 301',
   '/tan/* /projects/jack-tan/:splat 301',
-  '# 此前线上版本曾部署在 /projects/{id}/，保留 301 避免已收藏/分享的旧链接失效',
-  '/projects/pose/* /projects/jack-pose/:splat 301',
-  '/projects/wave/* /projects/jack-wave/:splat 301',
-  '/projects/tan/* /projects/jack-tan/:splat 301',
+  ...(SPA_MODE === 'standalone'
+    ? [
+        '# 独立模式：/projects/{id}/ 301 到独立产物路径（旧行为）',
+        ...liveProjects.map(
+          (p) => `/projects/${p.id}/* /projects/jack-${p.id}/:splat 301`,
+        ),
+      ]
+    : [
+        '# 单页模式：/projects/jack-{id}/ 是独立产物路径（仅供回退开关与旧链接使用），',
+        '# 其页面入口 301 到规范单页路由 /projects/{id}/，避免同一项目两个 URL 渲染出',
+        '# 两套界面（独立版 vs 外壳嵌入版）。',
+        '# 严禁在此用 /* 通配 —— 会把 /projects/jack-{id}/assets/* 与',
+        '# /projects/jack-wave/api/* 一并 301 掉（2026-08-04 静态资源全灭事故根因）。',
+        '# 反向规则 `/projects/{id}/* -> /projects/jack-{id}/:splat` 更是严禁出现：',
+        '# 它会劫持单页规范路由，使硬刷新 /projects/pose/ 跳回独立版、播放中断。',
+        ...liveProjects.flatMap((p) => [
+          `/projects/jack-${p.id}/ /projects/${p.id}/ 301`,
+          `/projects/jack-${p.id} /projects/${p.id}/ 301`,
+        ]),
+      ]),
   '',
   '# ③ 单页模式：/projects/{id} 由 studio 外壳 catch-all Function 承载（回退根入口），',
   '#    不再 301 到独立产物，确保硬刷新/直链也进入单页、播放不中断；',
