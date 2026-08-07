@@ -46,7 +46,7 @@ export default function Patents() {
                 国家发明专利
               </span>
               <h3 className="text-[15px] font-bold leading-snug text-neutral-900">{p.title}</h3>
-              <p className="mt-2 text-xs leading-relaxed text-neutral-500">{p.desc}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-neutral-500">{p.desc}</p>
               <div className="mt-3.5 flex items-center justify-between border-t border-neutral-100 pt-3 text-[11px] text-neutral-500">
                 <span>{p.number}</span>
                 <span>{p.date}</span>

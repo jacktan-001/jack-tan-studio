@@ -107,11 +107,11 @@ export function StudioBar({ current, quickLinks }: StudioBarProps) {
           ? 'calc(env(safe-area-inset-top, 0px) + 8px) calc(env(safe-area-inset-right, 0px) + 24px) 8px calc(env(safe-area-inset-left, 0px) + 24px)'
           : 'calc(env(safe-area-inset-top, 0px) + 12px) calc(env(safe-area-inset-right, 0px) + 24px) 12px calc(env(safe-area-inset-left, 0px) + 24px)',
         background: scrolled
-          ? 'color-mix(in srgb, var(--bg, #06060a) 88%, transparent)'
-          : 'color-mix(in srgb, var(--bg, #06060a) 40%, transparent)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: scrolled ? '1px solid var(--border, rgba(128,128,128,0.15))' : '1px solid transparent',
+          ? 'color-mix(in srgb, var(--bg, #06060a) 92%, transparent)'
+          : 'color-mix(in srgb, var(--bg, #06060a) 65%, transparent)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        borderBottom: '1px solid var(--border, rgba(128,128,128,0.15))',
         transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
         boxShadow: activeProject
           ? `inset 0 -1px 0 0 rgba(${previewRgb}, 0.25), 0 8px 40px rgba(${previewRgb}, 0.08)`

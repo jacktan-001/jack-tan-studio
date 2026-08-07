@@ -381,9 +381,9 @@ export function GlobalAudioPlayer({
         </span>
       </div>
 
-      {/* ====== 三圆圈按钮 ====== */}
+      {/* ====== 右侧：控制按钮 + 窗口操作 ====== */}
       <div
-        className="jack-global-player-controls"
+        className="jack-global-player-actions"
         style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}
       >
         {/* 1. 播放/暂停 — 大圆 */}
@@ -461,20 +461,20 @@ export function GlobalAudioPlayer({
             </svg>
           </a>
         )}
-      </div>
 
-      {/* ====== 右上角：最小化 + 关闭 ====== */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '8px',
-          right: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '2px',
-          zIndex: 2,
-        }}
-      >
+        {/* 分割线 — 视觉区分控制区与窗口操作 */}
+        <div
+          aria-hidden="true"
+          className="jack-global-player-divider"
+          style={{
+            width: '1px',
+            height: '24px',
+            background: 'var(--player-border, rgba(128,128,128,0.15))',
+            margin: '0 2px',
+          }}
+        />
+
+        {/* 4. 最小化 */}
         <button
           className="jack-global-player-minimize"
           onClick={() => setCollapsed(true)}
@@ -495,6 +495,8 @@ export function GlobalAudioPlayer({
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12" /></svg>
         </button>
+
+        {/* 5. 关闭 */}
         <button
           className="jack-global-player-close"
           onClick={() => { setCollapsed(false); closePlayer(); }}
@@ -552,13 +554,20 @@ export function GlobalAudioPlayer({
             width: 20px !important;
             height: 20px !important;
           }
-          .jack-global-player-controls {
+          .jack-global-player-actions {
             gap: 6px !important;
           }
-          .jack-global-player-controls > button:not(.jack-global-player-play),
-          .jack-global-player-controls > a {
+          .jack-global-player-actions > button:not(.jack-global-player-play),
+          .jack-global-player-actions > a {
             width: 36px !important;
             height: 36px !important;
+          }
+          .jack-global-player-divider {
+            display: none !important;
+          }
+          .jack-global-player-minimize,
+          .jack-global-player-close {
+            display: none !important;
           }
         }
         @media (max-width: 480px) {
@@ -577,8 +586,8 @@ export function GlobalAudioPlayer({
             width: 38px !important;
             height: 38px !important;
           }
-          .jack-global-player-controls > button:not(.jack-global-player-play),
-          .jack-global-player-controls > a {
+          .jack-global-player-actions > button:not(.jack-global-player-play),
+          .jack-global-player-actions > a {
             width: 32px !important;
             height: 32px !important;
           }
