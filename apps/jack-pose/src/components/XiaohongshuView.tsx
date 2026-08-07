@@ -75,7 +75,7 @@ export function XiaohongshuView({
               >
                 <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-hover">
                   {fullUrls[id] && (
-                    <img src={fullUrls[id]} alt="" width={300} height={400} loading={imageIds.indexOf(id) === 0 ? 'eager' : 'lazy'} className="w-full h-full object-cover" />
+                    <img src={fullUrls[id]} alt="照片" width={300} height={400} loading={imageIds.indexOf(id) === 0 ? 'eager' : 'lazy'} className="w-full h-full object-cover" />
                   )}
                 </div>
               </div>

@@ -286,6 +286,13 @@
 
 }
 
+/* P1：View Transitions reduced-motion 补丁 */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
 
 /* ==================== Jack Tan 独有视觉语言 ====================
    设计理念：蓝色商务精炼质感 + 色彩泡泡 + 毛玻璃
@@ -535,14 +542,27 @@
 }
 
 
-/* 精炼滚动揭示 */
+/* 精炼滚动揭示
+   P1 重构：添加 CSS Scroll-driven Animation 作为渐进增强。
+   支持 animation-timeline 的浏览器（Chrome/Safari）零 JS 运行；
+   Firefox 等回退到 useSectionReveal 的 IntersectionObserver + .visible。 */
 [data-project='tan'] .tan-reveal {
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
+@supports (animation-timeline: view()) {
+  [data-project='tan'] .tan-reveal {
+    animation: tanRevealScroll linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 100%;
+  }
+}
+@keyframes tanRevealScroll {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 [data-project='tan'] .tan-reveal.visible {
   opacity: 1;

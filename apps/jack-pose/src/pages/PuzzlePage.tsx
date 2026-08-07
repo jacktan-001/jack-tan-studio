@@ -230,7 +230,7 @@ export function PuzzlePage() {
                 renderItem={(id, idx) => (
                   <div className="relative aspect-square rounded overflow-hidden bg-hover group">
                     {urls[id] && (
-                      <img src={urls[id]} alt="" width={400} height={400} loading="lazy" className="w-full h-full object-cover" draggable={false} />
+                      <img src={urls[id]} alt="照片" width={400} height={400} loading="lazy" className="w-full h-full object-cover" draggable={false} />
                     )}
                     <span className="absolute top-1.5 left-1.5 text-[10px] text-white bg-black/40 px-1 rounded z-10">
                       {idx + 1}

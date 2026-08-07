@@ -89,6 +89,7 @@ export default function ProjectIntro() {
   const isLive = project.status === 'live'
 
   return (
+    <main>
     <Rise
       style={{
         minHeight: 'calc(100vh - 130px)',
@@ -358,7 +359,9 @@ export default function ProjectIntro() {
             }}
             style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}
           >
+            <label htmlFor="subscribe-email" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>邮箱地址</label>
             <input
+              id="subscribe-email"
               type="email"
               placeholder="your@email.com"
               required
@@ -397,5 +400,6 @@ export default function ProjectIntro() {
         )}
       </Rise>
     </Rise>
+    </main>
   )
 }

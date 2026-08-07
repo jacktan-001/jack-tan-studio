@@ -457,6 +457,14 @@ export default function ProjectShowcase() {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
           gap: 22px;
+          container-type: inline-size;
+        }
+
+        /* P2: 容器查询 — 窄容器下卡片更紧凑 */
+        @container (max-width: 340px) {
+          .showcase-grid > * {
+            font-size: 0.95em;
+          }
         }
 
         /* ===== 特色亮点：双列布局（窄屏回退单列），缩短卡片高度 ===== */

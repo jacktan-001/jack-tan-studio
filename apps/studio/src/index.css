@@ -884,3 +884,34 @@ button {
     transform: none !important;
   }
 }
+
+/* ==================== P1：CSS Scroll-driven Animation（渐进增强） ====================
+   在 Chrome/Safari 上完全免 JS 的滚动渐入动画，替代 IntersectionObserver。
+   Firefox 等不支持的环境由 Rise.tsx 自动回退到 .anim-rise + IntersectionObserver。
+   动画作用范围：entry 0%（元素刚进入视口底部）→ entry 100%（元素完全进入视口）。 */
+.reveal-scroll {
+  animation: revealScrollUp linear both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 100%;
+}
+@keyframes revealScrollUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-scroll {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ==================== P1：View Transitions reduced-motion 补丁 ====================
+   确保 View Transitions API 的路由切换动画也尊重系统无障碍偏好。 */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

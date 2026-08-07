@@ -383,6 +383,14 @@
 
 [data-project='wave'] .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* P1：Toast 弹性入场动画（@starting-style 渐进增强） */
+@starting-style {
+  [data-project='wave'] .toast.show {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px) scale(0.9);
+  }
+}
+
 
 /* Skip link */
 [data-project='wave'] .skip-link {
@@ -433,6 +441,14 @@
 @media (prefers-reduced-motion: reduce) {
   [data-project='wave'], [data-project='wave'] * { transition: none !important; animation: none !important; }
 
+}
+
+/* P1：View Transitions reduced-motion 补丁 */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
 
 
@@ -895,5 +911,69 @@
   }
   [data-project='wave'] .platform-btn {
     padding: 14px 16px !important;
+  }
+}
+
+
+/* ==================== P1: Skeleton Loading（骨架屏） ====================
+   歌单数据从 KV 加载期间，显示骨架卡片替代空白。 */
+
+@keyframes waveShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+[data-project='wave'] .skeleton-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+[data-project='wave'] .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--gray-100) 0%,
+    var(--gray-200) 40%,
+    var(--gray-100) 80%
+  );
+  background-size: 200% 100%;
+  animation: waveShimmer 1.5s ease-in-out infinite;
+}
+
+[data-project='wave'] .skeleton-cover {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+[data-project='wave'] .skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+[data-project='wave'] .skeleton-line.short {
+  width: 60%;
+}
+
+[data-project='wave'] .skeleton-line.medium {
+  width: 80%;
+}
+
+/* Grid layout for skeleton cards — mirrors the mood grid and monthly sections */
+[data-project='wave'] .skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+
+@media (max-width: 640px) {
+  [data-project='wave'] .skeleton-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 60px 16px;
   }
 }

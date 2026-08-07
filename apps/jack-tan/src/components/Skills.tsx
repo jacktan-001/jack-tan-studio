@@ -36,9 +36,9 @@ export default function Skills() {
         <SectionHeader title="技能与资质" />
         <div className="grid gap-3.5 sm:grid-cols-2">
           <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-            <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+            <h3 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
               专业能力
-            </h4>
+            </h3>
             <div className="flex flex-wrap gap-1.5">
               {PROFESSIONAL_SKILLS.map((s) => (
                 <span
@@ -51,9 +51,9 @@ export default function Skills() {
             </div>
           </div>
           <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-            <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+            <h3 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
               语言与资质
-            </h4>
+            </h3>
             <div className="flex flex-wrap gap-1.5">
               {LANGUAGE_SKILLS.map((s) => (
                 <span

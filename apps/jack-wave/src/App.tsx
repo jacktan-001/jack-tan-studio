@@ -133,48 +133,17 @@ function DataFallback() {
     <div
       role="status"
       aria-live="polite"
-      style={{
-        maxWidth: '1100px',
-        margin: '0 auto',
-        padding: '120px 24px',
-        textAlign: 'center',
-        color: 'var(--gray-400)',
-        fontSize: '14px',
-      }}
+      aria-label="正在加载歌单数据"
     >
-      <svg
-        width="28"
-        height="28"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        style={{ margin: '0 auto 12px', display: 'block' }}
-      >
-        <circle
-          cx="12"
-          cy="12"
-          r="9"
-          fill="none"
-          strokeWidth="3"
-          style={{ stroke: 'var(--gray-200)' }}
-        />
-        <path
-          d="M12 3a9 9 0 0 1 9 9"
-          fill="none"
-          strokeWidth="3"
-          strokeLinecap="round"
-          style={{ stroke: 'var(--teal)' }}
-        >
-          <animateTransform
-            attributeName="transform"
-            type="rotate"
-            from="0 12 12"
-            to="360 12 12"
-            dur="0.8s"
-            repeatCount="indefinite"
-          />
-        </path>
-      </svg>
-      正在加载歌单数据…
+      <div className="skeleton-grid">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="skeleton-card" style={{ padding: '16px' }}>
+            <div className="skeleton-shimmer skeleton-cover" style={{ borderRadius: '12px', marginBottom: '14px' }} />
+            <div className="skeleton-shimmer skeleton-line medium" />
+            <div className="skeleton-shimmer skeleton-line short" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -406,7 +375,7 @@ function WaveContent({ player }: { player: GlobalAudioPlayerReturn }) {
       <RippleField />
 
       {/* ============ 内容层（relative z-1，置于背景之上） ============ */}
-      <div style={{ position: 'relative', zIndex: 1 }}>
+      <main style={{ position: 'relative', zIndex: 1 }}>
         {/* Hero 区域 */}
         <Hero onPlayCurrentMonth={handlePlayCurrentMonth} />
 
@@ -419,7 +388,7 @@ function WaveContent({ player }: { player: GlobalAudioPlayerReturn }) {
 
         {/* 页脚 */}
         <Footer />
-      </div>
+      </main>
 
       {/* Toast 通知 */}
       <Toast message={message} show={show} onHide={hideToast} />
