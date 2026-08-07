@@ -30,7 +30,7 @@ export function EditorPage() {
 
   return (
     <div className="min-h-screen bg-hover text-primary">
-      <header className="sticky top-[calc(64px+var(--safe-top))] z-10 bg-surface-2/80 backdrop-blur-xl border-b border-outline-strong">
+      <header className="sticky top-[calc(64px_+_var(--safe-top))] z-10 bg-surface-2/80 backdrop-blur-xl border-b border-outline-strong">
         <div className="w-full max-w-md sm:max-w-xl lg:max-w-5xl mx-auto px-4 sm:px-8 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate('/')}
