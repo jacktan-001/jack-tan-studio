@@ -167,7 +167,7 @@ export function PuzzlePage() {
 
   return (
     <div className="min-h-screen bg-hover text-primary">
-      <header className="sticky top-0 z-10 bg-surface-2/80 backdrop-blur-xl border-b border-outline-strong">
+      <header className="sticky top-0 z-10 bg-surface-2/90 backdrop-blur-xl border-b border-outline-strong">
         <div className="w-full max-w-md sm:max-w-xl lg:max-w-4xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate('/')}
@@ -180,7 +180,7 @@ export function PuzzlePage() {
         </div>
       </header>
 
-      <main className="w-full max-w-md sm:max-w-xl lg:max-w-4xl mx-auto px-4 sm:px-8 py-6 space-y-5 lg:py-8">
+      <main className="w-full max-w-md sm:max-w-xl lg:max-w-4xl mx-auto px-4 sm:px-8 py-6 space-y-5 lg:py-8 pb-32 lg:pb-36">
         {/* 方向切换（紧凑） */}
         <div className="flex rounded-xl bg-surface-2 border border-outline-light p-1">
           <button

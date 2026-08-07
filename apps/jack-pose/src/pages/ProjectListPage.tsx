@@ -67,7 +67,7 @@ export function ProjectListPage() {
   return (
     <div className="min-h-screen bg-bg text-primary">
       <main
-        className="w-full max-w-md sm:max-w-xl lg:max-w-5xl mx-auto px-4 sm:px-8 pt-12 sm:pt-20 pb-16 lg:pb-24"
+        className="w-full max-w-md sm:max-w-xl lg:max-w-5xl mx-auto px-4 sm:px-8 pt-12 sm:pt-20 pb-32 lg:pb-36"
       >
         {/* Hero */}
         <div className="text-center mb-12 sm:mb-16 lg:mb-20 pose-pop-in">

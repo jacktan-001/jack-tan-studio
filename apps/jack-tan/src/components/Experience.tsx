@@ -70,11 +70,11 @@ export default function Experience() {
                 {exp.period}
               </span>
             </div>
-            <ul className="mt-2.5 space-y-1">
+            <ul className="mt-2.5 space-y-2">
               {exp.highlights.map((h, i) => (
                 <li
                   key={i}
-                  className="relative pl-3.5 text-[13px] leading-relaxed text-neutral-600 before:absolute before:left-0 before:top-[11px] before:h-[5px] before:w-[5px] before:rounded-full before:bg-neutral-400"
+                  className="relative pl-3.5 text-[14px] leading-[1.8] text-neutral-600 before:absolute before:left-0 before:top-[11px] before:h-[5px] before:w-[5px] before:rounded-full before:bg-neutral-400"
                 >
                   {h}
                 </li>

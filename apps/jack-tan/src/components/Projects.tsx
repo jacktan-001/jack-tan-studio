@@ -44,7 +44,7 @@ export default function Projects() {
           >
             <h3 className="text-[17px] font-bold text-neutral-900">{p.title}</h3>
             <p className="mt-1 text-xs font-semibold text-neutral-500">{p.role}</p>
-            <p className="mt-3.5 text-[13px] leading-[1.9] text-neutral-600">{p.desc}</p>
+            <p className="mt-3.5 text-[14px] leading-[1.9] text-neutral-600">{p.desc}</p>
             <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
               {p.highlights.map((h, i) => (
                 <div
@@ -52,7 +52,7 @@ export default function Projects() {
                   className="flex items-start gap-2.5 rounded-xl bg-neutral-50 px-3.5 py-2.5"
                 >
                   <span className="mt-2 h-[5px] w-[5px] shrink-0 rounded-full bg-neutral-400" />
-                  <span className="text-xs leading-relaxed text-neutral-600">{h}</span>
+                  <span className="text-[13px] leading-relaxed text-neutral-600">{h}</span>
                 </div>
               ))}
             </div>

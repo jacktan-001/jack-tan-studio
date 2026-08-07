@@ -57,7 +57,7 @@ function TanContent({ embedded = false }: { embedded?: boolean }) {
       >
         <Sidebar />
         <RevealObserver>
-          <main className="px-4 py-12 sm:px-8 lg:px-16 lg:py-16 xl:px-20">
+          <main className="px-4 pt-12 pb-32 sm:px-8 lg:px-16 lg:pt-16 lg:pb-36 xl:px-20">
             <About />
             <Experience />
             <Projects />

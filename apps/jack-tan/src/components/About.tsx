@@ -11,7 +11,7 @@ export default function About() {
   return (
     <section id="about" className="section-reveal mb-16">
       <SectionHeader title="关于我" badge="Beijing, China" />
-      <div className="space-y-4 text-sm leading-[2] text-neutral-600">
+      <div className="space-y-5 text-[15px] leading-[2.2] text-neutral-600">
         <p>
           现就职于<strong className="font-semibold text-neutral-900">民航行业监管信息化机构</strong>，驻地北京，中级工程师。
         </p>
@@ -26,7 +26,7 @@ export default function About() {
         {STATS.map((s) => (
           <div
             key={s.label}
-            className="card-hover rounded-xl border border-neutral-200 bg-white p-4 text-center"
+            className="card-hover rounded-xl border border-neutral-200 bg-white p-4 text-center shadow-sm"
           >
             <div className="text-2xl font-extrabold text-neutral-900">{s.num}</div>
             <div className="mt-0.5 text-[11px] font-medium text-neutral-500">{s.label}</div>

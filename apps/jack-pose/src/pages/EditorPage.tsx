@@ -30,7 +30,7 @@ export function EditorPage() {
 
   return (
     <div className="min-h-screen bg-hover text-primary">
-      <header className="sticky top-[calc(64px_+_var(--safe-top))] z-10 bg-surface-2/80 backdrop-blur-xl border-b border-outline-strong">
+      <header className="sticky top-[calc(64px_+_var(--safe-top))] z-10 bg-surface-2/90 backdrop-blur-xl border-b border-outline-strong">
         <div className="w-full max-w-md sm:max-w-xl lg:max-w-5xl mx-auto px-4 sm:px-8 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate('/')}
@@ -68,7 +68,7 @@ export function EditorPage() {
         </div>
       </header>
 
-      <main className="w-full max-w-md sm:max-w-xl lg:max-w-5xl mx-auto px-4 sm:px-8 py-6 lg:py-8 pb-28">
+      <main className="w-full max-w-md sm:max-w-xl lg:max-w-5xl mx-auto px-4 sm:px-8 py-6 lg:py-8 pb-36">
         <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-8 lg:items-start space-y-5 lg:space-y-0">
           <div className="space-y-5">
             <PhotoUploader projectId={project.id} platform={platform} />
