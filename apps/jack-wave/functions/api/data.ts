@@ -70,8 +70,9 @@ async function handleGet(context: PagesFunctionContext<Env>): Promise<Response> 
       return Response.json({ source: 'kv', data: JSON.parse(raw) });
     }
     return Response.json({ source: 'seed', data: null });
-  } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+  } catch (e) {
+    console.error('[data:GET] KV 读取失败:', e);
+    return Response.json({ error: '服务器内部错误' }, { status: 500 });
   }
 }
 
@@ -107,8 +108,9 @@ async function handlePut(context: PagesFunctionContext<Env>): Promise<Response> 
 
     await kv.put('data:playlists', serialized);
     return Response.json({ success: true });
-  } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+  } catch (e) {
+    console.error('[data:PUT] KV 写入失败:', e);
+    return Response.json({ error: '服务器内部错误' }, { status: 500 });
   }
 }
 
@@ -127,7 +129,8 @@ async function handleDelete(context: PagesFunctionContext<Env>): Promise<Respons
     const kv = context.env.JACK_WAVE_KV;
     await kv.delete('data:playlists');
     return Response.json({ success: true });
-  } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+  } catch (e) {
+    console.error('[data:DELETE] KV 删除失败:', e);
+    return Response.json({ error: '服务器内部错误' }, { status: 500 });
   }
 }

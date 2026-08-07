@@ -331,38 +331,7 @@ export function AudioPlayer({ player }: AudioPlayerProps) {
         </a>
       </div>
 
-      {/* 响应式：移动端隐藏进度条和平台链接文字 */}
-      <style>{`
-        .progress-bar:focus-visible {
-          outline: 2px solid var(--teal);
-          outline-offset: 4px;
-        }
-        @media (max-width: 768px) {
-          .player-bar {
-            height: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
-            padding: 0 14px !important;
-            gap: 10px !important;
-          }
-          .player-cover {
-            width: 60px !important;
-            height: 60px !important;
-          }
-          .player-progress {
-            display: none !important;
-          }
-          .player-time {
-            display: none !important;
-          }
-        }
-        @media (max-width: 480px) {
-          .platform-btn span {
-            display: none;
-          }
-          .platform-btn {
-            padding: 14px 16px !important;
-          }
-        }
-      `}</style>
+{/* 响应式规则已提取至 styles.css，统一作用域管理 */}
     </div>
   );
 }

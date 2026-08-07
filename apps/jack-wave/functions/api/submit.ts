@@ -229,7 +229,8 @@ async function handleSubmit(context: PagesFunctionContext<Env>): Promise<Respons
       id: submission.id,
       remaining: rateLimit.remaining,
     });
-  } catch (e: any) {
-    return Response.json({ error: '提交失败: ' + e.message }, { status: 500 });
+  } catch (e) {
+    console.error('[submit] 提交处理失败:', e);
+    return Response.json({ error: '提交失败，请稍后重试' }, { status: 500 });
   }
 }

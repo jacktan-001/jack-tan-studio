@@ -5,6 +5,10 @@ export default function CustomCursor() {
   const [hovering, setHovering] = useState(false)
 
   useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
+    if (prefersReduced || isTouchDevice) return
+
     const move = (e: MouseEvent) => {
       setPos({ x: e.clientX, y: e.clientY })
       const target = e.target as HTMLElement

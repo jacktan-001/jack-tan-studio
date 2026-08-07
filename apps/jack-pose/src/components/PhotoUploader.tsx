@@ -37,12 +37,16 @@ export function PhotoUploader({ projectId, platform }: Props) {
 
   useEffect(() => {
     let cancelled = false
-    photos.forEach(async (ph) => {
-      if (!urls[ph.id]) {
-        const url = await getThumbUrl(ph.id)
-        if (url && !cancelled) {
-          setUrls((u) => ({ ...u, [ph.id]: url }))
-        }
+    const pending = photos.filter((ph) => !urls[ph.id])
+    if (pending.length === 0) return
+    Promise.all(pending.map((ph) => getThumbUrl(ph.id))).then((results) => {
+      if (cancelled) return
+      const batch: Record<string, string> = {}
+      results.forEach((url, i) => {
+        if (url && pending[i]) batch[pending[i].id] = url
+      })
+      if (Object.keys(batch).length > 0) {
+        setUrls((u) => ({ ...u, ...batch }))
       }
     })
     return () => {

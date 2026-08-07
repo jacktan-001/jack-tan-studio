@@ -90,7 +90,7 @@ function staleWhileRevalidate(request, cacheName) {
 }
 
 self.addEventListener('message', (event) => {
-  if (event.data === 'SKIP_WAITING') {
+  if (event.source && event.source.type === 'client' && event.data === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });

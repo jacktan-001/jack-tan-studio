@@ -91,6 +91,9 @@ export function useAudioPlayer(
   const currentIndexRef = useRef<number>(-1);
   // 解绑当前 <audio> 上注册的监听器（切歌 / URL 刷新 / 卸载时调用，避免旧 audio 实例泄漏）
   const audioListenersCleanupRef = useRef<(() => void) | null>(null);
+  // 稳定引用：避免 onError 变化导致 setupAudioListeners / playSongInternal 重建
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -257,7 +260,7 @@ export function useAudioPlayer(
 
     const handleError = () => {
       setIsPlaying(false);
-      onError('音频加载失败，链接可能已过期');
+      onErrorRef.current('音频加载失败，链接可能已过期');
     };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
@@ -269,7 +272,7 @@ export function useAudioPlayer(
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
     };
-  }, [onError]);
+  }, []);
 
   // === 内部播放下一首（不依赖 state，用 ref） ===
 
@@ -324,17 +327,17 @@ export function useAudioPlayer(
               setupAudioListeners();
             } catch {
               setIsPlaying(false);
-              onError('音频加载失败，链接可能已过期');
+              onErrorRef.current('音频加载失败，链接可能已过期');
             }
           } else {
             setIsPlaying(false);
-            onError('音频加载失败，链接可能已过期');
+            onErrorRef.current('音频加载失败，链接可能已过期');
           }
         });
 
       setupAudioListeners();
     },
-    [refreshSingleUrl, setupAudioListeners, onError],
+    [refreshSingleUrl, setupAudioListeners],
   );
 
   // === 公开 API ===
