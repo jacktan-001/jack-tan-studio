@@ -379,10 +379,6 @@ button {
   ::view-transition-new(root) {
     animation: vt-fade-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
-  ::view-transition-old(studio-navbar),
-  ::view-transition-new(studio-navbar) {
-    animation: none;
-  }
 }
 
 @keyframes vt-fade-out {

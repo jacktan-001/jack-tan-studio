@@ -25,7 +25,7 @@ export default function Sidebar() {
   const activeId = useScrollSpy(SECTION_IDS)
 
   return (
-    <aside className="w-full border-b border-neutral-200 bg-white/80 backdrop-blur-md px-6 py-8 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:bg-white lg:px-10 lg:py-12">
+    <aside className="w-full border-b border-neutral-200 bg-white/80 backdrop-blur-md px-6 py-10 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:bg-white lg:px-10 lg:py-16">
       <div className="flex flex-col lg:h-full">
         {/* Avatar + Name row on mobile, stacked on desktop */}
         <div className="flex items-center gap-5 lg:block">

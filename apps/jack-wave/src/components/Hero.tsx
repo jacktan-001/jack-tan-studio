@@ -22,9 +22,11 @@ export function Hero({ onPlayCurrentMonth }: HeroProps) {
         alignItems: 'center',
         justifyContent: 'center',
         textAlign: 'center',
-        padding: '100px 24px 60px',
+        padding: '120px 24px 80px',
         position: 'relative',
         overflow: 'hidden',
+        maxWidth: '900px',
+        margin: '0 auto',
       }}
     >
       {/* 背景渐变光斑 */}
@@ -111,8 +113,9 @@ export function Hero({ onPlayCurrentMonth }: HeroProps) {
           fontSize: '15px',
           color: 'var(--gray-500)',
           marginBottom: '40px',
-          maxWidth: '400px',
+          maxWidth: '500px',
           position: 'relative',
+          lineHeight: 1.7,
         }}
       >
         用音乐记录生活，用旋律收藏时光

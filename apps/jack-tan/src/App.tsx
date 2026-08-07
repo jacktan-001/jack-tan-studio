@@ -48,7 +48,7 @@ function TanContent({ embedded = false }: { embedded?: boolean }) {
       <Spotlight />
 
       <div
-        className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 lg:grid-cols-[380px_1fr] lg:gap-8"
+        className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 lg:grid-cols-[400px_1fr] lg:gap-10"
         style={{
           paddingTop: embedded
             ? 'calc(24px + env(safe-area-inset-top, 0px))'
@@ -57,7 +57,7 @@ function TanContent({ embedded = false }: { embedded?: boolean }) {
       >
         <Sidebar />
         <RevealObserver>
-          <main className="px-4 py-12 sm:px-7 lg:px-14 lg:py-12">
+          <main className="px-4 py-12 sm:px-8 lg:px-16 lg:py-16 xl:px-20">
             <About />
             <Experience />
             <Projects />

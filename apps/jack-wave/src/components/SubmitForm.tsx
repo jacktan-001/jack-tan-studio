@@ -250,7 +250,7 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
       <h2
         className="section-title"
         style={{
-          fontSize: '32px',
+          fontSize: 'clamp(28px, 5vw, 36px)',
           fontWeight: 700,
           letterSpacing: '-1px',
           marginBottom: '8px',
@@ -260,7 +260,7 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
       </h2>
       <p
         className="section-desc"
-        style={{ color: 'var(--gray-500)', fontSize: '15px', marginBottom: '40px' }}
+        style={{ color: 'var(--gray-500)', fontSize: '16px', marginBottom: '40px', lineHeight: 1.6 }}
       >
         分享你的音乐故事
       </p>

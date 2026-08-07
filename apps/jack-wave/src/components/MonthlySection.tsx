@@ -65,7 +65,7 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
         <h2
           className="section-title"
           style={{
-            fontSize: '32px',
+            fontSize: 'clamp(28px, 5vw, 36px)',
             fontWeight: 700,
             letterSpacing: '-1px',
             marginBottom: '8px',
@@ -75,7 +75,7 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
         </h2>
         <p
           className="section-desc"
-          style={{ color: 'var(--gray-500)', fontSize: '15px', marginBottom: '28px' }}
+          style={{ color: 'var(--gray-500)', fontSize: '16px', marginBottom: '32px', lineHeight: 1.6 }}
         >
           每月精选歌单，记录这个月的声音记忆
         </p>
@@ -328,17 +328,18 @@ export const MonthlySection = forwardRef<MonthlySectionRef, MonthlySectionProps>
             outline-offset: 3px;
           }
           @media (max-width: 640px) {
+            .section { padding: 60px 20px !important; }
             .monthly-card { border-radius: 16px !important; }
             .monthly-header {
               flex-direction: column !important;
               align-items: center !important;
-              gap: 20px !important;
-              padding: 20px !important;
+              gap: 24px !important;
+              padding: 24px !important;
               text-align: center;
             }
             .monthly-cover {
               width: 100% !important;
-              max-width: 260px !important;
+              max-width: 280px !important;
               height: auto !important;
               aspect-ratio: 1 / 1 !important;
             }
