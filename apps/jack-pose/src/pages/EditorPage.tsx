@@ -31,7 +31,7 @@ export function EditorPage() {
   return (
     <div className="min-h-screen bg-hover text-primary">
       <header className="sticky top-[calc(64px+var(--safe-top))] z-10 bg-surface-2/80 backdrop-blur-xl border-b border-outline-strong">
-        <div className="max-w-lg mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
+        <div className="w-full max-w-md sm:max-w-xl lg:max-w-5xl mx-auto px-4 sm:px-8 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate('/')}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-hover text-secondary hover:bg-hover transition"
@@ -44,7 +44,7 @@ export function EditorPage() {
             {project.photos.length} 张
           </span>
         </div>
-        <div className="max-w-lg mx-auto px-4 sm:px-6 pb-3">
+        <div className="w-full max-w-md sm:max-w-xl lg:max-w-5xl mx-auto px-4 sm:px-8 pb-3">
           <div className="flex rounded-xl bg-surface-2 border border-outline-light p-1">
             {PLATFORMS.map((p) => (
               <button
@@ -68,10 +68,16 @@ export function EditorPage() {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 sm:px-6 py-5 space-y-5 pb-28">
-        <PhotoUploader projectId={project.id} platform={platform} />
-        <PlatformPreview projectId={project.id} platform={platform} />
-        <ExportPanel projectId={project.id} platform={platform} />
+      <main className="w-full max-w-md sm:max-w-xl lg:max-w-5xl mx-auto px-4 sm:px-8 py-6 lg:py-8 pb-28">
+        <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-8 lg:items-start space-y-5 lg:space-y-0">
+          <div className="space-y-5">
+            <PhotoUploader projectId={project.id} platform={platform} />
+          </div>
+          <div className="space-y-5">
+            <PlatformPreview projectId={project.id} platform={platform} />
+            <ExportPanel projectId={project.id} platform={platform} />
+          </div>
+        </div>
       </main>
     </div>
   )

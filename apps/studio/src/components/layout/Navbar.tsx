@@ -284,9 +284,6 @@ export default function Navbar() {
         )}
 
       <style>{`
-        .studio-navbar {
-          view-transition-name: studio-navbar;
-        }
         @media (max-width: 768px) {
           .nav-product-row { display: none !important; }
           .nav-mobile-toggle { display: block !important; }

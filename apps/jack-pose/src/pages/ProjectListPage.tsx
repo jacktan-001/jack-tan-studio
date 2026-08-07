@@ -67,11 +67,10 @@ export function ProjectListPage() {
   return (
     <div className="min-h-screen bg-bg text-primary">
       <main
-        className="w-full max-w-lg mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-16"
-        style={{ marginLeft: 'auto', marginRight: 'auto' }}
+        className="w-full max-w-md sm:max-w-xl lg:max-w-5xl mx-auto px-4 sm:px-8 pt-12 sm:pt-20 pb-16 lg:pb-24"
       >
         {/* Hero */}
-        <div className="text-center mb-12 sm:mb-14 pose-pop-in">
+        <div className="text-center mb-12 sm:mb-16 lg:mb-20 pose-pop-in">
           <img
             src={assetUrl('hero-sm.jpg')}
             alt="Jack Pose"
@@ -81,16 +80,16 @@ export function ProjectListPage() {
             fetchPriority="high"
             className="w-44 h-44 sm:w-52 sm:h-52 mx-auto mb-6 rounded-3xl shadow-lg shadow-black/10"
           />
-          <h1 className="text-5xl sm:text-6xl font-bold tracking-tighter mb-3 text-primary">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter mb-3 text-primary">
             Jack-<span style={{ color: 'var(--color-accent, #ec4899)' }}>Pose</span>
           </h1>
-          <p className="text-lg text-tertiary font-medium">
+          <p className="text-lg sm:text-xl text-tertiary font-medium">
             Photo Layout Tool · 社媒排版・长图导出
           </p>
         </div>
 
         {/* 三个一级入口 */}
-        <div className="space-y-4 mb-16">
+        <div className="space-y-4 lg:grid lg:grid-cols-3 lg:gap-5 lg:space-y-0 mb-16 lg:mb-20">
           <button
             ref={tiltRef1}
             onClick={() => setShowInput((v) => !v)}
@@ -116,7 +115,7 @@ export function ProjectListPage() {
           </button>
 
           {showInput && (
-            <div className="flex gap-2 px-1">
+            <div className="lg:col-span-3 flex gap-2 px-1">
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -188,16 +187,16 @@ export function ProjectListPage() {
 
         {/* 项目列表 */}
         <div>
-          <h2 className="text-sm font-semibold text-tertiary uppercase tracking-wide mb-3 px-1">
+          <h2 className="text-sm font-semibold text-tertiary uppercase tracking-wide mb-4 px-1">
             最近项目
           </h2>
           {projects.length === 0 ? (
-            <div className="text-center py-12 text-tertiary bg-surface rounded-2xl border border-outline">
+            <div className="text-center py-16 text-tertiary bg-surface rounded-2xl border border-outline">
               <p className="text-sm">还没有项目</p>
               <p className="text-xs mt-1">从上方开始创建或导入</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {projects.map((p) => (
                 <div
                   key={p.id}
