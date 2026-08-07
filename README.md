@@ -6,7 +6,7 @@
 
 ## 项目愿景
 
-把 Jack Wave（音乐随记）、Jack Pose（社媒排版）、Jack Tan（个人主页）以及未来的 Jack Lens / Jack Cast / JackCraft 整合到同一个门户下，统一品牌、统一导航、独立部署路径。
+把 Jack Wave（音乐随记）、Jack Pose（社媒排版）、Jack Tan（个人主页）以及未来的 Jack Lens / Jack Talk / JackCraft 整合到同一个门户下，统一品牌、统一导航、独立部署路径。
 
 ## 技术栈
 
@@ -168,7 +168,7 @@ Cloudflare 会自动向所有页面注入 beacon，无需改动任何代码。
 
 ## 阶段三：架构演进（Router Worker + 多 Pages）
 
-当前采用「单 Cloudflare Pages 项目 + merge-dist 合并产物」模式，适合 3-4 个已上线应用。当 Jack Lens / Jack Cast / JackCraft 陆续上线后，建议迁移到以下架构：
+当前采用「单 Cloudflare Pages 项目 + merge-dist 合并产物」模式，适合 3-4 个已上线应用。当 Jack Lens / Jack Talk / JackCraft 陆续上线后，建议迁移到以下架构：
 
 ```text
 用户请求 → Router Worker → Service Bindings → 各子应用 Pages 项目

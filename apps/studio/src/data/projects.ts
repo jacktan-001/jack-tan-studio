@@ -1,3 +1,5 @@
+import type { ProjectGlyphId } from '@jack-tan/studio-core';
+
 export interface Project {
   id: string;
   name: string;
@@ -5,7 +7,7 @@ export interface Project {
   /** 功能定位（一句话说明项目是做什么的） */
   positioning?: string;
   description: string;
-  icon: string;
+  icon: ProjectGlyphId;
   color: string;
   colorRgb: string;
   url: string;
@@ -63,10 +65,10 @@ export const projects: Project[] = [
   },
   {
     id: 'cast',
-    name: 'Jack Cast',
+    name: 'Jack Talk',
     tagline: 'Audio Stories',
     positioning: '个人播客与音频内容平台',
-    description: '把灵感录成声音。Jack Cast 面向个人创作者，打通录制、剪辑、发布与订阅全流程，让每一段声音都被收藏与分享。',
+    description: '把灵感录成声音。Jack Talk 面向个人创作者，打通录制、剪辑、发布与订阅全流程，让每一段声音都被收藏与分享。',
     icon: 'cast',
     color: '#f59e0b',
     colorRgb: '245, 158, 11',

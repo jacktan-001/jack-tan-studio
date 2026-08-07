@@ -1,0 +1,722 @@
+/* ==================================================================
+ * pose — 应用自定义样式（作用域化）
+ *
+ * 本文件不含 Tailwind 入口，供 studio 单页壳层直接 @import，
+ * 避免重复初始化 Tailwind；所有规则作用域在 [data-project='pose'] 内，
+ * 不会污染外壳（导航栏 / 全局播放器）与其他子应用。
+ *
+ * 独立部署时 ThemeProvider 会在 <html> 上设置 data-project="pose"，
+ * 因此同一份样式在独立与嵌入两种形态下表现一致。
+ *
+ * 由 scripts 自动生成（scope-css.mjs），如需修改请直接编辑本文件。
+ * ================================================================== */
+/* ==================== CSS 变量：颜色系统 ====================
+   基础中性色保留 jack-pose 原有配色（暖色系），主题色通过
+   studio-core ThemeProvider 动态注入（poseTheme: 粉紫活力）。
+   ThemeProvider 设置 --accent / --accent-2 等变量到 documentElement，
+   这里通过 var() 桥接使 jack-pose 的 --color-accent 跟随主题切换。 */
+
+[data-project='pose'] {
+  /* 对齐 studio-core 强调色变量：固定为 pose 粉紫主题色（具体色值）。
+     注意：必须用具体色值，不可写成 var(--color-accent)，否则会与下方
+     --color-accent: var(--accent, ...) 互相引用形成循环引用，两者变为
+     guaranteed-invalid，导致按钮背景 / 渐变文字失效（透明）。 */
+  --accent: #ec4899;
+  --accent-2: #f43f5e;
+
+  /* 基础中性色 — 亮色模式（jack-pose 暖色系） */
+  --color-bg: #FBF7F0;
+  --color-surface: #FFFBF5;
+  --color-surface-2: #ffffff;
+  --color-hover: #f5f5f7;
+  --color-text: #1d1d1f;
+  /* a11y：原 #86868b 在 #FBF7F0 上仅 3.39:1，未达 WCAG AA 4.5:1 → #6e6e73 = 4.75:1 */
+  --color-text-2: #6e6e73;
+  /* a11y：原 #9B8E7E 仅 2.99:1 → #7A6E60 = 4.65:1（保留暖色调） */
+  --color-text-3: #7A6E60;
+  --color-border: #EDE8E0;
+  --color-border-light: #e8e8ed;
+  --color-border-strong: #d2d2d7;
+  --color-wechat: #07C160;
+  --color-xhs: #FF2442;
+  --color-divider: #f2f2f7;
+  --color-placeholder: #c7c7cc;
+  --color-avatar: #C4956A;
+
+  /* 暖色调桥接 — 将 studio-core 共享中性色变量覆盖为暖色系，
+     使 StudioBar 等共享组件与 jack-pose 暖色基调一致 */
+  --bg: #FBF7F0;
+  --bg-surface: #FFFBF5;
+  --bg-elevated: #F5EFE6;
+  --bg-glass: rgba(255, 251, 245, 0.6);
+  --text: #1d1d1f;
+  /* a11y：StudioBar 导航文字消费此变量，3.39:1 → 4.75:1 */
+  --text-muted: #6e6e73;
+  --text-dim: #9B8E7E;
+  --border: rgba(193, 149, 106, 0.15);
+  --border-hover: rgba(193, 149, 106, 0.28);
+
+  /* 主题色 — 桥接 studio-core（由 ThemeProvider 动态设置） */
+  --color-accent: var(--accent, #ec4899);
+  --color-accent-hover: var(--accent-2, #f43f5e);
+  --color-accent-bg: rgba(var(--accent-rgb, 236, 72, 153), 0.08);
+
+  /* Layout */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-card: 18px;
+  --radius-modal: 24px;
+  --shadow: 0 4px 24px rgba(193, 149, 106, 0.08);
+  --shadow-lg: 0 8px 40px rgba(193, 149, 106, 0.12);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+
+:root[data-theme="dark"] [data-project='pose'] {
+  --color-bg: #1c1612;
+  --color-surface: #26201a;
+  --color-surface-2: #2c251e;
+  --color-hover: #332b22;
+  --color-text: #f5f0e8;
+  /* #a89888 在 #1c1612 上为 6.40:1，已达标，保持不变 */
+  --color-text-2: #a89888;
+  /* a11y：原 #7a6e60 仅 3.60:1 → #9A8D7C = 5.52:1（保留暖色调） */
+  --color-text-3: #9A8D7C;
+  --color-border: #3a3028;
+  --color-border-light: #342a22;
+  --color-border-strong: #4a3e34;
+  --color-wechat: #07C160;
+  --color-xhs: #FF2442;
+  --color-divider: #3a3028;
+  --color-placeholder: #5a4e44;
+  --color-avatar: #C4956A;
+
+  /* 暖色调桥接 — 暗色模式下使用深暖色背景，使 StudioBar 等共享组件保持暖色基调 */
+  --bg: #1c1612;
+  --bg-surface: #26201a;
+  --bg-elevated: #2c251e;
+  --bg-glass: rgba(38, 32, 26, 0.5);
+  --text: #f5f0e8;
+  --text-muted: #a89888;
+  --text-dim: #7a6e60;
+  --border: rgba(193, 149, 106, 0.12);
+  --border-hover: rgba(193, 149, 106, 0.24);
+
+  /* 主题色桥接（暗色模式下也跟随 studio-core） */
+  --color-accent: var(--accent, #ec4899);
+  --color-accent-hover: var(--accent-2, #f43f5e);
+  --color-accent-bg: rgba(var(--accent-rgb, 236, 72, 153), 0.12);
+}
+
+
+/* ==================== Base ==================== */
+
+[data-project='pose'], [data-project='pose'] :where(*) {
+  box-sizing: border-box;
+}
+
+
+
+
+[data-project='pose'] {
+  margin: 0;
+  font-family: var(--font-body, 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  /* StudioBar 为 fixed 定位（约 64px + 系统状态栏安全区），为下方内容预留顶部空间 */
+  padding-top: calc(64px + env(safe-area-inset-top, 0px));
+  transition: background-color 0.2s, color 0.2s;
+}
+
+
+/* ==================== Utilities ==================== */
+
+[data-project='pose'] .line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+/* Apple 风格滚动条 */
+[data-project='pose'] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+
+[data-project='pose'] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+[data-project='pose'] ::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 3px;
+}
+
+
+[data-project='pose'] ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-3);
+}
+
+
+/* 隐藏滚动条但保留滚动（用于轮播） */
+[data-project='pose'] .hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+[data-project='pose'] .hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* 拖拽时禁用系统 touch 行为 */
+[data-project='pose'] .no-touch-action {
+  touch-action: none;
+}
+
+
+/* ==================== 动画 ==================== */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-project='pose'], [data-project='pose'] * {
+    transition: none !important;
+    animation: none !important;
+  }
+
+}
+
+
+/* ==================== Jack Pose 独有视觉语言 ====================
+   设计理念：暖色手作质感
+   - 纸张纹理：暖色噪点叠加
+   - 圆点网格：取代 Studio 的线条网格
+   - 有机气泡：不规则形态的暖色光斑
+   - 弹性弹跳：bounce 缓动入场
+   - 暖光发光：琥珀色柔光
+   ================================================== */
+
+/* 纸张纹理 — 暖色噪点 */
+[data-project='pose'] .pose-paper-texture {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.8 0 0 0 0 0.6 0 0 0 0 0.4 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+  animation: pose-texture-drift 30s ease-in-out infinite;
+}
+
+
+:root[data-theme="dark"] [data-project='pose'] .pose-paper-texture {
+  opacity: 0.1;
+  mix-blend-mode: screen;
+}
+
+
+@keyframes pose-texture-drift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-2%, 1%); }
+}
+
+
+/* 圆点网格 — 取代线条网格 */
+[data-project='pose'] .pose-dot-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: radial-gradient(circle, var(--color-accent, #ec4899) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.04;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+}
+
+
+:root[data-theme="dark"] [data-project='pose'] .pose-dot-grid {
+  opacity: 0.08;
+}
+
+
+/* 有机暖色气泡 */
+[data-project='pose'] .pose-warm-blobs {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+
+[data-project='pose'] .pose-warm-blob {
+  position: absolute;
+  border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+  filter: blur(70px);
+  opacity: 0.32;
+  animation: pose-blob-morph 18s ease-in-out infinite;
+}
+
+
+[data-project='pose'] .pose-warm-blob:nth-child(1) {
+  width: 460px;
+  height: 400px;
+  background: radial-gradient(circle, var(--color-accent, #ec4899), transparent 70%);
+  top: -8%;
+  left: -3%;
+  animation-delay: 0s;
+}
+
+
+[data-project='pose'] .pose-warm-blob:nth-child(2) {
+  width: 400px;
+  height: 340px;
+  background: radial-gradient(circle, var(--color-accent-hover, #f43f5e), transparent 70%);
+  bottom: -5%;
+  right: -5%;
+  animation-delay: -6s;
+  border-radius: 58% 42% 37% 63% / 56% 59% 41% 44%;
+}
+
+
+[data-project='pose'] .pose-warm-blob:nth-child(3) {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, #fbbf24, transparent 70%);
+  top: 45%;
+  left: 40%;
+  animation-delay: -12s;
+  border-radius: 63% 37% 41% 59% / 44% 56% 44% 56%;
+}
+
+
+[data-project='pose'] .pose-warm-blob:nth-child(4) {
+  width: 240px;
+  height: 220px;
+  background: radial-gradient(circle, #fb923c, transparent 70%);
+  top: 20%;
+  right: 10%;
+  animation-delay: -9s;
+  border-radius: 59% 41% 63% 37% / 56% 44% 56% 44%;
+}
+
+
+:root[data-theme="dark"] [data-project='pose'] .pose-warm-blob {
+  opacity: 0.22;
+  filter: blur(90px);
+}
+
+
+@keyframes pose-blob-morph {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+  }
+  33% {
+    transform: translate(60px, -40px) scale(1.08) rotate(120deg);
+    border-radius: 58% 42% 37% 63% / 56% 59% 41% 44%;
+  }
+  66% {
+    transform: translate(-40px, 30px) scale(0.92) rotate(240deg);
+    border-radius: 37% 63% 58% 42% / 59% 41% 56% 44%;
+  }
+}
+
+
+/* ==================== 全局相机闪光特效 ====================
+   随机位置、随机时长的闪光灯，模拟「四处拍照」氛围；
+   与 Jack Pose「摆拍 / 摄影」主题契合。
+   - fixed 全屏覆盖，pointer-events:none，绝不拦截交互
+   - z-index 9990：内容层(1) / 导航栏(999) 之上，纸张纹理(9998) / Toast 之下
+   - 暖白光晕，暗色模式偏冷白，保持与页面暖色基调协调 */
+[data-project='pose'] .pose-flash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+
+[data-project='pose'] .pose-flash {
+  position: absolute;
+  /* top/left 表示闪光中心点，用 translate 居中 */
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: opacity, transform;
+  mix-blend-mode: screen;
+  animation-name: pose-flash-burst;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: forwards;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 248, 230, 0.6) 18%,
+    rgba(255, 240, 210, 0.25) 38%,
+    transparent 70%
+  );
+}
+
+
+/* 暗色模式：闪光更亮、偏冷白，避免暖色过曝 */
+:root[data-theme="dark"] [data-project='pose'] .pose-flash {
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(245, 248, 255, 0.7) 16%,
+    rgba(220, 230, 255, 0.3) 38%,
+    transparent 70%
+  );
+}
+
+
+@keyframes pose-flash-burst {
+  0%   { opacity: 0;    transform: translate(-50%, -50%) scale(0.4); }
+  8%   { opacity: 0.95; transform: translate(-50%, -50%) scale(1); }
+  35%  { opacity: 0.35; transform: translate(-50%, -50%) scale(1.12); }
+  100% { opacity: 0;    transform: translate(-50%, -50%) scale(1.45); }
+}
+
+
+/* 减少动效偏好下彻底关闭闪光层 */
+@media (prefers-reduced-motion: reduce) {
+  [data-project='pose'] .pose-flash-overlay {
+    display: none;
+  }
+
+}
+
+
+/* 暖光发光 */
+[data-project='pose'] .pose-warm-glow {
+  box-shadow:
+    0 0 24px rgba(var(--accent-rgb, 236, 72, 153), 0.18),
+    0 0 48px rgba(251, 191, 36, 0.1),
+    0 0 80px rgba(251, 146, 60, 0.06),
+    0 4px 24px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+:root[data-theme="dark"] [data-project='pose'] .pose-warm-glow {
+  box-shadow:
+    0 0 28px rgba(var(--accent-rgb, 236, 72, 153), 0.3),
+    0 0 56px rgba(251, 191, 36, 0.14),
+    0 0 90px rgba(251, 146, 60, 0.08),
+    0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+
+/* 手作风格按钮 — 微旋转 */
+[data-project='pose'] .pose-craft-hover {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+}
+
+
+[data-project='pose'] .pose-craft-hover:hover {
+  transform: translateY(-3px) rotate(-0.5deg);
+}
+
+
+[data-project='pose'] .pose-craft-hover:active {
+  transform: translateY(0) rotate(0deg) scale(0.98);
+}
+
+
+/* 弹跳入场 */
+@keyframes pose-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) rotate(-2deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.03) rotate(0.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+
+[data-project='pose'] .pose-pop-in {
+  animation: pose-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+
+/* 弹跳入场 — 延迟变体，用于错落入场效果 */
+[data-project='pose'] .pose-pop-in-delay-1 { animation: pose-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s both; }
+
+[data-project='pose'] .pose-pop-in-delay-2 { animation: pose-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.16s both; }
+
+[data-project='pose'] .pose-pop-in-delay-3 { animation: pose-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.24s both; }
+
+
+/* 卡片翻转悬停 — 支持 JS 驱动的动态倾斜 */
+[data-project='pose'] .pose-card-tilt {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+
+/* JS 驱动倾斜：通过 CSS 变量 --tilt-x / --tilt-y 控制旋转角度 */
+[data-project='pose'] .pose-card-tilt[data-tilt] {
+  transform: perspective(800px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateY(var(--tilt-lift, 0px)) scale(var(--tilt-scale, 1));
+}
+
+
+[data-project='pose'] .pose-card-tilt:hover {
+  transform: perspective(800px) rotateX(5deg) rotateY(-5deg) translateY(-6px) scale(1.01);
+}
+
+
+/* 移动端按压反馈 */
+[data-project='pose'] .pose-card-tilt:active {
+  transform: perspective(800px) rotateX(0deg) rotateY(0deg) translateY(-2px) scale(0.98);
+  transition: transform 0.15s ease-out;
+}
+
+
+/* 暖色渐变文字 */
+[data-project='pose'] .pose-gradient-text {
+  background: linear-gradient(135deg, var(--color-accent, #ec4899), #fbbf24, var(--color-accent-hover, #f43f5e));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: pose-gradient-shift 8s ease infinite;
+}
+
+
+@keyframes pose-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+
+/* 手绘风格边框 */
+[data-project='pose'] .pose-handcraft-border {
+  border-radius: 16px 20px 16px 22px;
+  border-width: 1.5px;
+  transition: border-radius 0.4s ease, transform 0.3s ease;
+}
+
+
+[data-project='pose'] .pose-handcraft-border:hover {
+  border-radius: 20px 16px 22px 14px;
+  transform: translateY(-2px);
+}
+
+
+:root[data-theme="dark"] [data-project='pose'] .pose-handcraft-border {
+  border-radius: 18px 16px 22px 14px;
+}
+
+
+:root[data-theme="dark"] [data-project='pose'] .pose-handcraft-border:hover {
+  border-radius: 16px 20px 14px 22px;
+}
+
+
+/* ==================== 与 Studio 一致的设计增强 ====================
+   毛玻璃 / 渐变边框 / 入场动画 / 光晕脉冲
+   设计语言与 Jack Tan Studio 保持一致：
+   - 毛玻璃半透明背景 + saturate 增强
+   - 渐变光边 hover 显现
+   - 入场动画：上滑淡入 / 缩放淡入
+   - 微光闪烁 / 光晕脉冲用于活跃状态
+   ================================================== */
+
+/* 毛玻璃效果 — 暖色版 */
+[data-project='pose'] .pose-glass {
+  background: rgba(255, 251, 245, 0.72);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid var(--color-border);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.5), 0 4px 24px rgba(236, 72, 153, 0.06);
+}
+
+
+:root[data-theme="dark"] [data-project='pose'] .pose-glass {
+  background: rgba(38, 32, 26, 0.72);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-color: rgba(236, 72, 153, 0.16);
+  box-shadow: inset 0 1px 0 0 rgba(236, 72, 153, 0.1), 0 4px 24px rgba(236, 72, 153, 0.12);
+}
+
+
+/* 渐变光边 — hover 时暖色光边显现 */
+[data-project='pose'] .pose-gradient-border {
+  position: relative;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+
+[data-project='pose'] .pose-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--color-accent, #ec4899), #fbbf24, var(--color-accent-hover, #f43f5e));
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+
+[data-project='pose'] .pose-gradient-border:hover::before {
+  opacity: 0.6;
+}
+
+
+/* 入场动画 — 上滑淡入 */
+@keyframes pose-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+[data-project='pose'] .pose-fade-up {
+  animation: pose-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+
+[data-project='pose'] .pose-fade-up-delay-1 { animation: pose-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+
+[data-project='pose'] .pose-fade-up-delay-2 { animation: pose-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both; }
+
+[data-project='pose'] .pose-fade-up-delay-3 { animation: pose-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both; }
+
+
+/* 入场动画 — 缩放淡入 */
+@keyframes pose-scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+[data-project='pose'] .pose-scale-in {
+  animation: pose-scale-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+
+/* 微光闪烁 — 用于强调元素 */
+@keyframes pose-shimmer {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+
+[data-project='pose'] .pose-shimmer {
+  animation: pose-shimmer 2.5s ease-in-out infinite;
+}
+
+
+/* 暖色光晕脉冲 — 用于活跃状态 */
+@keyframes pose-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(var(--accent-rgb, 236, 72, 153), 0.2);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(var(--accent-rgb, 236, 72, 153), 0.4);
+  }
+}
+
+
+[data-project='pose'] .pose-glow-pulse {
+  animation: pose-glow-pulse 2s ease-in-out infinite;
+}
+
+
+/* ==================== Jack Pose 交互增强 ====================
+   设计规范：
+   - PC：3D tilt ±6° 跟随光标坐标，平缓归位
+   - 移动端：取消 3D 倾斜，改为长按轻微缩放按压反馈
+   ================================================== */
+
+/* JS 驱动的倾斜卡片 — 快速 transition 响应光标移动 */
+[data-project='pose'] .pose-tilt-card {
+  transition: transform 0.15s ease-out, box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+
+/* 移动端：按压反馈 */
+@media (max-width: 768px) {
+  [data-project='pose'] .pose-tilt-card,
+[data-project='pose'] .pose-card-tilt {
+    transition: transform 0.2s ease-out;
+  }
+
+
+  [data-project='pose'] .pose-tilt-card:active,
+[data-project='pose'] .pose-card-tilt:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease-out;
+  }
+
+
+  /* 噪点纹理静态化 — 关闭动画节省性能 */
+  [data-project='pose'] .pose-paper-texture {
+    animation: none;
+  }
+
+
+  /* 气泡动画降频 */
+  [data-project='pose'] .pose-warm-blob {
+    animation-duration: 30s;
+  }
+
+}
+
+
+/* ==================== View Transitions API ====================
+   Jack Pose 页面切换启用 View Transitions，卡片逐个 spring 弹性缩放入场。 */
+@supports (view-transition-name: none) {
+  [data-project='pose'] ::view-transition-old(root) {
+    animation: pose-vt-out 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  [data-project='pose'] ::view-transition-new(root) {
+    animation: pose-vt-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+}
+
+
+@keyframes pose-vt-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+
+@keyframes pose-vt-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+

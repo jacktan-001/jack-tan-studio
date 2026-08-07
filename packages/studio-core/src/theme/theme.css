@@ -61,6 +61,13 @@
   --text-dim: #a0a0b8;
   --border: rgba(0, 0, 0, 0.08);
   --border-hover: rgba(0, 0, 0, 0.16);
+  /* 跨应用全局播放器栏 / 浮层玻璃令牌（统一来源，明暗各自适配） */
+  --player-bg: rgba(255, 255, 255, 0.72);
+  --player-border: rgba(0, 0, 0, 0.10);
+  --player-text: #1a1a2e;
+  --player-text-muted: #646480;
+  --player-glow: rgba(15, 23, 42, 0.08);
+  --glass-blur: 22px;
   color-scheme: light;
 }
 
@@ -75,6 +82,13 @@
   --text-dim: #555568;
   --border: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(255, 255, 255, 0.16);
+  /* 暗色下播放器栏用深色半透明，保证与亮色文字对比（此前缺省回退为白底，对比失效） */
+  --player-bg: rgba(18, 18, 30, 0.62);
+  --player-border: rgba(255, 255, 255, 0.12);
+  --player-text: #f5f5f7;
+  --player-text-muted: #8888a0;
+  --player-glow: rgba(255, 255, 255, 0.16);
+  --glass-blur: 22px;
   color-scheme: dark;
 }
 
@@ -92,8 +106,14 @@
   --gradient: linear-gradient(135deg, #7c3aed, #ec4899, #06b6d4);
 }
 
+/* ---------- 项目强调色 ----------
+   选择器不加 :root 前缀，使其同时命中两种形态：
+   - 独立部署：<html data-project="wave">（ThemeProvider 设置）
+   - 嵌入 studio 单页外壳：<div data-project="wave">（ProjectHost 容器）
+   否则子应用在外壳内会错用 studio 的紫粉强调色。 */
+
 /* ---------- 项目强调色：Wave（青蓝暖光） ---------- */
-:root[data-project='wave'] {
+[data-project='wave'] {
   --accent: #06b6d4;
   --accent-2: #0ea5e9;
   --accent-3: #14b8a6;
@@ -106,7 +126,7 @@
 }
 
 /* ---------- 项目强调色：Pose（粉紫活力） ---------- */
-:root[data-project='pose'] {
+[data-project='pose'] {
   --accent: #ec4899;
   --accent-2: #f43f5e;
   --accent-3: #8b5cf6;
@@ -119,7 +139,7 @@
 }
 
 /* ---------- 项目强调色：Tan（紫蓝商务） ---------- */
-:root[data-project='tan'] {
+[data-project='tan'] {
   --accent: #7c3aed;
   --accent-2: #3b82f6;
   --accent-3: #6366f1;

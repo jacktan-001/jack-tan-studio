@@ -1,20 +1,15 @@
 /**
  * App — Jack Wave 主应用组件
  *
- * 从原 app.js 的 IIFE 迁移，包含：
- * - 数据初始化（静态数据 + KV 动态数据合并）
- * - 音频播放器管理（useAudioPlayer）
- * - Toast 通知
- * - 心情歌单弹窗
- * - 键盘快捷键（Space/ArrowLeft/ArrowRight/Escape）
- * - PWA Service Worker 注册
- * - iTunes URL 后台刷新
+ * 单页壳层（studio）合并架构下的两种装配方式：
+ * - `App`（默认导出）：独立部署入口。自托管 player + StudioBar + GlobalAudioPlayer，
+ *   由 main.tsx 包在 ThemeProvider 中渲染。
+ * - `WaveAppEmbedded`：被 studio 外壳客户端挂载时使用的入口。不创建音频、
+ *   不渲染 StudioBar / GlobalAudioPlayer（由外壳统一提供），仅注册自己的封面解析器，
+ *   从而让全局唯一的 <audio> 在外壳中持续播放，实现导航零间隙。
  *
- * KV 动态数据加载使用 React 19 的 use() + Suspense：
- * - PublicDataProvider 在 Suspense 边界内通过 use(promise) 挂起并读取数据
- * - fetch Promise 缓存在模块级 Map 中，避免每次渲染重复请求
- * - 加载失败时 Promise 内部 catch 并 resolve 为 null，静默回退到静态数据
- * - 额外的 ErrorBoundary 作为子树渲染异常的防御性兜底
+ * 公共 UI 与全部状态逻辑抽到 `WaveContent`，它只接收 `player` 属性，
+ * 因此无论哪种装配方式都不会各自创建 audio 实例（避免双声/冲突）。
  */
 
 import {
@@ -43,7 +38,9 @@ import {
   GlobalAudioPlayer,
   useGlobalAudioPlayer,
   toPlayerTrack,
+  setArtworkResolver,
   type PlayerTrack,
+  type GlobalAudioPlayerReturn,
 } from '@jack-tan/studio-core';
 import { StudioBar } from '@jack-tan/studio-core';
 import { Hero } from './components/Hero';
@@ -55,6 +52,7 @@ import { SubmitForm } from './components/SubmitForm';
 import { Footer } from './components/Footer';
 import { Toast, useToast } from './components/Toast';
 import { artworkSrc } from './utils';
+import { assetUrl } from './assetBase';
 
 /** /api/public-data 返回的 KV 公开数据结构 */
 interface PublicData {
@@ -88,7 +86,7 @@ function getPublicDataPromise(): Promise<PublicData | null> {
   const key = 'public-data';
   let promise = publicDataPromiseCache.get(key);
   if (!promise) {
-    promise = fetch(import.meta.env.BASE_URL + 'api/public-data')
+    promise = fetch(assetUrl('api/public-data'))
       .then((r) => {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json() as Promise<PublicData>;
@@ -220,7 +218,12 @@ class PublicDataErrorBoundary extends Component<
   }
 }
 
-export default function App() {
+/**
+ * WaveContent — Jack Wave 的全部 UI 与状态逻辑。
+ * 不直接创建音频：player 由外部传入（standalone 由 App 自托管，嵌入模式由 studio 外壳传入），
+ * 因此全局只有一个 <audio> 实例，导航（含跨应用到 studio 外壳）不中断播放。
+ */
+function WaveContent({ player }: { player: GlobalAudioPlayerReturn }) {
   // === Toast 通知 ===
   const { message, show, showToast, hideToast } = useToast();
 
@@ -229,12 +232,6 @@ export default function App() {
 
   // === iTunes 预览 URL 后台刷新（jack-wave 专属） ===
   useAudioPlayer(songLibrary, showToast, forceUpdate);
-
-  // === 跨应用全局音频播放器 ===
-  const player = useGlobalAudioPlayer({
-    onError: showToast,
-    resolveArtwork: artworkSrc,
-  });
 
   // 用 ref 持有最新 player：避免把整个 player 对象放进 useEffect/useCallback 依赖，
   // 否则键盘监听会随 player 身份变化（播放中每秒重渲染）反复解绑重绑（P1-2）。
@@ -275,29 +272,6 @@ export default function App() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // === PWA Service Worker 注册 ===
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register(import.meta.env.BASE_URL + 'sw.js')
-        .then((reg) => {
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            if (newWorker) {
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'activated') {
-                  location.reload();
-                }
-              });
-            }
-          });
-        })
-        .catch(() => {
-          // SW 注册失败静默处理
-        });
-    }
   }, []);
 
   // === 事件处理 ===
@@ -409,9 +383,6 @@ export default function App() {
         跳到主要内容
       </a>
 
-      {/* StudioBar 跨项目共享导航栏（fixed 定位，下方内容由 index.css 预留 64px 顶部间距） */}
-      <StudioBar current="wave" />
-
       {/* ============ 全局背景动效层（fixed, z-index:0，置于内容之下） ============ */}
       {/* 波纹纹理 — SVG 水波 */}
       <div className="wave-ripple-texture" aria-hidden="true" />
@@ -450,11 +421,75 @@ export default function App() {
         <Footer />
       </div>
 
-      {/* 跨应用全局底部播放器 */}
-      <GlobalAudioPlayer player={player} resolveArtwork={artworkSrc} />
-
       {/* Toast 通知 */}
       <Toast message={message} show={show} onHide={hideToast} />
     </>
   );
+}
+
+/**
+ * App — 独立部署入口（默认导出）。
+ * 自托管 player + StudioBar + GlobalAudioPlayer，由 main.tsx 包在 ThemeProvider 中渲染。
+ */
+export default function App() {
+  const { showToast } = useToast();
+  const player = useGlobalAudioPlayer({
+    onError: showToast,
+    resolveArtwork: artworkSrc,
+  });
+
+  // === PWA Service Worker 注册（独立部署时由本应用负责；嵌入外壳时交由外壳处理） ===
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register(import.meta.env.BASE_URL + 'sw.js')
+        .then((reg) => {
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'activated') {
+                  location.reload();
+                }
+              });
+            }
+          });
+        })
+        .catch(() => {
+          // SW 注册失败静默处理
+        });
+    }
+  }, []);
+
+  return (
+    <>
+      {/* StudioBar 跨项目共享导航栏（fixed 定位，下方内容由 index.css 预留 64px 顶部间距） */}
+      <StudioBar current="wave" />
+
+      {/* 主内容 */}
+      <WaveContent player={player} />
+
+      {/* 跨应用全局底部播放器 */}
+      <GlobalAudioPlayer player={player} resolveArtwork={artworkSrc} />
+    </>
+  );
+}
+
+/**
+ * WaveAppEmbedded — 被 studio 单页外壳客户端挂载时的入口。
+ * 不创建音频、不渲染 StudioBar / GlobalAudioPlayer（外壳统一提供），
+ * 仅注册 jack-wave 专属的封面解析器（Apple 图床走同源 /api/img 代理），
+ * 让外壳唯一的 <audio> 能正确解析封面，导航零间隙。
+ */
+export function WaveAppEmbedded({
+  player,
+}: {
+  player: GlobalAudioPlayerReturn;
+}) {
+  useEffect(() => {
+    setArtworkResolver(artworkSrc);
+    return () => setArtworkResolver(null);
+  }, []);
+
+  return <WaveContent player={player} />;
 }

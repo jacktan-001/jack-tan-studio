@@ -12,6 +12,7 @@ import { useProjectStore } from '../stores/projectStore'
 import { importProjectArchive } from '../lib/importExport'
 import { toast } from 'sonner'
 import { useTilt } from '../hooks/useTilt'
+import { assetUrl } from '../assetBase'
 
 export function ProjectListPage() {
   const navigate = useNavigate()
@@ -65,11 +66,14 @@ export function ProjectListPage() {
 
   return (
     <div className="min-h-screen bg-bg text-primary">
-      <main className="max-w-lg mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-10">
+      <main
+        className="w-full max-w-lg mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-16"
+        style={{ marginLeft: 'auto', marginRight: 'auto' }}
+      >
         {/* Hero */}
-        <div className="text-center mb-10 sm:mb-12 pose-pop-in">
+        <div className="text-center mb-12 sm:mb-14 pose-pop-in">
           <img
-            src={`${import.meta.env.BASE_URL}hero-sm.jpg`}
+            src={assetUrl('hero-sm.jpg')}
             alt="Jack Pose"
             width={208}
             height={208}
@@ -86,7 +90,7 @@ export function ProjectListPage() {
         </div>
 
         {/* 三个一级入口 */}
-        <div className="space-y-3 mb-12">
+        <div className="space-y-4 mb-16">
           <button
             ref={tiltRef1}
             onClick={() => setShowInput((v) => !v)}
