@@ -1,7 +1,8 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useCallback } from 'react'
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { GlobalAudioPlayer, useGlobalAudioPlayer } from '@jack-tan/studio-core'
 import Navbar from './components/layout/Navbar'
+import ProjectHost from './components/ProjectHost'
 import CustomCursor from './components/ui/CustomCursor'
 import StarField from './components/effects/StarField'
 import { projects } from './data/projects'
@@ -33,10 +34,17 @@ export default function App() {
   const location = useLocation()
   const player = useGlobalAudioPlayer()
 
+  // 播放错误的兜底处理（嵌入子应用复用外壳的 player，错误也汇集到这里）
+  const handlePlayerError = useCallback((message: string) => {
+    console.warn('[player]', message)
+  }, [])
+
   return (
     <>
       <CustomCursor />
-      <BackgroundEffects />
+      {/* 项目页（/projects/*）由子应用自带背景与装饰，外壳环境背景常驻会透出
+          紫/青模糊光斑 → 顶部紫色条 + 左上青绿色块。故项目路由下隐藏 BackgroundEffects。 */}
+      {!location.pathname.startsWith('/projects') && <BackgroundEffects />}
       <Navbar />
       <div className="page-wrap">
         {/* N-2：用 key + CSS .studio-page-fade 实现路由切换淡入，替代 AnimatePresence（去除首屏 Motion 依赖） */}
@@ -45,23 +53,19 @@ export default function App() {
           <Routes location={location}>
             <Route path="/" element={<Home />} />
 
-            {/* 项目介绍页：/projects/:id/intro */}
-            {projects.map((p) => (
-              <Route
-                key={`intro-${p.id}`}
-                path={`/projects/${p.id}/intro`}
-                element={<ProjectIntro />}
-              />
-            ))}
+            {/* 项目介绍页：/projects/:id/intro
+                必须用动态段声明，否则 ProjectIntro 里的 useParams().id 取不到值 */}
+            <Route path="/projects/:id/intro" element={<ProjectIntro />} />
 
-            {/* 项目路由：已上线的直接跳转到子应用目录；未上线的渲染 Coming Soon */}
+            {/* 项目路由：已上线的直接在单页壳层内客户端挂载子应用（音乐不中断）；
+                未上线的渲染 Coming Soon */}
             {projects.map((p) => (
               <Route
                 key={p.id}
                 path={`/projects/${p.id}`}
                 element={
                   p.status === 'live' ? (
-                    <Navigate to={p.url} replace />
+                    <ProjectHost id={p.id} player={player} onError={handlePlayerError} />
                   ) : (
                     <ComingSoon project={p} />
                   )

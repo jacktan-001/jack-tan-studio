@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { Lock, ArrowUpRight, Github } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Lock, ArrowRight, Github } from 'lucide-react'
 import { projects, type Project } from '../../data/projects'
 import { Rise } from '../Rise'
 
@@ -229,6 +230,18 @@ function StatusBadge({ project }: { project: Project }) {
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
   const isLive = project.status === 'live'
+  const navigate = useNavigate()
+
+  /** 单页壳层：进入子应用走客户端路由，不新开标签页、不打断全局播放 */
+  const enterProject = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const go = () => navigate(`/projects/${project.id}`)
+    if (typeof document !== 'undefined' && document.startViewTransition) {
+      document.startViewTransition(go)
+    } else {
+      go()
+    }
+  }
 
   return (
     <Rise delay={index * 0.09} style={{ height: '100%' }}>
@@ -338,9 +351,8 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         {isLive ? (
           <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
             <a
-              href={project.url}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`/projects/${project.id}`}
+              onClick={enterProject}
               style={{
                 flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                 padding: '11px 16px', borderRadius: '10px',
@@ -351,7 +363,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
               onMouseEnter={(e) => { e.currentTarget.style.background = `rgba(${project.colorRgb}, 0.24)` }}
               onMouseLeave={(e) => { e.currentTarget.style.background = `rgba(${project.colorRgb}, 0.14)` }}
             >
-              访问 <ArrowUpRight size={14} />
+              进入 <ArrowRight size={14} />
             </a>
             {project.repo && (
               <a
@@ -426,7 +438,7 @@ export default function ProjectShowcase() {
           fontSize: '15px', color: 'var(--text-muted)', maxWidth: '620px', margin: '0 auto', lineHeight: 1.75,
         }}>
           从音乐随记到社媒排版、再到个人作品集，每一个作品都是独立的创意；
-          Jack Cast 与 Jack Craft 正在路上。
+          Jack Talk 与 Jack Craft 正在路上。
         </p>
       </Rise>
 
@@ -481,7 +493,7 @@ export default function ProjectShowcase() {
         .pv-scan { position: absolute; top: 0; bottom: 0; width: 60px; background: linear-gradient(90deg, transparent, rgba(167,139,250,0.16), transparent); animation: pvScan 3.2s linear infinite; }
         @keyframes pvScan { from { left: -60px; } to { left: 100%; } }
 
-        /* ===== Jack Cast：平滑声波（SMIL 形变，区别于 Wave 方块均衡器） ===== */
+        /* ===== Jack Talk：平滑声波（SMIL 形变，区别于 Wave 方块均衡器） ===== */
         .pv-cast { display: flex; align-items: center; background: linear-gradient(180deg, rgba(245,158,11,0.08), rgba(217,70,239,0.03)); }
         .pv-cast-svg { width: 100%; height: 100%; }
 

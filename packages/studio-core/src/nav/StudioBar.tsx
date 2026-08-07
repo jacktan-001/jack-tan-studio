@@ -14,24 +14,30 @@
  *  - 移动端自适应折叠
  */
 
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../theme/useTheme';
+import { ProjectGlyph, type ProjectGlyphId } from '../brand/glyphs';
 
-export type StudioBarProject = 'studio' | 'pose' | 'wave' | 'tan';
+export type StudioBarProject = 'studio' | 'wave' | 'pose' | 'tan' | 'cast' | 'craft';
 
 interface StudioBarLink {
   id: StudioBarProject;
+  /** 对应统一字形 id（与 projects.ts 的 icon 字段对齐） */
+  glyph: ProjectGlyphId;
   label: string;
   href: string;
   color: string;
   colorRgb: string;
 }
 
+/** 跨项目导航：与 Studio 外壳 Navbar 完全一致（含 Jack Talk / Jack Craft） */
 const LINKS: StudioBarLink[] = [
-  { id: 'studio', label: 'Jack Tan Studio', href: '/', color: '#7c3aed', colorRgb: '124, 58, 237' },
-  { id: 'wave', label: 'Jack Wave', href: '/projects/jack-wave/', color: '#06b6d4', colorRgb: '6, 182, 212' },
-  { id: 'pose', label: 'Jack Pose', href: '/projects/jack-pose/', color: '#ec4899', colorRgb: '236, 72, 153' },
-  { id: 'tan', label: 'Jack Tan', href: '/projects/jack-tan/', color: '#3b82f6', colorRgb: '59, 130, 246' },
+  { id: 'studio', glyph: 'studio', label: 'Jack Tan Studio', href: '/', color: '#7c3aed', colorRgb: '124, 58, 237' },
+  { id: 'wave', glyph: 'wave', label: 'Jack Wave', href: '/projects/jack-wave/', color: '#06b6d4', colorRgb: '6, 182, 212' },
+  { id: 'pose', glyph: 'pose', label: 'Jack Pose', href: '/projects/jack-pose/', color: '#ec4899', colorRgb: '236, 72, 153' },
+  { id: 'tan', glyph: 'profile', label: 'Jack Tan', href: '/projects/jack-tan/', color: '#7c3aed', colorRgb: '124, 58, 237' },
+  { id: 'cast', glyph: 'cast', label: 'Jack Talk', href: '/projects/cast', color: '#f59e0b', colorRgb: '245, 158, 11' },
+  { id: 'craft', glyph: 'craft', label: 'Jack Craft', href: '/projects/craft', color: '#10b981', colorRgb: '16, 185, 129' },
 ];
 
 /** 各子系统的全称品牌名（左侧品牌区使用） */
@@ -40,41 +46,19 @@ const BRAND_NAMES: Record<StudioBarProject, { main: string; sub: string }> = {
   wave: { main: 'Jack', sub: 'Wave' },
   pose: { main: 'Jack', sub: 'Pose' },
   tan: { main: 'Jack', sub: 'Tan' },
+  cast: { main: 'Jack', sub: 'Talk' },
+  craft: { main: 'Jack', sub: 'Craft' },
 };
 
-/** 项目小图标 */
-function NavIcon({ type, color, size = 16 }: { type: StudioBarProject; color: string; size?: number }) {
-  const icons: Record<StudioBarProject, ReactNode> = {
-    studio: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <rect x="3" y="3" width="7" height="7" rx="2" />
-        <rect x="14" y="3" width="7" height="7" rx="2" />
-        <rect x="3" y="14" width="7" height="7" rx="2" />
-        <rect x="14" y="14" width="7" height="7" rx="2" />
-      </svg>
-    ),
-    wave: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <path d="M2 12 Q6 6, 10 12 T18 12 T22 12" />
-        <path d="M2 16 Q6 10, 10 16 T18 16 T22 16" opacity="0.5" />
-      </svg>
-    ),
-    pose: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <rect x="3" y="3" width="18" height="18" rx="3" />
-        <path d="M3 9 L21 9 M9 3 L9 21" opacity="0.5" />
-        <circle cx="15" cy="15" r="2" />
-      </svg>
-    ),
-    tan: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21 Q4 14, 12 14 T20 21" />
-      </svg>
-    ),
-  }
-  return icons[type]
-}
+/** 当前子系统 → 统一字形 id */
+const CURRENT_GLYPH: Record<StudioBarProject, ProjectGlyphId> = {
+  studio: 'studio',
+  wave: 'wave',
+  pose: 'pose',
+  tan: 'profile',
+  cast: 'cast',
+  craft: 'craft',
+};
 
 /** 子应用内部的快速跳转链接（如 jack-wave 的 本月推荐/心情歌单/推荐歌单） */
 export interface StudioBarQuickLink {
@@ -166,7 +150,7 @@ export function StudioBar({ current, quickLinks }: StudioBarProps) {
             transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
           }}
         >
-          <NavIcon type={current} color="#fff" size={17} />
+          <ProjectGlyph id={CURRENT_GLYPH[current]} color="#fff" size={17} />
         </div>
         <span
           className="studiobar-brand"
@@ -223,7 +207,7 @@ export function StudioBar({ current, quickLinks }: StudioBarProps) {
                 whiteSpace: 'nowrap',
               }}
             >
-              <NavIcon type={l.id} color={active ? l.color : 'currentColor'} size={14} />
+              <ProjectGlyph id={l.glyph} color={active ? l.color : 'currentColor'} size={14} />
               <span>{l.label}</span>
             </a>
           );

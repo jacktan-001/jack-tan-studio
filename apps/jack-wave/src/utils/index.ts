@@ -4,6 +4,7 @@
  */
 
 import { safeUrl as coreSafeUrl } from '@jack-tan/studio-core';
+import { assetUrl } from '../assetBase';
 
 /** URL 安全验证 — 仅允许 http/https 协议（重新导出 studio-core） */
 export const safeUrl = coreSafeUrl;
@@ -27,7 +28,7 @@ export function artworkSrc(src: unknown): string {
   const url = safeUrl(src);
   if (!url) return '';
   if (APPLE_IMG_HOST.test(url)) {
-    return `${import.meta.env.BASE_URL}api/img?u=${encodeURIComponent(url)}`;
+    return assetUrl(`api/img?u=${encodeURIComponent(url)}`);
   }
   return url;
 }

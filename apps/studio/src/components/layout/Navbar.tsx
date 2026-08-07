@@ -1,55 +1,8 @@
-import React, { useState, useEffect, type ReactNode } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Sun, Moon, Lock, ArrowUpRight } from 'lucide-react'
-import { useTheme, setPendingProject, navigateWithTransition } from '@jack-tan/studio-core'
+import React, { useState, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Menu, X, Sun, Moon, Lock } from 'lucide-react'
+import { useTheme, ProjectGlyph } from '@jack-tan/studio-core'
 import { projects, type Project } from '../../data/projects'
-
-/** 项目小图标 */
-function ProjectIcon({ type, color, size = 18 }: { type: string; color: string; size?: number }) {
-  const icons: Record<string, ReactNode> = {
-    wave: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <path d="M2 12 Q6 6, 10 12 T18 12 T22 12" />
-        <path d="M2 16 Q6 10, 10 16 T18 16 T22 16" opacity="0.5" />
-      </svg>
-    ),
-    pose: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <rect x="3" y="3" width="18" height="18" rx="3" />
-        <path d="M3 9 L21 9 M9 3 L9 21" opacity="0.5" />
-        <circle cx="15" cy="15" r="2" />
-      </svg>
-    ),
-    profile: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21 Q4 14, 12 14 T20 21" />
-      </svg>
-    ),
-    lens: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <circle cx="11" cy="11" r="7" />
-        <path d="M11 8 A3 3 0 0 1 14 11" opacity="0.6" />
-        <path d="M21 21 L16 16" />
-      </svg>
-    ),
-    cast: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <rect x="9" y="3" width="6" height="11" rx="3" />
-        <path d="M5 11 Q5 18, 12 18 Q19 18, 19 11" opacity="0.6" />
-        <path d="M12 18 L12 21" />
-      </svg>
-    ),
-    craft: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <path d="M12 2 L22 12 L12 22 L2 12 Z" />
-        <path d="M12 6 L18 12 L12 18 L6 12 Z" opacity="0.5" />
-        <circle cx="12" cy="12" r="2" />
-      </svg>
-    ),
-  }
-  return icons[type] || null
-}
 
 function ProductChip({
   project,
@@ -62,15 +15,21 @@ function ProductChip({
   onHover: (project: Project | null) => void
   onLeave: () => void
 }) {
+  const navigate = useNavigate()
   const isLive = project.status === 'live'
-  const href = isLive ? project.url : `/projects/${project.id}`
-  const isExternal = href.startsWith('http') || href.startsWith('/projects/jack-')
+  // 单页壳层：所有项目一律走外壳路由 /projects/{id}
+  // （project.url 是独立部署路径 /projects/jack-xxx/，与外壳路由不匹配，
+  //  客户端 navigate 过去会被 * 兜底跳回首页）
+  const href = `/projects/${project.id}`
 
   const handleClick = (e: React.MouseEvent) => {
-    if (isExternal) {
-      e.preventDefault()
-      setPendingProject(project.id)
-      navigateWithTransition(href)
+    // 所有项目链接走客户端路由，避免整页刷新打断全局播放
+    e.preventDefault()
+    const go = () => navigate(href)
+    if (typeof document !== 'undefined' && document.startViewTransition) {
+      document.startViewTransition(go)
+    } else {
+      go()
     }
   }
 
@@ -108,10 +67,9 @@ function ProductChip({
         e.currentTarget.style.boxShadow = 'none'
       }}
     >
-      <ProjectIcon type={project.icon} color={isActive ? project.color : 'currentColor'} size={16} />
+      <ProjectGlyph id={project.icon} color={isActive ? project.color : 'currentColor'} size={16} />
       <span>{project.name}</span>
       {!isLive && <Lock size={12} style={{ opacity: 0.7 }} />}
-      {isLive && isExternal && <ArrowUpRight size={12} style={{ opacity: 0.7 }} />}
     </a>
   )
 }
@@ -121,6 +79,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null)
   const location = useLocation()
+  const navigate = useNavigate()
   const { mode, toggleMode } = useTheme()
 
   useEffect(() => {
@@ -291,12 +250,14 @@ export default function Navbar() {
               return (
                 <a
                   key={p.id}
-                  href={isLive ? p.url : `/projects/${p.id}`}
+                  href={`/projects/${p.id}`}
                   onClick={(e) => {
-                    if (isLive) {
-                      e.preventDefault()
-                      setPendingProject(p.id)
-                      navigateWithTransition(p.url)
+                    e.preventDefault()
+                    const go = () => navigate(`/projects/${p.id}`)
+                    if (typeof document !== 'undefined' && document.startViewTransition) {
+                      document.startViewTransition(go)
+                    } else {
+                      go()
                     }
                   }}
                   style={{
@@ -312,7 +273,7 @@ export default function Navbar() {
                     textDecoration: 'none',
                   }}
                 >
-                  <ProjectIcon type={p.icon} color={p.color} size={20} />
+                  <ProjectGlyph id={p.icon} color={p.color} size={20} />
                   <span>{p.name}</span>
                   <span style={{ color: 'var(--text-dim)', marginLeft: 'auto', fontSize: '12px' }}>{p.tagline}</span>
                   {!isLive && <Lock size={14} style={{ color: 'var(--text-dim)' }} />}

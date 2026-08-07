@@ -28,6 +28,9 @@ export * from './theme';
 // Layer 4.5: Navigation (cross-project StudioBar)
 export * from './nav';
 
+// Layer 4.6: Brand (unified project glyphs + badges)
+export * from './brand';
+
 // Layer 5: PWA
 export * from './pwa';
 

@@ -7,6 +7,7 @@
 import { useOptimistic, useRef, useState, useTransition } from 'react';
 import type { SubmitPayload } from '../types';
 import { safeUrl } from '../utils';
+import { assetUrl } from '../assetBase';
 
 export interface SubmitFormProps {
   allTags: string[];
@@ -195,7 +196,7 @@ export function SubmitForm({ allTags, onToast }: SubmitFormProps) {
       addOptimisticStatus('submitting');
 
       try {
-        const res = await fetch(import.meta.env.BASE_URL + 'api/submit', {
+        const res = await fetch(assetUrl('api/submit'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),

@@ -29,6 +29,18 @@ const functions = resolve(deploy, 'functions');
  */
 const SITE_ORIGIN = 'https://jacktan-studio.pages.dev';
 
+/**
+ * 部署模式开关（回退用）。通过 CI 环境变量 SPA_MODE 传入，本地默认 studio。
+ *   SPA_MODE=studio    （默认）单页外壳模式：
+ *     /projects/{id} 由 studio 外壳的 catch-all Function 承载，回退到根 /index.html，
+ *     从而硬刷新 / 直链也能进入单页，全局 <audio> 不卸载（音乐零间隙）。
+ *     子应用独立产物仍保留在 /projects/jack-{id}/ 供旧链接 301 与回退开关使用。
+ *   SPA_MODE=standalone        独立部署回退模式（旧行为）：
+ *     /projects/{id} 经 _redirects 301 到独立产物 /projects/jack-{id}/，由子应用自身
+ *     index.html 承载。单页化出问题时一键回退到独立部署。
+ */
+const SPA_MODE = process.env.SPA_MODE === 'standalone' ? 'standalone' : 'studio';
+
 function copy(src, dest) {
   if (!existsSync(src)) {
     console.warn(`[merge] 跳过不存在的目录: ${src}`);
@@ -94,14 +106,24 @@ const spaFallbackTemplate = readFileSync(
   'utf-8',
 );
 for (const p of liveProjects) {
-  const appDir = `projects/jack-${p.id}`;
-  const targetDir = resolve(functions, appDir);
+  const standaloneDir = `projects/jack-${p.id}`;
+  const clientDir = `projects/${p.id}`;
+  // 单页模式：Function 挂在客户端路由 /projects/{id}/，回退到 studio 根入口；
+  // 独立模式：Function 挂在 /projects/jack-{id}/，回退到子应用自身入口。
+  const funcDir = SPA_MODE === 'standalone' ? standaloneDir : clientDir;
+  const fallbackPath =
+    SPA_MODE === 'standalone' ? `/${standaloneDir}/index.html` : '/index.html';
+  const targetDir = resolve(functions, funcDir);
   mkdirSync(targetDir, { recursive: true });
   writeFileSync(
     resolve(targetDir, '[[path]].js'),
-    spaFallbackTemplate.replaceAll('__APP_BASE__', `/${appDir}`),
+    spaFallbackTemplate
+      .replaceAll('__APP_BASE__', `/${standaloneDir}`)
+      .replaceAll('__FALLBACK_PATH__', fallbackPath),
   );
-  console.log(`[merge] SPA 回退 Function -> /${appDir}/[[path]].js`);
+  console.log(
+    `[merge] SPA 回退 Function -> /${funcDir}/[[path]].js (mode=${SPA_MODE}, fallback=${fallbackPath})`,
+  );
 }
 
 // 4. 生成统一的 _redirects
@@ -132,8 +154,12 @@ const redirects = [
   '/projects/wave/* /projects/jack-wave/:splat 301',
   '/projects/tan/* /projects/jack-tan/:splat 301',
   '',
-  '# ③ 已上线项目的短链直接 301 到子应用（比进 SPA 再客户端跳转快一个往返）',
-  ...liveProjects.map((p) => `/projects/${p.id} ${p.url} 301`),
+  '# ③ 单页模式：/projects/{id} 由 studio 外壳 catch-all Function 承载（回退根入口），',
+  '#    不再 301 到独立产物，确保硬刷新/直链也进入单页、播放不中断；',
+  '#    独立模式（回退开关）：/projects/{id} 301 到独立产物路径（旧行为）。',
+  ...(SPA_MODE === 'standalone'
+    ? liveProjects.map((p) => `/projects/${p.id} ${p.url} 301`)
+    : liveProjects.map((p) => `/projects/${p.id} /projects/${p.id}/ 301`)),
   '',
   '# ④ 未上线项目的 Coming Soon 页，由 studio SPA 渲染',
   ...upcomingProjects.map((p) => `/projects/${p.id} / 200`),
@@ -154,9 +180,13 @@ writeFileSync(resolve(dist, '_redirects'), redirects);
 const routesJson = {
   version: 1,
   include: [
-    '/projects/jack-pose/*',
-    '/projects/jack-wave/*',
-    '/projects/jack-tan/*',
+    // 单页模式：客户端路由 /projects/{id}/* 由 catch-all Function 承载（回退 studio 根入口）；
+    // 独立模式：/projects/jack-{id}/* 由子应用 catch-all 承载（旧行为）。
+    ...(SPA_MODE === 'standalone'
+      ? liveProjects.map((p) => `/projects/jack-${p.id}/*`)
+      : liveProjects.map((p) => `/projects/${p.id}/*`)),
+    // jack-wave 的 API 始终挂在独立产物路径下，两种模式都需要。
+    '/projects/jack-wave/api/*',
   ],
   exclude: [
     '/assets/*',
@@ -241,7 +271,11 @@ const today = new Date().toISOString().slice(0, 10);
 const sitemapUrls = [
   { loc: '/', priority: '1.0', changefreq: 'weekly' },
   // 已上线子应用
-  ...liveProjects.map((p) => ({ loc: p.url, priority: '0.9', changefreq: 'weekly' })),
+  ...liveProjects.map((p) => ({
+    loc: SPA_MODE === 'standalone' ? p.url : `/projects/${p.id}`,
+    priority: '0.9',
+    changefreq: 'weekly',
+  })),
   // 项目介绍页（仅收录已上线项目，Coming Soon 页无实质内容不提交）
   ...liveProjects.map((p) => ({ loc: `/projects/${p.id}/intro`, priority: '0.7', changefreq: 'monthly' })),
 ];

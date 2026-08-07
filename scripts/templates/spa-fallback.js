@@ -14,7 +14,8 @@
  * 并替换 __APP_BASE__ 占位符，请勿直接编辑 deploy/ 下的产物。
  */
 
-const APP_BASE = '__APP_BASE__'; // 例如 /projects/jack-wave
+const APP_BASE = '__APP_BASE__'; // 例如 /projects/jack-wave（独立部署路径，用于 301/直接访问与资源基址）
+const FALLBACK_PATH = '__FALLBACK_PATH__'; // 单页模式=/index.html（studio 外壳），独立模式=APP_BASE+/index.html
 
 export const onRequest = async (context) => {
   const { request, env } = context;
@@ -27,11 +28,13 @@ export const onRequest = async (context) => {
   //     不做 SPA 回退 —— 避免软 404，也让 <img>/<script> 加载失败语义正确。
   if (/\.[a-z0-9]+$/i.test(new URL(request.url).pathname)) return asset;
 
-  // 2. 静态资源不存在 → SPA 回退到子应用入口
+  // 2. 静态资源不存在 → SPA 回退到入口
+  //    FALLBACK_PATH 由部署模式决定：单页模式回退到 studio 根 /index.html（外壳常驻，
+  //    播放不中断）；独立模式回退到子应用自身 index.html。
   //    注意必须显式请求 index.html：ASSETS.fetch 不会把目录路径解析成 index.html，
   //    直接取目录会得到 404。Pages 对 /index.html 的 308 规范化由 fetch 自动跟随。
   const url = new URL(request.url);
-  url.pathname = APP_BASE + '/index.html';
+  url.pathname = FALLBACK_PATH;
   url.search = '';
   const fallback = await env.ASSETS.fetch(new Request(url.toString(), request), {
     redirect: 'follow',

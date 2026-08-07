@@ -1,6 +1,14 @@
 @import "tailwindcss";
-/* 让 Tailwind 扫描 packages/studio-core 中的类名（其位于 src 之外，自动检测覆盖不到） */
+/* 引入被嵌入子应用的自定义样式（不含 Tailwind 入口，避免重复初始化；
+   三份样式均已作用域化到 [data-project='xxx']，不会互相污染或影响外壳） */
+@import "../../jack-wave/src/styles.css";
+@import "../../jack-pose/src/styles.css";
+@import "../../jack-tan/src/styles.css";
+/* 让 Tailwind 扫描 packages/studio-core 与嵌入子应用中的类名 */
 @source "../../../packages/studio-core/src";
+@source "../../jack-wave/src";
+@source "../../jack-pose/src";
+@source "../../jack-tan/src";
 
 /* ==================== Tailwind v4 主题映射 ====================
    将 studio-core 的 CSS 变量映射到 Tailwind 工具类。
@@ -24,6 +32,46 @@
   --font-display: 'Inter', 'Noto Sans SC', sans-serif;
   --font-body: 'Inter', 'Noto Sans SC', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-sans: var(--font-body, 'Inter', 'Noto Sans SC', system-ui, sans-serif);
+
+  /* ---------- 嵌入子应用所需的工具类令牌（单页壳层合并） ----------
+     这些键原本各自定义在 jack-pose / jack-tan / jack-wave 的 index.css 里，
+     单页壳层只有一个 Tailwind 实例，必须在此合并，否则子应用的工具类
+     （bg-surface / text-primary / bg-neutral-100 …）不会被生成。
+     取值统一指向 CSS 变量，由各子应用 styles.css 在 [data-project] 作用域内覆盖。 */
+
+  /* jack-pose */
+  --color-surface: var(--color-surface);
+  --color-surface-2: var(--color-surface-2);
+  --color-hover: var(--color-hover);
+  --color-primary: var(--color-text);
+  --color-secondary: var(--color-text-2);
+  --color-tertiary: var(--color-text-3);
+  --color-outline: var(--color-border);
+  --color-outline-light: var(--color-border-light);
+  --color-outline-strong: var(--color-border-strong);
+  --color-wechat: var(--color-wechat);
+  --color-xhs: var(--color-xhs);
+  --color-divider: var(--color-divider);
+  --color-placeholder: var(--color-placeholder);
+
+  /* jack-pose / jack-tan / jack-wave 共用的强调色别名 */
+  --color-accent-hover: var(--accent-2);
+  --color-accent-bg: rgba(var(--accent-rgb, 124, 58, 237), 0.08);
+
+  /* jack-tan 中性色阶（暗色模式下整体反转，故必须走变量） */
+  --color-white: var(--color-white);
+  --color-black: var(--color-black);
+  --color-neutral-50: var(--color-neutral-50);
+  --color-neutral-100: var(--color-neutral-100);
+  --color-neutral-200: var(--color-neutral-200);
+  --color-neutral-300: var(--color-neutral-300);
+  --color-neutral-400: var(--color-neutral-400);
+  --color-neutral-500: var(--color-neutral-500);
+  --color-neutral-600: var(--color-neutral-600);
+  --color-neutral-700: var(--color-neutral-700);
+  --color-neutral-800: var(--color-neutral-800);
+  --color-neutral-900: var(--color-neutral-900);
 }
 
 /* ==================== 静态设计令牌 ====================
@@ -62,6 +110,24 @@
   --accent-3-rgb: 6, 182, 212;
   --glow: 0 0 40px rgba(124, 58, 237, 0.5);
   --gradient: linear-gradient(135deg, #7c3aed, #ec4899, #06b6d4);
+
+  /* ---------- 嵌入子应用令牌的全局兜底 ----------
+     上方 @theme 里把 --color-white / --color-neutral-* 映射成同名 CSS 变量，
+     真正取值由 jack-tan 在 [data-project='tan'] 作用域内提供。
+     这里给出作用域外的默认值，保证 bg-white / text-neutral-500 等工具类
+     在外壳与其他子应用中依然可用（jack-pose 就用到 text-white / bg-black）。 */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-neutral-50: #fafbfd;
+  --color-neutral-100: #f3f5fa;
+  --color-neutral-200: #e5e9f2;
+  --color-neutral-300: #d1d7e6;
+  --color-neutral-400: #9ba4be;
+  --color-neutral-500: #6b7494;
+  --color-neutral-600: #4a5170;
+  --color-neutral-700: #333a55;
+  --color-neutral-800: #1e2238;
+  --color-neutral-900: #111426;
 }
 
 * {
@@ -286,6 +352,23 @@ button {
   .page-wrap {
     padding-top: 70px;
   }
+}
+
+/* ==================== 嵌入子应用容器 ====================
+   子应用在独立部署时会为自己的 StudioBar 预留 64px 顶部间距
+   （规则写在各自 styles.css 的 [data-project='x'] 上）。
+   嵌入外壳后顶部间距已由 .page-wrap 统一提供，这里抵消掉避免双倍留白。
+   选择器特异性 (0,2,0) 高于子应用的 [data-project='x'] (0,1,0)。 */
+[data-project][data-embedded='true'] {
+  padding-top: 0;
+  margin: 0;
+  /* 铺满视口并置为不透明背景：防止外壳 BackgroundEffects（紫/青模糊光斑）
+     在子应用顶部 80px 间隙与内容下方透出，导致出现紫色条 / 青绿色块 */
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
 }
 
 /* View Transitions API — 跨应用跳转的伪 SPA 过渡 */

@@ -18,7 +18,13 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@jack-tan/studio-core": ["../../packages/studio-core/src/index.ts"],
-      "@jack-tan/studio-core/*": ["../../packages/studio-core/src/*"]
+      "@jack-tan/studio-core/*": ["../../packages/studio-core/src/*"],
+      "jack-wave": ["../../apps/jack-wave/src/index.ts"],
+      "jack-wave/*": ["../../apps/jack-wave/src/*"],
+      "jack-pose": ["../../apps/jack-pose/src/index.ts"],
+      "jack-pose/*": ["../../apps/jack-pose/src/*"],
+      "jack-tan": ["../../apps/jack-tan/src/index.ts"],
+      "jack-tan/*": ["../../apps/jack-tan/src/*"]
     }
   },
   "include": ["src"],

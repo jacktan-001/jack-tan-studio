@@ -33,6 +33,8 @@ import {
   subscribePlayerMessages,
   writePlayerState,
 } from './storage';
+import { safeUrl } from '../utils';
+import { getArtworkResolver } from './artworkResolver';
 
 /** 格式化时间：秒 → m:ss */
 function fmtTime(s: number): string {
@@ -69,7 +71,12 @@ export interface UseGlobalAudioPlayerOptions {
 export function useGlobalAudioPlayer(
   options: UseGlobalAudioPlayerOptions = {},
 ): GlobalAudioPlayerReturn {
-  const { onError, resolveArtwork } = options;
+  const { onError } = options;
+  // 解析封面：优先用调用方显式传入的解析器；否则委托给当前嵌入子应用注册的解析器
+  // （单页壳层场景下，jack-wave 等子应用会注册自己的 Apple 图床代理逻辑），最后回退到 safeUrl。
+  const resolveArtwork: (url: string) => string =
+    options.resolveArtwork ??
+    ((url: string) => getArtworkResolver()?.(url) ?? safeUrl(url) ?? '');
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const trackRef = useRef<PlayerTrack | null>(null);

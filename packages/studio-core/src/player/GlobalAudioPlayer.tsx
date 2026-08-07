@@ -5,6 +5,8 @@
  * 支持通过 prop 自定义封面解析与错误处理。
  */
 
+import { useState, useRef } from 'react';
+
 import type { GlobalAudioPlayerReturn, PlayerTrack } from './types';
 import { fixAppleMusicUrl } from '../utils/url';
 
@@ -43,9 +45,88 @@ export function GlobalAudioPlayer({
     playNext,
     playPrev,
     seek,
+    closePlayer,
   } = player;
 
+  const [collapsed, setCollapsed] = useState(false);
+
+  // 播放器栏 DOM 引用 + 鼠标跟随高光坐标
+  const barRef = useRef<HTMLDivElement>(null);
+  const reduceMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const handleBarMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (reduceMotion || !barRef.current) return;
+    const rect = barRef.current.getBoundingClientRect();
+    barRef.current.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    barRef.current.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  };
+
   if (!isVisible || !currentTrack) return null;
+
+  // 收起态：右下角紧凑小圆钮（音乐持续播放，单页导航零间隙不受影响）
+  if (collapsed) {
+    return (
+      <div
+        className="jack-global-player-collapsed"
+        role="region"
+        aria-label="音乐播放器（已收起）"
+        style={{
+          position: 'fixed',
+          bottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+          right: '20px',
+          zIndex: 150,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          padding: '10px 14px',
+          borderRadius: '999px',
+          background: 'var(--player-bg, rgba(255,255,255,0.85))',
+          backdropFilter: 'blur(var(--glass-blur, 22px)) saturate(180%)',
+          WebkitBackdropFilter: 'blur(var(--glass-blur, 22px)) saturate(180%)',
+          border: '1px solid var(--player-border, rgba(128,128,128,0.15))',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.18)',
+          color: 'var(--player-text, #111)',
+        }}
+      >
+        <button
+          className="jack-global-player-ctrl-btn"
+          onClick={togglePlay}
+          aria-label={isPlaying ? '暂停' : '播放'}
+          title={isPlaying ? '暂停' : '播放'}
+          style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--teal, #14b8a6)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+        >
+          {isPlaying ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" /></svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+          )}
+        </button>
+        <div style={{ minWidth: 0, overflow: 'hidden', maxWidth: '160px' }}>
+          <div style={{ fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentTrack.title}</div>
+          <div style={{ fontSize: '11px', color: 'var(--player-text-muted, #6b7280)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentTrack.artist}</div>
+        </div>
+        <button
+          className="jack-global-player-ctrl-btn"
+          onClick={() => setCollapsed(false)}
+          aria-label="展开播放器"
+          title="展开"
+          style={{ width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--player-text, #111)', background: 'transparent', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15" /></svg>
+        </button>
+        <button
+          className="jack-global-player-ctrl-btn"
+          onClick={() => { setCollapsed(false); closePlayer(); }}
+          aria-label="关闭播放器"
+          title="关闭"
+          style={{ width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--player-text, #111)', background: 'transparent', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+        </button>
+      </div>
+    );
+  }
 
   const platformUrl = resolvePlatformUrl
     ? resolvePlatformUrl(currentTrack)
@@ -63,6 +144,8 @@ export function GlobalAudioPlayer({
 
   return (
     <div
+      ref={barRef}
+      onMouseMove={handleBarMove}
       className="jack-global-player-bar active"
       role="region"
       aria-label="音乐播放器"
@@ -73,10 +156,12 @@ export function GlobalAudioPlayer({
         right: 0,
         zIndex: 150,
         height: 'calc(96px + env(safe-area-inset-bottom, 0px))',
-        background: 'var(--player-bg, rgba(255,255,255,0.85))',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        borderTop: '1px solid var(--border, rgba(128,128,128,0.15))',
+        /* Apple 风磨砂玻璃：半透明 + 强模糊 + 饱和，细边框 + 柔和投影 */
+        background: 'var(--player-bg, rgba(255,255,255,0.72))',
+        backdropFilter: 'blur(var(--glass-blur, 22px)) saturate(180%)',
+        WebkitBackdropFilter: 'blur(var(--glass-blur, 22px)) saturate(180%)',
+        borderTop: '1px solid var(--player-border, rgba(128,128,128,0.12))',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.22)',
         display: 'flex',
         alignItems: 'center',
         padding: '0 20px',
@@ -84,9 +169,11 @@ export function GlobalAudioPlayer({
         gap: '14px',
         transform: 'translateY(0)',
         transition: 'transform .3s ease',
-        color: 'var(--text, #111)',
+        color: 'var(--player-text, #111)',
       }}
     >
+      {/* 鼠标跟随高光层（降级：reduced-motion 时不跟随；无 backdrop-filter 时由样式兜底为实底） */}
+      <div className="jack-global-player-glow" aria-hidden="true" />
       {/* 封面 */}
       <img
         className="jack-global-player-cover"
@@ -135,7 +222,7 @@ export function GlobalAudioPlayer({
           className="jack-global-player-artist"
           style={{
             fontSize: '13px',
-            color: 'var(--gray-500, #6b7280)',
+            color: 'var(--player-text-muted, #6b7280)',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -234,7 +321,7 @@ export function GlobalAudioPlayer({
           className="jack-global-player-time"
           style={{
             fontSize: '11px',
-            color: 'var(--gray-400, #9ca3af)',
+            color: 'var(--player-text-muted, #9ca3af)',
             fontWeight: 500,
             minWidth: '32px',
             textAlign: 'center',
@@ -277,7 +364,7 @@ export function GlobalAudioPlayer({
           className="jack-global-player-time"
           style={{
             fontSize: '11px',
-            color: 'var(--gray-400, #9ca3af)',
+            color: 'var(--player-text-muted, #9ca3af)',
             fontWeight: 500,
             minWidth: '32px',
             textAlign: 'center',
@@ -288,12 +375,18 @@ export function GlobalAudioPlayer({
         </span>
       </div>
 
-      {/* 平台链接 — Apple Music */}
-      {platformUrl && (
-        <div
-          className="jack-global-player-platforms"
-          style={{ display: 'flex', gap: '8px', flexShrink: 0 }}
-        >
+      {/* 右侧操作区：Apple Music + 最小化 + 关闭，flex 排列避免重叠 */}
+      <div
+        className="jack-global-player-actions"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          flexShrink: 0,
+        }}
+      >
+        {/* 平台链接 — Apple Music */}
+        {platformUrl && (
           <a
             className="jack-global-platform-btn jack-global-platform-am"
             href={platformUrl}
@@ -305,16 +398,16 @@ export function GlobalAudioPlayer({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '14px 22px',
+              padding: '12px 18px',
               borderRadius: '999px',
               background: '#000000',
               color: '#fff',
-              fontSize: '14px',
+              fontSize: '13px',
               fontWeight: 600,
               transition: 'transform .15s, opacity .15s',
               textDecoration: 'none',
               whiteSpace: 'nowrap',
-              minHeight: '48px',
+              minHeight: '44px',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'scale(1.05)';
@@ -330,32 +423,121 @@ export function GlobalAudioPlayer({
             </svg>
             <span>Apple Music</span>
           </a>
-        </div>
-      )}
+        )}
+
+        {/* 分隔线 */}
+        <div
+          className="jack-global-player-actions-divider"
+          style={{
+            width: '1px',
+            height: '28px',
+            background: 'var(--border, rgba(128,128,128,0.2))',
+            flexShrink: 0,
+          }}
+        />
+
+        {/* 最小化按钮 */}
+        <button
+          className="jack-global-player-ctrl-btn jack-global-player-minimize"
+          onClick={() => setCollapsed(true)}
+          aria-label="最小化播放器"
+          title="最小化"
+          style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--player-text, #111)',
+            background: 'var(--gray-100, rgba(128,128,128,0.1))',
+            border: 'none',
+            cursor: 'pointer',
+            flexShrink: 0,
+            transition: 'background .15s, transform .15s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--gray-200, rgba(128,128,128,0.2))';
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'var(--gray-100, rgba(128,128,128,0.1))';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+        </button>
+
+        {/* 关闭按钮 */}
+        <button
+          className="jack-global-player-ctrl-btn jack-global-player-close"
+          onClick={() => { setCollapsed(false); closePlayer(); }}
+          aria-label="关闭播放器"
+          title="关闭"
+          style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--player-text, #111)',
+            background: 'var(--gray-100, rgba(128,128,128,0.1))',
+            border: 'none',
+            cursor: 'pointer',
+            flexShrink: 0,
+            transition: 'background .15s, transform .15s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--gray-200, rgba(128,128,128,0.2))';
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'var(--gray-100, rgba(128,128,128,0.1))';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+        </button>
+      </div>
 
       {/* 响应式：移动端隐藏进度条和平台链接文字 */}
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
           .jack-global-player-bar {
             height: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
             padding: 0 14px !important;
             gap: 10px !important;
           }
           .jack-global-player-cover {
-            width: 60px !important;
-            height: 60px !important;
+            width: 56px !important;
+            height: 56px !important;
           }
           .jack-global-player-progress,
           .jack-global-player-time {
             display: none !important;
           }
+          .jack-global-player-actions-divider {
+            display: none !important;
+          }
         }
-        @media (max-width: 480px) {
+        @media (max-width: 640px) {
           .jack-global-platform-btn span {
             display: none;
           }
           .jack-global-platform-btn {
-            padding: 14px 16px !important;
+            padding: 12px 14px !important;
+            min-height: 40px !important;
+          }
+          .jack-global-player-minimize,
+          .jack-global-player-close {
+            width: 32px !important;
+            height: 32px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .jack-global-player-actions {
+            gap: 6px !important;
           }
         }
       `}</style>

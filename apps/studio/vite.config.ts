@@ -13,7 +13,16 @@ export default defineConfig(({ command }) => ({
   resolve: {
     alias: {
       '@jack-tan/studio-core': resolve(__dirname, '../../packages/studio-core/src/index.ts'),
+      // 单页壳层：studio 在客户端路由进入子应用时，直接打包其子应用源码
+      // （而非整页跳转到独立部署产物），从而全局只有一个 <audio>，导航零间隙。
+      'jack-wave': resolve(__dirname, '../jack-wave/src'),
+      'jack-pose': resolve(__dirname, '../jack-pose/src'),
+      'jack-tan': resolve(__dirname, '../jack-tan/src'),
     },
+  },
+  server: {
+    // 允许 Vite 读取 monorepo 内其他应用的源码（被嵌入的子应用）
+    fs: { allow: [resolve(__dirname, '..', '..')] },
   },
   build: {
     outDir: 'dist',

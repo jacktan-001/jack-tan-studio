@@ -3,6 +3,8 @@
  * 包含品牌信息和管理员链接
  */
 
+import { assetUrl } from '../assetBase';
+
 export function Footer() {
   return (
     <footer
@@ -28,7 +30,7 @@ export function Footer() {
       <p>Music Journal &middot; 好友乐享 · 音乐随记</p>
       <p>&copy; 2026 &middot; Made with &hearts; and music</p>
       <a
-        href={`${import.meta.env.BASE_URL}admin.html`}
+        href={assetUrl('admin.html')}
         className="footer-admin"
         aria-label="管理员登录"
         style={{

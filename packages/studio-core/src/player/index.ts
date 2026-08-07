@@ -11,4 +11,5 @@
 export * from './types';
 export * from './storage';
 export * from './useGlobalAudioPlayer';
+export * from './artworkResolver';
 export * from './GlobalAudioPlayer';

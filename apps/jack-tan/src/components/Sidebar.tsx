@@ -1,4 +1,5 @@
 import { useScrollSpy } from '../hooks/useScrollSpy'
+import { assetUrl } from '../assetBase'
 
 const NAV_ITEMS = [
   { id: 'about', label: '关于我', icon: 'M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v2h20v-2c0-3.33-6.67-5-10-5z' },
@@ -30,7 +31,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-5 lg:block">
           <div className="mb-0 h-[120px] w-[120px] shrink-0 overflow-hidden rounded-[24px] bg-neutral-100 shadow-[0_8px_32px_rgba(0,0,0,0.08)] sm:h-[140px] sm:w-[140px] lg:mb-6 lg:h-[160px] lg:w-[160px] lg:rounded-[28px]">
             <img
-              src={`${import.meta.env.BASE_URL}avatar.jpg`}
+              src={assetUrl('avatar.jpg')}
               alt="Jack Tan"
               width={160}
               height={160}

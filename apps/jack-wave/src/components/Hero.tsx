@@ -3,6 +3,8 @@
  * 包含头像、标题、副标题和操作按钮
  */
 
+import { assetUrl } from '../assetBase';
+
 export interface HeroProps {
   /** 点击"播放本月歌单" */
   onPlayCurrentMonth: () => void;
@@ -38,7 +40,7 @@ export function Hero({ onPlayCurrentMonth }: HeroProps) {
       />
       <img
         className="hero-avatar"
-        src={`${import.meta.env.BASE_URL}avatar.jpg`}
+        src={assetUrl('avatar.jpg')}
         alt="Jack-Wave 头像"
         loading="eager"
         style={{

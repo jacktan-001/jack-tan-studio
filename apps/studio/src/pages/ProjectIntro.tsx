@@ -1,28 +1,9 @@
 import { useMemo } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, ArrowUpRight, Lock, Sparkles, Zap, Layers, Radio, Wand2, Send } from 'lucide-react'
-import { setPendingProject, navigateWithTransition } from '@jack-tan/studio-core'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { ArrowLeft, ArrowRight, Lock, Send } from 'lucide-react'
+import { ProjectBadge } from '@jack-tan/studio-core'
 import { projects, type Project } from '../data/projects'
 import { Rise } from '../components/Rise'
-
-/** 项目图标映射（与 ProjectShowcase / Navbar 保持一致） */
-function ProjectIcon({ project, size = 48 }: { project: Project; size?: number }) {
-  const color = '#fff'
-  const icons: Record<string, React.ReactNode> = {
-    wave: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round">
-        <path d="M2 12 Q6 6, 10 12 T18 12 T22 12" />
-        <path d="M2 16 Q6 10, 10 16 T18 16 T22 16" opacity="0.5" />
-      </svg>
-    ),
-    pose: <Layers size={size} color={color} />,
-    profile: <Zap size={size} color={color} />,
-    lens: <Radio size={size} color={color} />,
-    cast: <Wand2 size={size} color={color} />,
-    craft: <Sparkles size={size} color={color} />,
-  }
-  return icons[project.icon] || <Sparkles size={size} color={color} />
-}
 
 function ScreenshotCarousel({ project }: { project: Project }) {
   // 目前用风格化占位图，后续可替换为真实截图
@@ -92,6 +73,7 @@ function ScreenshotCarousel({ project }: { project: Project }) {
 
 export default function ProjectIntro() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const project = projects.find((p) => p.id === id)
 
   if (!project) {
@@ -144,21 +126,7 @@ export default function ProjectIntro() {
         marginBottom: '48px',
         flexWrap: 'wrap',
       }}>
-        <div
-          style={{
-            width: '96px',
-            height: '96px',
-            borderRadius: '26px',
-            background: `linear-gradient(135deg, ${project.color}, ${project.color}66)`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: `0 12px 48px rgba(${project.colorRgb}, 0.25)`,
-            flexShrink: 0,
-          }}
-        >
-          <ProjectIcon project={project} size={44} />
-        </div>
+        <ProjectBadge id={project.icon} color={project.color} colorRgb={project.colorRgb} size={96} radius={26} />
         <div style={{ flex: 1, minWidth: '260px' }}>
           <div
             style={{
@@ -345,11 +313,16 @@ export default function ProjectIntro() {
         </div>
         {isLive ? (
           <a
-            href={project.url}
+            href={`/projects/${project.id}`}
             onClick={(e) => {
+              // 单页壳层：客户端路由进入子应用，不整页跳转、不打断全局播放
               e.preventDefault()
-              setPendingProject(project.id)
-              navigateWithTransition(project.url)
+              const go = () => navigate(`/projects/${project.id}`)
+              if (typeof document !== 'undefined' && document.startViewTransition) {
+                document.startViewTransition(go)
+              } else {
+                go()
+              }
             }}
             style={{
               display: 'inline-flex',
@@ -375,7 +348,7 @@ export default function ProjectIntro() {
               e.currentTarget.style.boxShadow = `0 8px 32px rgba(${project.colorRgb}, 0.3)`
             }}
           >
-            进入应用 <ArrowUpRight size={18} />
+            进入应用 <ArrowRight size={18} />
           </a>
         ) : (
           <form
